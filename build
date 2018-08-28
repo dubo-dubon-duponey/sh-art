@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+_here=$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)
+. "$_here/source/tooling/builder.sh"
+
+if [ ! "$PREFIX" ]; then
+  PREFIX="$_here/bin"
+fi
+if [ ! -d "$PREFIX" ]; then
+  mkdir -p "$PREFIX"
+fi
+
+# Build the library
+library="$PREFIX/dc-library"
+destination="$library"
+
+dc-tools::builder::header "$destination" "the library version" "MIT license" "dubo-dubon-duponey"
+for k in "$_here/source/core"/*.sh; do
+  dc-tools::builder::append "$k" "$destination"
+done
+chmod u+x "$destination"
+
+# Build the library with extensions
+libraryExt="$PREFIX/dc-library+extensions"
+destination="$libraryExt"
+
+dc-tools::builder::header "$destination" "the library version, with extensions" "MIT license" "dubo-dubon-duponey"
+cat "$library" >> "$destination"
+for k in "$_here/source/extensions"/**/*.sh; do
+  dc-tools::builder::append "$k" "$destination"
+done
+chmod u+x "$destination"
+
+
+for i in "$_here/source/cli"/*; do
+  if [ ! -d "$i" ]; then
+    continue
+  fi
+  destination="$PREFIX/dc-$(basename $i)"
+  destination=${destination%-ext*}
+
+  dc-tools::builder::header "$destination" "another fancy piece of shcript" "MIT license" "dubo-dubon-duponey"
+  if [ "$i" != "${i%-ext*}" ]; then
+    cat "$libraryExt" >> "$destination"
+  else
+    cat "$library" >> "$destination"
+  fi
+
+  for k in "$i"/*.sh; do
+    dc-tools::builder::append "$k" "$destination"
+  done
+
+  chmod u+x "$destination"
+done

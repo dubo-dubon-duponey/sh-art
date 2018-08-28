@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+_here=$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)
+. "$_here/source/tooling/assert.sh"
+
+
+tests::run::integration(){
+  # Source useful constants from the source code (mainly for exit codes and manifest media types
+  . "$_here/source/core/errors.sh"
+  . "$_here/source/cli/**/errors.sh"
+
+  # Run all tests
+  local allTests=$(ls "$_here/tests/integration/"**/*.sh)
+  for i in "$allTests"; do
+    echo "Running integration test suite: $i"
+    . "$i"
+  done
+}
+
+tests::run::unit(){
+  # Force a fresh build
+  local k
+  for k in "$_here/source/core"/*.sh; do
+    source "$k"
+  done
+
+  for k in "$_here/source/extensions"/**/*.sh; do
+    source "$k"
+  done
+
+  # Run all tests
+  local allTests=( $(ls "$_here/tests/unit/"*.sh) )
+  for i in "${allTests[@]}"; do
+    echo "Running unit test suite: $i"
+    source "$i"
+  done
+}
+
+# Force a fresh build
+# $_here/build
+
+tests::run::unit
+# tests::run::integration

@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+_here=$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)
+
+_name=$1
+shift
+
+for k in "$_here/source/core"/*.sh; do
+  source "$k"
+done
+
+for k in "$_here/source/extensions"/**/*.sh; do
+  source "$k"
+done
+
+for k in "$_here/source/cli/$_name"/*.sh; do
+  source "$k"
+done
+
