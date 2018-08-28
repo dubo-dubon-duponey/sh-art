@@ -14,7 +14,7 @@ And you need `jq` and `curl` installed if you plan on doing anything useful.
 
 ## Moar
 
- * [explore some of the example clis](cli/README.md), as one of them may turn out to be useful
+ * [explore some of the example clis](source/cli/README.md), as one of them may turn out to be useful
  * read about the [core library details](source/core/README.md)
  * or [extensions library details](source/extensions/README.md)
  
