@@ -2,6 +2,8 @@
 ##########################################################################
 # Prompting
 # ------
+# https://unix.stackexchange.com/questions/222974/ask-for-a-password-in-posix-compliant-shell/222977
+# ech-o() { printf "%s\n" "$*"; }
 ##########################################################################
 
 dc::prompt::question() {

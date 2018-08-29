@@ -9,7 +9,7 @@ dc::commander::init
 
 dc::logger::info "$1"
 
-data=$(./debug media-info -s "$1")
+data=$(./debug movie-info -s "$1")
 
 if [ $? != 0 ]; then
   dc::logger::error " > Media info analysis failed. Exiting."

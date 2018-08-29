@@ -12,5 +12,5 @@ dc::commander::init
 dc::fs::isfile "$1"
 
 filename="$1"
-dc::logger::info "[media-info] $filename"
+dc::logger::info "[movie-info] $filename"
 info::ffprobe "$filename"

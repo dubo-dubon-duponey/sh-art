@@ -1,10 +1,10 @@
-# dc-media-info
+# dc-movie-info
 
 > A simple helper to extract info from movie files
 
 ## TL;DR
 
-`dc-media-info -s somefile.mp4`
+`dc-movie-info -s somefile.mp4`
 
 ```
 {
