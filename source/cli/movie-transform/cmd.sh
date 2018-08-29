@@ -4,9 +4,6 @@ readonly CLI_LICENSE="MIT License"
 readonly CLI_DESC="because I never remember how to use ffmpeg"
 readonly CLI_USAGE="[-s] [--destination=folder] [--delete] [--convert=X] [--remove=X Y Z] [--extract=X:ln.ext Y:ln.ext Z:ln.ext] filename"
 
-
-# XXX add support for titles / year / director: https://multimedia.cx/eggs/supplying-ffmpeg-with-metadata/
-
 # Boot
 dc::commander::init
 
@@ -47,6 +44,7 @@ if [[ $? != 0 ]]; then
 else
   dc::logger::info "Successfully transmogrified $1"
   if [ "$DC_ARGE_DELETE" ] || [ "$DC_ARGE_D" ]; then
+    dc::logger::info "Press enter to delete the original"
     dc::prompt::confirm
     rm "$1"
     dc::logger::info "Original deleted"

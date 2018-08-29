@@ -15,14 +15,24 @@ currentdir="$1"
 directory=$(basename "$1")
 parent=$(dirname "$1")
 
-parse::dirname(){
-  local movie="$1"
-#  imdbID=$(echo $movie | sed -E 's/[(]?[^(\[]*[(\[]tt([0-9]{7}).*/\1/')
-  imdbID=$(echo $movie | sed -E 's/.*tt([0-9]{7}).*/\1/')
-  ltitle=$(echo $movie | sed -E 's/[^ ]*[ -]+([^(\[]+).*/\1/')
-  ltitle=${ltitle% *}
-  quality=$(echo $movie | sed -E 's/.*\[(.*)\]/\1/')
-}
+dc::logger::info "Processing $directory"
+
+# Extract id from directory
+imdbID=$(echo "$directory" | sed -E 's/.*(tt[0-9]{7}).*/\1/')
+
+# Fetch data
+imdb=$(./debug imdb $imdbID)
+if [ $? != 0 ]; then
+  dc::logger::error "Could not retrieve information from imdb for id $imdbID and directory $directory. Aborting!"
+  exit $ERROR_FAILED
+fi
+
+imdbYear=$(echo $imdb | jq -rc .year)
+imdbTitle=$(echo $imdb | jq -rc .title)
+imdbOriginal=$(echo $imdb | jq -rc .original)
+
+IFS=$'\n' read -r -d '' -a imdbRuntime < <(echo $imdb | jq -rc .runtime[])
+
 
 parse::newfilename(){
   local parent="$1"
@@ -79,8 +89,8 @@ parse::newfilename(){
   newname="$newtitle$part$disc$episode$ln.$extension"
 
   if [ "$newname" != "$oldname" ]; then
-    dc::logger::info "     > $oldname"
-    dc::logger::info "     > $newname"
+    dc::logger::warning "     < $oldname"
+    dc::logger::warning "     > $newname"
     if [ -e "$parent/$newname" ]; then
       dc::logger::error "Destination already exist! Ignoring file!"
       return
@@ -92,13 +102,16 @@ parse::newfilename(){
 }
 
 parse::newdirname(){
-  local hm="$1"
+  local parent="$1"
   local oldname="$2"
-  local quality="$3"
-  local newname="($imdbYear) $imdbTitle [tt$imdbID$quality]"
+  local id="$3"
+  local year="$4"
+  local title="$5"
+  local quality="$6"
+  local newname="($year) $title [$id$quality]"
   if [ "$newname" != "$oldname" ]; then
-    dc::logger::info "| $oldname"
-    dc::logger::info "| $newname"
+    dc::logger::warning "< $oldname"
+    dc::logger::warning "> $newname"
     if [ -e "$parent/$newname" ]; then
       dc::logger::error "Destination already exist! Abort!"
       exit 1
@@ -108,16 +121,12 @@ parse::newdirname(){
   fi
 }
 
-
-
-
-dc::logger::debug "$parent/$directory"
-parse::dirname "$directory"
-
-retrieveIMDB $imdbID
-
-
 finalquality=
+
+# XXX don't forget to reimplement filesystem safe escaping
+
+runtime=$(echo "${imdbRuntime[@]}" | sed -E 's/ min//g')
+
 for i in "$1"/*; do
   if [ ! -f "$i" ]; then
     dc::logger::warning "Ignoring non file: $i"
@@ -130,7 +139,8 @@ for i in "$1"/*; do
   if [ "$validatedDuration" ]; then
     validatedDuration=".[$validatedDuration]"
   fi
-  parse::newfilename "$currentdir" "$filename" "$imdbTitle$validatedDuration" # "$mkvquality"
+
+  parse::newfilename "$currentdir" "$filename" "$imdbTitle$validatedDuration"
 
   ispart=$(echo $filename | grep ", part [2-9]")
   isdisc=$(echo $filename | grep ", disc [2-9]")
@@ -138,67 +148,27 @@ for i in "$1"/*; do
     continue
   fi
   if [ "$mkvquality" ]; then
-    finalquality="-${imdbLengths[@]}-$mkvquality"
+    finalquality="-$runtime-$mkvquality"
   fi
 
 done
 
 
-parse::newdirname "$parent" "$directory" "$finalquality"
-
-
-exit
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#echo "Dir: $directory"
-
-#echo "Local: $imdbID | $ltitle | $quality"
-#echo "Remot: $iyear | $ititle"
-
-# dc::http::request https://www.imdb.com/title/tt$imdbID/ GET
-
-exit
-
-
-
-
-
-if [ -n "${DC_ARGV_ISO_NAME+x}" ]; then
-  iname="$DC_ARGV_ISO_NAME"
+# Finally, rename the directory
+if [ "$imdbOriginal" == "$imdbTitle" ]; then
+  imdbOriginal=
 else
-  iname="$(basename $source)"
+  imdbOriginal=" ($imdbOriginal)"
 fi
-
-dc::logger::info "Creating ISO $iname.iso with volume name $vname from $source"
-dc::logger::debug hdiutil makehybrid -udf -udf-volume-name "$vname" -o "$iname.iso" "$source"
-
-hdiutil makehybrid -udf -udf-volume-name "$vname" -o "$iname.iso" "$source"
-
-if [ $? != 0 ]; then
-  dc::logger::error "Failed to create ISO!"
-  exit $ERROR_FAILED
+newname="($imdbYear) $imdbTitle$imdbOriginal [$imdbID$finalquality]"
+if [ "$newname" != "$directory" ]; then
+  dc::logger::info "< $directory"
+  dc::logger::info "> $newname"
+  if [ -e "$parent/$newname" ]; then
+    dc::logger::error "Destination already exist! Abort!"
+    exit 1
+  fi
+  dc::prompt::confirm
+  mv "$parent/$directory" "$parent/$newname"
 fi
-
-dc::logger::info "Done"
-
-
-
-
 
