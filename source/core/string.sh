@@ -97,7 +97,8 @@ dc::string::join(){
     exresult="$exresult$sep$i"
     sep="$2"
   done
-  result="$exresult"
+  printf "%s" "$exresult"
+  # result="$exresult"
 }
 
 
@@ -117,12 +118,11 @@ dc::string::splitN(){
   local _dcss_segment
 
   if [ "${3}" == 0 ]; then
-    result=
+    # Should return nil
     return
   fi
-  result=()
-  # No subject, empty array
   if [ ! "${_dcss_subject}" ]; then
+    # Should return an empty array
     return
   fi
 
@@ -130,7 +130,7 @@ dc::string::splitN(){
   if [ ! "${!2}" ]; then
     local i
     for (( i=0; i<${#_dcss_subject}; i++)); do
-      result[${#result[@]}]=${_dcss_subject:$i:1}
+      printf "%s\0" "${_dcss_subject:$i:1}"
     done
     return
   fi
@@ -138,15 +138,43 @@ dc::string::splitN(){
   # Otherwise
   local count=1
   while
-    _dcss_segment=${_dcss_subject%%"${!2}"*}
+    _dcss_segment="${_dcss_subject%%"${!2}"*}"
     [ "$_dcss_segment" != "$_dcss_subject" ] && ( [ "$3" == -1 ] || [ "$count" -le "$3" ] )
   do
-    result[${#result[@]}]=$_dcss_segment
+    printf "%s\0" "$_dcss_segment"
     _dcss_subject=${_dcss_subject#*"${!2}"}
     count=$(( count + 1 ))
   done
-  result[${#result[@]}]=$_dcss_subject
+  printf "%s\0" "$_dcss_subject"
 }
+
+XXXdc::string::splitNAWK(){
+  local _dcss_subject=${!1}
+  local _dcss_segment
+
+  if [ "${3}" == 0 ]; then
+    # Should return nil
+    return
+  fi
+  if [ ! "${_dcss_subject}" ]; then
+    # Should return an empty array
+    return
+  fi
+
+  # No sep, split on every single char
+  if [ ! "${!2}" ]; then
+    local i
+    for (( i=0; i<${#_dcss_subject}; i++)); do
+      printf "%s\0" "${_dcss_subject:$i:1}"
+    done
+    return
+  fi
+
+  # Otherwise
+  echo "$1" | awk -F "${!2}" -v end=$3 '{for(i=1;i<=end;i++){printf "%s\0", $i};}'
+}
+
+
 
 # https://golang.org/pkg/strings/#SplitAfterN
 dc::string::splitAfterN(){
@@ -221,16 +249,30 @@ dc::string::hasSuffix(){
 
 # https://golang.org/pkg/strings/#Replace
 dc::string::replace(){
-  dc::string::splitN $1 "$2" ${4:--1}
-  dc::string::join result "$3"
+  local v
+  local arr=()
+  while IFS= read -r -d '' -a v; do
+    arr[${#arr[@]}]="$v"
+  done < <(dc::string::splitN $1 "$2" ${4:--1})
+  result=$(dc::string::join arr "$3")
 }
 
+# ***************** OK
 dc::string::toLower(){
-  result=$(echo "${!1}" | tr '[:upper:]' '[:lower:]')
+  if [ ! "${1}" ]; then
+    cat /dev/stdin | tr '[:upper:]' '[:lower:]'
+  else
+    printf "%s" "${!1}" | tr '[:upper:]' '[:lower:]'
+  fi
 }
 
+# ***************** OK
 dc::string::toUpper(){
-  result=$(echo "${!1}" | tr '[:lower:]' '[:upper:]')
+  if [ ! "${1}" ]; then
+    cat /dev/stdin | tr '[:lower:]' '[:upper:]'
+  else
+    printf "%s" "${!1}" | tr '[:lower:]' '[:upper:]'
+  fi
 }
 
 dc::string::trimLeft(){
@@ -277,13 +319,13 @@ dc::string::trim(){
   dc::string::trimLeft "$1" "$pattern"
   dc::string::trimRight "result" "$pattern"
 }
-
+# ***************** OK
 dc::string::trimSpace(){
-  result=$(echo -e "${!1}" | sed -E "s/^[[:space:]\n]*//")
-  result=$(echo -e "${result}" | sed -E "s/[[:space:]\n]*\$//")
-  #dc::string::trimLeft "$1" "[:space:]"
-  #dc::string::trimRight "result" "[:space:]"
-#  dc::string::trim "$1" "\s\n\r\t"
+  if [ ! "${1}" ]; then
+    cat /dev/stdin | sed -E "s/^[[:space:]\n]*//" | sed -E "s/[[:space:]\n]*\$//"
+  else
+    printf "%s" "${!1}" | sed -E "s/^[[:space:]\n]*//" | sed -E "s/[[:space:]\n]*\$//"
+  fi
 }
 
 dc::string::trimPrefix(){

@@ -2,18 +2,23 @@
 
 _here=$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)
 
-_name=$1
+_name="$1"
+
 shift
 
 for k in "$_here/source/core"/*.sh; do
-  source "$k"
+  # shellcheck source=/dev/null
+  . "$k"
 done
 
 for k in "$_here/source/extensions"/**/*.sh; do
-  source "$k"
+  # shellcheck source=/dev/null
+  . "$k"
 done
 
-for k in "$_here/source/cli/$_name"/*.sh; do
-  source "$k"
-done
-
+if [ "$_name" ]; then
+  for k in "$_here/source/cli/$_name"/*.sh; do
+    # shellcheck source=/dev/null
+    . "$k"
+  done
+fi

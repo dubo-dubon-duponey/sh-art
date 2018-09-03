@@ -1,21 +1,28 @@
 #!/usr/bin/env bash
 
 info::ffprobe(){
+  local data
+  local fast
+  local duration
+  local return
+
   dc::logger::debug "ffprobe -show_format -show_error -show_data -show_streams  -print_format json \"$1\" 2>/dev/null)"
-  local data=$(ffprobe -show_format -show_error -show_data -show_streams  -print_format json "$1" 2>/dev/null)
-  if [ $? != 0 ] || [ "$(echo $data | jq -c .error)" != "null" ]; then
-    dc::output::json "{\"filesize\": \"$filesize\", \"file\":\"$1\"}"
+
+
+  if ! data=$(ffprobe -show_format -show_error -show_data -show_streams -print_format json "$1" 2>/dev/null) || [ "$(echo "$data" | jq -c .error)" != "null" ]; then
+    # XXX review this to see what other info we should return (filesize?)
+    dc::output::json "{\"file\":\"$1\"}"
     dc::logger::error "ffprobe is unable to analyze this file. Not a movie. Stopping here."
-    exit $ERROR_FAILED
+    exit "$ERROR_FAILED"
   fi
 
-  local fast=$(mp4info --format json "$1" | jq -rc .file.fast_start 2>/dev/null)
-  local duration=$(echo $data | jq '.format | select(.duration != null) | .duration | tonumber | floor')
+  fast=$(mp4info --format json "$1" | jq -rc .file.fast_start 2>/dev/null)
+  duration=$(echo "$data" | jq '.format | select(.duration != null) | .duration | tonumber | floor')
   if [ ! "$duration" ]; then
     duration=0
   fi
 
-  local return=$(echo $data | jq --arg fast "$fast" --arg duration "$duration" -r '{
+  return=$(echo "$data" | jq --arg fast "$fast" --arg duration "$duration" -r '{
     file: .format.filename,
     size: .format.size,
     container: .format.format_name,

@@ -11,9 +11,9 @@ dc::fs::isfile(){
   if [ "$createifmissing" ]; then
     touch "$1"
   fi
-  if [ ! -f "$1" ] || [ ! -r "$1" ] || ( [ "$writable" ] && [ ! -w "$1" ] )  ; then
+  if [ ! -f "$1" ] || [ ! -r "$1" ] || { [ "$writable" ] && [ ! -w "$1" ]; }  ; then
     dc::logger::error "You need to specify a valid file that you have access to"
-    exit $ERROR_FILESYSTEM
+    exit "$ERROR_FILESYSTEM"
   fi
 }
 
@@ -23,9 +23,9 @@ dc::fs::isdir(){
   if [ "$createifmissing" ]; then
     mkdir -p "$1"
   fi
-  if [ ! -d "$1" ] || [ ! -r "$1" ] || ( [ "$writable" ] && [ ! -w "$1" ] )  ; then
+  if [ ! -d "$1" ] || [ ! -r "$1" ] || { [ "$writable" ] && [ ! -w "$1" ]; }  ; then
     dc::logger::error "You need to specify a valid directory that you have access to"
-    exit $ERROR_FILESYSTEM
+    exit "$ERROR_FILESYSTEM"
   fi
 
 }

@@ -24,9 +24,9 @@ dc-tools::assert::equal "$result" "someg  in a tin g-g er" "replace"
 
 
 source="∞Foo"
-dc::string::toUpper source
+result=$(dc::string::toUpper source)
 dc-tools::assert::equal "$result" "∞FOO" "upper"
-dc::string::toLower source
+result=$(dc::string::toLower source)
 dc-tools::assert::equal "$result" "∞foo" "upper"
 
 
@@ -54,7 +54,7 @@ dc::string::trimSuffix source 'whatever'
 dc-tools::assert::equal "$result" "$source" "trimsuffix fail"
 
 source="    a b d     "
-dc::string::trimSpace source
+result=$(dc::string::trimSpace source)
 dc-tools::assert::equal "$result" "a b d" "trimspace"
 source=".-_+/*\\()[]a b d.-_+/*\\()[]"
 chars=".]_[()+/-*\\"

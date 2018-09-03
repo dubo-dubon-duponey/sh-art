@@ -1,19 +1,24 @@
 #!/usr/bin/env bash
 
 _here=$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)
+# shellcheck source=$_here/source/tooling/assert.sh
 . "$_here/source/tooling/assert.sh"
+# shellcheck source=/dev/null
 . "$_here/source/tooling/shellcheck.sh"
 
 
 tests::run::integration(){
   # Source useful constants from the source code (mainly for exit codes and manifest media types
+  # shellcheck source=/dev/null
   . "$_here/source/core/errors.sh"
+  # shellcheck source=/dev/null
   . "$_here/source/cli/**/errors.sh"
 
   # Run all tests
   local allTests=$(ls "$_here/tests/integration/"**/*.sh)
   for i in "$allTests"; do
-    echo "Running integration test suite: $i"
+    printf "%s\n" "Running integration test suite: $i"
+    # shellcheck source=/dev/null
     . "$i"
   done
 }
@@ -22,18 +27,21 @@ tests::run::unit(){
   # Force a fresh build
   local k
   for k in "$_here/source/core"/*.sh; do
-    source "$k"
+    # shellcheck source=/dev/null
+    . "$k"
   done
 
   for k in "$_here/source/extensions"/**/*.sh; do
-    source "$k"
+    # shellcheck source=/dev/null
+    . "$k"
   done
 
   # Run all tests
   local allTests=( $(ls "$_here/tests/unit/"*.sh) )
   for i in "${allTests[@]}"; do
-    echo "Running unit test suite: $i"
-    source "$i"
+    printf "%s\n" "Running unit test suite: $i"
+    # shellcheck source=/dev/null
+    . "$i"
   done
 }
 

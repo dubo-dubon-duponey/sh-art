@@ -3,13 +3,24 @@
 #### Split and splitN
 
 # Split slices s into all substrings separated by sep and returns a slice of the substrings between those separators.
-haystack='1 1∞1 1 12'$'\r'$'\n''1 13'
+haystack='1 1∞1 1 12'$'\r'$'\n''a 1 13'
 sep="1 1"
-dc::string::split haystack sep
-dc-tools::assert::equal "${result[0]}" "" "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${result[1]}" "∞" "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${result[2]}" ' 12'$'\r''
-' "'$haystack' split, sep '$sep'"
+result=()
+
+# read -r -a thing < <(echo "a b cc")
+#read -d '' -r -a thing < <(dc::string::split haystack sep)
+#read -r -d $'\0' -a thing < <(printf "%s\0%s\0%s" "a" "b" "c")
+#echo "${#thing[@]}"
+#exit
+
+while IFS= read -r -d '' -a foo; do
+  result[${#result[@]}]="$foo"
+done < <(dc::string::split haystack sep)
+
+dc-tools::assert::equal "${result[0]}" "" "[0]: '$haystack' split, sep '$sep'"
+dc-tools::assert::equal "${result[1]}" "∞" "[1]: '$haystack' split, sep '$sep'"
+dc-tools::assert::equal "${result[2]}" ' 12'$'\r'$'\na ' "[2]: '$haystack' split, sep '$sep'"
+exit
 dc-tools::assert::equal "${result[3]}" 3 "'$haystack' split, sep '$sep'"
 dc-tools::assert::equal "${#result[@]}" 4 "'$haystack' split, sep '$sep'"
 

@@ -42,6 +42,8 @@ DC_HTTP_BODY=
 # XXX fixme: this will dump sensitive information and should be
 dc::http::dump::headers() {
   dc::logger::warning "[dc-http] status: $DC_HTTP_STATUS"
+  dc::logger::warning "[dc-http] redirected to: $DC_HTTP_REDIRECTED"
+
   dc::logger::warning "[dc-http] headers:"
 
   local value
@@ -50,21 +52,21 @@ dc::http::dump::headers() {
     value=DC_HTTP_HEADER_$i
 
     # Expunge
-    [ "$_DC_HTTP_REDACT" ] && [[ "${_DC_HTTP_PROTECTED_HEADERS[@]}" == *"$i"* ]] && value=REDACTED
+    [ "$_DC_HTTP_REDACT" ] && [[ "${_DC_HTTP_PROTECTED_HEADERS[*]}" == *"$i"* ]] && value=REDACTED
     dc::logger::warning "[dc-http] $i: ${!value}"
   done
 }
 
 dc::http::dump::body() {
-  dc::logger::warning $(cat $DC_HTTP_BODY | jq . 2>/dev/null)
-  if [ $? != 0 ]; then
+  if ! dc::logger::warning "$(jq . $DC_HTTP_BODY 2>/dev/null)"; then
     dc::logger::warning "$(cat $DC_HTTP_BODY)"
   fi
 }
 
 # A helper to encode uri fragments
 dc::http::uriencode() {
-  s="${@//'%'/%25}"
+  local s
+  s="${*//'%'/%25}"
   s="${s//' '/%20}"
   s="${s//'"'/%22}"
   s="${s//'#'/%23}"
@@ -89,8 +91,7 @@ dc::http::request(){
   DC_HTTP_REDIRECTED=
   local i
   for i in $DC_HTTP_HEADERS; do
-    i=DC_HTTP_HEADER_$i
-    read "$i" < <(echo "")
+    read -r "DC_HTTP_HEADER_$i" < <(echo "")
   done
   DC_HTTP_HEADERS=
   DC_HTTP_BODY=
@@ -98,24 +99,25 @@ dc::http::request(){
   # Grab the named parameters first
   local url="$1"
   local method="${2:-HEAD}"
-  local payload="$3"
+  # local payload="$3"
   shift
   shift
   shift
 
   # Build the curl request
-  local filename=$(mktemp -t dc::http::request)
+  local filename
   local curlOpts=( "$url" "-v" "-L" "-s" )
 
   # Special case HEAD, damn you curl
   if [ "$method" == "HEAD" ]; then
+    filename=/dev/null
     curlOpts[${#curlOpts[@]}]="-I"
-    curlOpts[${#curlOpts[@]}]="-o/dev/null"
   else
+    filename="$(mktemp -t dc::http::request)"
     curlOpts[${#curlOpts[@]}]="-X"
     curlOpts[${#curlOpts[@]}]="$method"
-    curlOpts[${#curlOpts[@]}]="-o$filename"
   fi
+  curlOpts[${#curlOpts[@]}]="-o$filename"
 
   local i
 
@@ -132,17 +134,15 @@ dc::http::request(){
 
   _dc::http::logcommand
 
-  local result
-
   # Do it!
   local key
   local value
   local isRedirect
+  local line
 
-  local exit=
   while read -r i; do
     # Ignoring the leading character, and trim for content
-    local line=$(echo "${i:1}" | sed -E "s/^[[:space:]]*//" | sed -E "s/[[:space:]]*\$//")
+    line=$(echo "${i:1}" | sed -E "s/^[[:space:]]*//" | sed -E "s/[[:space:]]*\$//")
     # Ignore empty content
     [ "$line" ] || continue
 
@@ -156,18 +156,18 @@ dc::http::request(){
 
         # This is a header
         if [[ "$line" == *":"* ]]; then
-          key=$(echo ${line%%:*} | tr "-" "_" | tr '[:lower:]' '[:upper:]')
+          key=$(echo "${line%%:*}" | tr "-" "_" | tr '[:lower:]' '[:upper:]')
           value=${line#*: }
 
           if [ ! "$isRedirect" ]; then
             [ ! "$DC_HTTP_HEADERS" ] && DC_HTTP_HEADERS=$key || DC_HTTP_HEADERS="$DC_HTTP_HEADERS $key"
-            read "DC_HTTP_HEADER_$key" < <(echo $value)
+            read -r "DC_HTTP_HEADER_$key" < <(echo "$value")
           elif [ "$key" == "LOCATION" ]; then
             DC_HTTP_REDIRECTED=$value
           fi
 
           # Expunge what we log
-          [ "$_DC_HTTP_REDACT" ] && [[ "${_DC_HTTP_PROTECTED_HEADERS[@]}" == *"$key"* ]] && value=REDACTED
+          [ "$_DC_HTTP_REDACT" ] && [[ "${_DC_HTTP_PROTECTED_HEADERS[*]}" == *"$key"* ]] && value=REDACTED
           dc::logger::debug "[dc-http] $key | $value"
           continue
         fi
@@ -195,7 +195,7 @@ dc::http::request(){
         # Info
       ;;
     esac
-    headers[${#headers[@]}]="$t"
+    # headers[${#headers[@]}]="$t"
   done < <(
     curl "${curlOpts[@]}" 2>&1
   )
@@ -223,7 +223,7 @@ _dc::http::logcommand() {
 
     # If we redact, filter out sensitive headers
     if [ "$_DC_HTTP_REDACT" ]; then
-      case "${_DC_HTTP_PROTECTED_HEADERS[@]}" in
+      case "${_DC_HTTP_PROTECTED_HEADERS[*]}" in
         *$(echo ${i%%:*} | tr '[:upper:]' '[:lower:]')*)
           output="$output \"${i%%:*}: REDACTED\""
           continue
@@ -238,16 +238,4 @@ _dc::http::logcommand() {
   dc::logger::info "[dc-http] ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★"
   dc::logger::info "[dc-http] $output"
   dc::logger::info "[dc-http] ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★"
-}
-
-_dc::http::clear() {
-  DC_HTTP_STATUS=
-  DC_HTTP_REDIRECTED=
-  local i
-  for i in $DC_HTTP_HEADERS; do
-    i=DC_HTTP_HEADER_$i
-    read "$i" < <(echo "")
-  done
-  DC_HTTP_HEADERS=
-  DC_HTTP_BODY=
 }

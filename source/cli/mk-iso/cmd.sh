@@ -10,17 +10,15 @@ dc::commander::init
 directory="$1"
 dc::fs::isdir "$directory"
 
-iname="${DC_ARGV_ISO_NAME:-$(basename $directory)}"
+iname="${DC_ARGV_ISO_NAME:-$(basename "$directory")}"
 vname="${DC_ARGV_VOLUME_NAME:-$iname}"
 
 dc::logger::info "Creating ISO $iname.iso with volume name $vname from $directory"
 dc::logger::debug "hdiutil makehybrid -udf -udf-volume-name \"$vname\" -o \"$iname.iso\" \"$directory\""
 
-hdiutil makehybrid -udf -udf-volume-name "$vname" -o "$iname.iso" "$directory"
-
-if [ $? != 0 ]; then
+if hdiutil makehybrid -udf -udf-volume-name "$vname" -o "$iname.iso" "$directory"; then
   dc::logger::error "Failed to create ISO!"
-  exit $ERROR_FAILED
+  exit "$ERROR_FAILED"
 fi
 
 dc::logger::info "Done"

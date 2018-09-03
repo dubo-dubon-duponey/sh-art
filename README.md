@@ -69,6 +69,10 @@ Includes a basic test framework.
  * finish regander
  * movie-transform: add support for titles / year / director: https://multimedia.cx/eggs/supplying-ffmpeg-with-metadata/
  * explore using curl -w to build an HTTP perf/security testing tool
+ * finish changing the string API to printf
+ * move from echo to printf everywhere
+ * investigate performance of string processing
+ * make a call on passing by reference or not for the string API: http://fvue.nl/wiki/Bash:_Passing_variables_by_reference
 
 ### Research
 
@@ -87,4 +91,19 @@ set -E
 trap "echo EXIT trap fired!" EXIT
 trap "echo SIGINT trap fired!" INT
 trap "echo SIGTERM trap fired!" TERM
+```
+
+```
+Nastier tput effects
+bold 	Start bold text
+smul 	Start underlined text
+rmul 	End underlined text
+rev 	Start reverse video
+blink 	Start blinking text
+invis 	Start invisible text
+smso 	Start "standout" mode
+rmso 	End "standout" mode
+sgr0 	Turn off all attributes
+setaf <value> 	Set foreground color
+setab <value> 	Set background color
 ```

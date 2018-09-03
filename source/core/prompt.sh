@@ -12,7 +12,7 @@ dc::prompt::question() {
     return
   fi
 
-  read -p "$message" $2
+  read -r -p "$message" "$2"
 }
 
 dc::prompt::confirm(){
@@ -20,7 +20,7 @@ dc::prompt::confirm(){
     return
   fi
 
-  read
+  read -r
 }
 
 dc::prompt::credentials() {
@@ -31,14 +31,14 @@ dc::prompt::credentials() {
   fi
 
   # No username? Then ask for one.
-  read -p "$1" $2
+  read -r -p "$1" "$2"
   # No answer? Stay anonymous
   if [ ! "${!2}" ]; then
     return
   fi
 
   # Otherwise, ask for password
-  read -s -p "$3" $4
+  read -r -s -p "$3" "$4"
   # Just to avoid garbling the output
   >&2 echo
 }

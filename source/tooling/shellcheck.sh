@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 dc-tools::sc::list(){
-  git ls-tree -r HEAD | grep -E '^1007|.*\..*sh$' | awk '{print $4}'
+  git ls-tree -r HEAD | grep -E '^1007|.*\..*sh$' | awk '{print $4}' | grep -v tests
 }
 
 dc-tools::sc::isShell() {

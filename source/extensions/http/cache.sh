@@ -9,7 +9,7 @@ dc-ext::http::request-cache(){
     dc::http::request "$url" GET
     if [ "$DC_HTTP_STATUS" != 200 ]; then
       dc::logger::error "Failed fetching for $url"
-      exit $ERROR_NETWORK
+      exit "$ERROR_NETWORK"
     fi
     if [ "$DC_HTTP_STATUS" == 200 ]; then
       result="$(cat $DC_HTTP_BODY | base64)"
