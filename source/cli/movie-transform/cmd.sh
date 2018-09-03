@@ -11,7 +11,7 @@ dc::commander::init
 dc::fs::isfile "$1"
 
 filename=$(basename "$1")
-extension="${filename##*.}"
+# extension="${filename##*.}"
 filename="${filename%.*}"
 
 # Optional destination must be a writable directory, and create it is it does not exist
@@ -33,22 +33,22 @@ if [ "$DC_ARGV_EXTRACT" ]; then
   dc::argv::flag::validate extract "^[0-9]+:[^ ]+(?: [0-9]+:[^ ]+)*$"
 fi
 
-transmogrify::do "$1" "$destination" "${DC_ARGV_CONVERT}" "${DC_ARGV_REMOVE}" "${DC_ARGV_EXTRACT}"
 
-if [[ $? != 0 ]]; then
+
+if ! transmogrify::do "$1" "$destination" "${DC_ARGV_CONVERT}" "${DC_ARGV_REMOVE}" "${DC_ARGV_EXTRACT}"; then
   dc::logger::error "Failed to convert $filename!"
   if [ -f "$destination.mp4" ]; then
     rm "$destination.mp4"
   fi
-  exit $ERROR_FAILED
+  exit "$ERROR_FAILED"
+fi
+
+dc::logger::info "Successfully transmogrified $1"
+if [ "$DC_ARGE_DELETE" ] || [ "$DC_ARGE_D" ]; then
+  dc::logger::info "Press enter to delete the original"
+  dc::prompt::confirm
+  rm "$1"
+  dc::logger::info "Original deleted"
 else
-  dc::logger::info "Successfully transmogrified $1"
-  if [ "$DC_ARGE_DELETE" ] || [ "$DC_ARGE_D" ]; then
-    dc::logger::info "Press enter to delete the original"
-    dc::prompt::confirm
-    rm "$1"
-    dc::logger::info "Original deleted"
-  else
-    dc::logger::info "Original preserved"
-  fi
+  dc::logger::info "Original preserved"
 fi

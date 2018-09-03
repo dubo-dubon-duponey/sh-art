@@ -1,27 +1,31 @@
 #!/usr/bin/env bash
 
 _here=$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)
+
+# shellcheck source=/dev/null
 . "$_here/source/tooling/builder.sh"
 
 if [ ! "$PREFIX" ]; then
-  PREFIX="$_here/bin"
+  PREFIX="$_here"
 fi
-if [ ! -d "$PREFIX" ]; then
-  mkdir -p "$PREFIX"
+if [ ! -d "$PREFIX/bin" ]; then
+  mkdir -p "$PREFIX/bin"
+fi
+if [ ! -d "$PREFIX/lib" ]; then
+  mkdir -p "$PREFIX/lib"
 fi
 
 # Build the library
-library="$PREFIX/dc-library"
+library="$PREFIX/lib/dc-sh-art"
 destination="$library"
 
 dc-tools::builder::header "$destination" "the library version" "MIT license" "dubo-dubon-duponey"
 for k in "$_here/source/core"/*.sh; do
   dc-tools::builder::append "$k" "$destination"
 done
-chmod u+x "$destination"
 
 # Build the library with extensions
-libraryExt="$PREFIX/dc-library+extensions"
+libraryExt="${library}+ext"
 destination="$libraryExt"
 
 dc-tools::builder::header "$destination" "the library version, with extensions" "MIT license" "dubo-dubon-duponey"
@@ -29,14 +33,13 @@ cat "$library" >> "$destination"
 for k in "$_here/source/extensions"/**/*.sh; do
   dc-tools::builder::append "$k" "$destination"
 done
-chmod u+x "$destination"
 
 
 for i in "$_here/source/cli"/*; do
   if [ ! -d "$i" ]; then
     continue
   fi
-  destination="$PREFIX/dc-$(basename $i)"
+  destination="$PREFIX/bin/dc-$(basename "$i")"
   destination=${destination%-ext*}
 
   dc-tools::builder::header "$destination" "another fancy piece of shcript" "MIT license" "dubo-dubon-duponey"

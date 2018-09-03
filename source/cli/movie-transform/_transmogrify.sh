@@ -5,7 +5,8 @@ transmogrify::do(){
   local filename="$1"
   local destination="$2"
   local audconvert=$3
-  local removelist=( $4 )
+  local removelist
+  read -r -a removelist< <(echo "$4")
   shift
   shift
   shift
@@ -20,7 +21,7 @@ transmogrify::do(){
 
   # Now, remove the stuff in removelist
   local i
-  for i in ${removelist[@]}; do
+  for i in "${removelist[@]}"; do
     ar[${#ar[@]}]="-map"
     ar[${#ar[@]}]="-0:$i"
   done
@@ -40,7 +41,7 @@ transmogrify::do(){
 
   # Now, do we have anything to extract? "id:suffix id:suffix"
   if [ "$1" ]; then
-    for i in $@; do
+    for i in "$@"; do
       ar[${#ar[@]}]="-map"
       ar[${#ar[@]}]="0:${i%:*}"
       #ar[${#ar[@]}]="-c"
@@ -57,7 +58,15 @@ transmogrify::do(){
     done
   fi
 
-  local debug="${ar[@]}"
-  dc::logger::debug "$debug"
+  dc::logger::debug "${ar[*]}"
   "${ar[@]}" 2>/dev/null
 }
+
+xxxtranscode::fullmonthy(){
+  dc::logger::info "Full Monty this!"
+  local ar=( "HandBrakeCLI" "--preset" "Fast 1080p30" "-i" "$1" "-o" "$2" )
+  dc::logger::debug "${ar[@]}"
+  dc::prompt::confirm
+  "${ar[@]}"
+}
+

@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 readonly CLI_VERSION="0.0.1"
 readonly CLI_LICENSE="MIT License"
 readonly CLI_DESC="because I never remember ffmpeg invocation"
@@ -20,7 +21,7 @@ dc::fs::isdir "$destination" writable create
 
 # Process filename
 filename=$(basename "$filename")
-extension="${filename##*.}"
+# extension="${filename##*.}"
 filename="${filename%.*}"
 
 # Validate codec if present
@@ -35,7 +36,7 @@ codec=${DC_ARGV_CODEC:-ALAC}
 ar=( "-hide_banner" "-v" 8 "-i" "$1" "-vn" "-codec:a" )
 
 # Process the codec
-case "$(echo $codec | tr '[:lower:]' '[:upper:]')" in
+case "$(echo "$codec" | tr '[:lower:]' '[:upper:]')" in
   MP3)
     dc::logger::debug "Codec: MP3 320k"
     codec="libmp3lame -b:a 320k"
@@ -72,21 +73,19 @@ ar[${#ar[@]}]="$destination/$filename.$finalextension"
 # If the file already exists, stop here
 if [ -f "$destination/$filename.$finalextension" ]; then
   dc::logger::error "Destination file already exist. Aborting!"
-  exit $ERROR_FAILED
+  exit "$ERROR_FAILED"
 fi
 
-dc::logger::info "Transcoding $filename to $dest/$filename.$finalextension using settings: $codec"
+dc::logger::info "Transcoding $filename to $destination/$filename.$finalextension using settings: $codec"
 
 # Go for it
-dc::logger::debug ffmpeg "${ar[@]}"
-ffmpeg "${ar[@]}"
-
-if [[ $? != 0 ]]; then
+dc::logger::debug "ffmpeg ${ar[*]}"
+if ! ffmpeg "${ar[@]}"; then
 	dc::logger::error "Failed to convert $filename!"
 	if [ -f "$destination/$filename.$finalextension" ]; then
   	rm "$destination/$filename.$finalextension"
 	fi
-	exit $ERROR_FAILED
+	exit "$ERROR_FAILED"
 else
 	dc::logger::info "Success"
   if [ "$DC_ARGE_DELETE" ] || [ "$DC_ARGE_D" ]; then

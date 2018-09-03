@@ -22,11 +22,11 @@ dc::commander::help(){
   local license=$3
   local shortdesc=$4
   local shortusage=$5
-  echo "$name, version $version, released under $license"
-  echo "    > $shortdesc"
-  echo
-  echo "Usage:"
-  echo "    > $name $shortusage"
+  printf "%s, version %s, released under %s\\n" "$name" "$version" "$license"
+  printf "\\t> %s\\n" "$shortdesc"
+  printf "\\n"
+  printf "Usage\\n"
+  printf "\\t> %s %s\\n" "$name" "$shortusage"
 }
 
 # The method being called when the "version" flag is used (by default --version or -v) is passed to the script
@@ -34,7 +34,7 @@ dc::commander::help(){
 dc::commander::version(){
   local name=$1
   local version=$2
-  echo $name $version
+  printf "%s %s\\n" "$name" "$version"
 }
 
 # This is the entrypoint you should call in your script
@@ -49,10 +49,14 @@ dc::commander::version(){
 # The same goes for the *CLI_NAME*_LOG_AUTH environment variable
 
 dc::commander::init(){
-  local defaultllv=$(echo ${CLI_NAME:-${DC_CLI_NAME}} | tr "-" "_" | tr [:lower:] [:upper:])_LOG_LEVEL
-  local loglevelvar=${1:-${defaultllv}}
-  local defaultlav=$(echo ${CLI_NAME:-${DC_CLI_NAME}} | tr "-" "_" | tr [:lower:] [:upper:])_LOG_AUTH
-  local logauthvar=${2:-${defaultlav}}}
+  local defaultllv
+  local defaultlav
+  local loglevelvar
+  local logauthvar
+  defaultllv="$(echo "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_LEVEL"
+  loglevelvar="${1:-${defaultllv}}"
+  defaultlav="$(echo "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_AUTH"
+  logauthvar="${2:-${defaultlav}}"
 
   # If we have been asked for --help or -h, show help
   if [ -n "${DC_ARGV_HELP+x}" ] || [ -n "${DC_ARGV_H+x}" ]; then
@@ -76,7 +80,7 @@ dc::commander::init(){
     dc::configure::logger::mute
   else
     # Configure the logger from the LOG_LEVEL env variable
-    case "$(echo ${!loglevelvar} | tr '[:lower:]' '[:upper:]')" in
+    case "$(echo "${!loglevelvar}" | tr '[:lower:]' '[:upper:]')" in
       DEBUG)
         dc::configure::logger::setlevel::debug
       ;;
