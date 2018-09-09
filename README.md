@@ -13,11 +13,34 @@ Right now this is solely tested and used on macOS, using bash 3-something.
 
 And you need `jq` and `curl` installed if you plan on doing anything useful.
 
+## TL;DR
+
+`brew install sh_art`
+
+Then use one of the binaries (`dc-something`).
+
+Or start your own:
+
+```
+#!/usr/bin/env bash
+
+. $(brew --prefix)/lib/dc-sh-art
+
+readonly CLI_VERSION="0.0.1"
+readonly CLI_LICENSE="MIT License"
+readonly CLI_DESC="super top dupper awesome"
+readonly CLI_USAGE="[-s] [--insecure] [--myflag] param1 param2"
+
+dc::commander::init
+
+# Now do something useful below (like looking at other cli or reading the docs)
+```
+
 ## Design principles
 
  * emphasize use of json ([you should really learn `jq`](https://stedolan.github.io/jq/manual/))
  * don't pollute stdout with random stuff
- * aim for correctness (shellcheck pass), but not POSIX-ness
+ * aim for correctness (shellcheck pass), but not true POSIX-ness (too boring)
 
 ## Moar
 
