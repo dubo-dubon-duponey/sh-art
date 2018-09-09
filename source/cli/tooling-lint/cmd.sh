@@ -7,7 +7,13 @@ readonly CLI_USAGE="[-s] file-or-directory"
 
 dc::commander::init
 
-if [ -f "$1" ] && [ -r "$1" ]; then
+if [ ! -r "$1" ]; then
+  dc::logger::error "Please provide a readable file or directory to lint."
+  exit "$ERROR_ARGUMENT_INVALID"
+fi
+
+
+if [ -f "$1" ]; then
   dc-tools::sc::filecheck "$1"
   if [ "$DC_SHELLCHECK_FAIL" ]; then
     dc::logger::error "Shellcheck failed."
@@ -16,15 +22,8 @@ if [ -f "$1" ] && [ -r "$1" ]; then
   exit
 fi
 
-if [ -d "$1" ] && [ -r "$1" ]; then
-  dc-tools::sc::dircheck "$1"
-  if [ "$DC_SHELLCHECK_FAIL" ]; then
-    dc::logger::error "Shellcheck failed."
-    exit "$ERROR_FAILED"
-  fi
-  exit
+dc-tools::sc::dircheck "$1"
+if [ "$DC_SHELLCHECK_FAIL" ]; then
+  dc::logger::error "Shellcheck failed."
+  exit "$ERROR_FAILED"
 fi
-
-dc::logger::error "Please provide a valid file or directory to lint."
-
-exit "$ERROR_ARGUMENT_INVALID"
