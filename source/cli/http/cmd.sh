@@ -3,7 +3,7 @@
 readonly CLI_VERSION="0.0.1"
 readonly CLI_LICENSE="MIT License"
 readonly CLI_DESC="like curl, in a nicer json-way"
-readonly CLI_USAGE="url [method] [payload] [...headers]"
+readonly CLI_USAGE="[-s] [--insecure] url [method] [payload] [...headers]"
 
 dc::commander::init
 
