@@ -2,7 +2,7 @@
 
 readonly CLI_VERSION="0.0.1"
 readonly CLI_LICENSE="MIT License"
-readonly CLI_DESC="machine bootstrapping helper"
+readonly CLI_DESC="a ridiculously stupid bootstrapper to setup pyenv, nvm, and gvm, and their most useful accompanying versions"
 readonly CLI_USAGE="[-s]"
 
 # Boot
@@ -10,7 +10,6 @@ dc::commander::init
 
 # Depend on brew
 dc::depends::mac
-
 
 # Arg 1 must be the digits section of a movie imdb id
 #dc::argv::arg::validate 1 "^tt[0-9]{7}$"
@@ -31,6 +30,10 @@ kingpin::dev::refresh(){
 
 get::go(){
   dc::logger::info "Installing golang development environment"
+  if command -v gvm >/dev/null; then
+    dc::logger::info "gvm already installed"
+    return
+  fi
 
   dc::depends::mac::on go
   dc::depends::mac::on dep
@@ -75,6 +78,10 @@ setit(){
 
 get::node(){
   dc::logger::info "Installing node development environment"
+  if command -v nvm >/dev/null; then
+    dc::logger::info "gvm already installed"
+    return
+  fi
   ## About node version management:
   # https://github.com/ekalinin/nodeenv
   # https://github.com/isaacs/nave
@@ -123,6 +130,10 @@ EOF
 
 get::python(){
   dc::logger::info "Installing python development environment"
+  if command -v pyenv >/dev/null; then
+    dc::logger::info "gvm already installed"
+    return
+  fi
 
   # From https://github.com/pyenv/pyenv/wiki/Common-build-problems#requirements
   dc::depends::mac::on readline
@@ -158,7 +169,6 @@ EOF
   dc::logger::info "Done with python"
 }
 
-
-# get::go
-# get::node
+get::go
+get::node
 get::python
