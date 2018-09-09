@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+_here=$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)
+# shellcheck source=/dev/null
+. "$_here/source/tooling/assert.sh"
+
+tests::run::integration(){
+  if [ ! "$ERROR_FAILED" ]; then
+    # Source useful constants from the source code (mainly for exit codes and manifest media types)
+    # ... if not already there
+    # shellcheck source=/dev/null
+    . "$_here/source/core/errors.sh"
+  fi
+
+  local p
+
+  while read -r p; do
+    printf "%s\\n" "Running integration test suite: $p"
+    # shellcheck source=/dev/null
+    . "$p"
+  done < <(  if [ "$1" ]; then
+    ls "$_here/tests/integration/$1/"*.sh
+  else
+    ls "$_here/tests/integration/"**/*.sh
+  fi
+)
+}
+
+# Force a fresh build
+# $_here/build
+PATH=$_here/bin:$PATH
+
+tests::run::integration "$1"

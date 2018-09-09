@@ -11,31 +11,32 @@ DC_JWT_PAYLOAD=
 DC_JWT_ACCESS=
 
 dc::jwt::read(){
-  DC_JWT_TOKEN="$1"
-  local decoded=($(echo $1 | tr "." " "))
+  export DC_JWT_TOKEN="$1"
+
+  local decoded
+  read -r -a decoded< <(printf "%s" "$1" | tr "." " ")
   #local sig
 
   # XXX WTFFFFF base64
-  DC_JWT_HEADER=$(echo ${decoded[0]}== | base64 -D 2>/dev/null)
-  if [[ $? != 0 ]]; then
-    DC_JWT_HEADER=$(echo ${decoded[0]} | base64 -D)
+  if ! DC_JWT_HEADER="$(printf "%s" "${decoded[0]}==" | base64 -D 2>/dev/null)"; then
+    DC_JWT_HEADER="$(printf "%s" "${decoded[0]}" | base64 -D)"
   fi
-  DC_JWT_PAYLOAD=$(echo ${decoded[1]}== | base64 -D 2>/dev/null)
-  if [[ $? != 0 ]]; then
-    DC_JWT_PAYLOAD=$(echo ${decoded[1]} | base64 -D)
+  if ! DC_JWT_PAYLOAD="$(printf "%s" "${decoded[1]}==" | base64 -D 2>/dev/null)"; then
+    DC_JWT_PAYLOAD="$(printf "%s" "${decoded[1]}" | base64 -D)"
   fi
-  #sig=$(echo ${decoded[2]}== | base64 -D 2>/dev/null)
+  #sig=$(printf "%s" ${decoded[2]}== | base64 -D 2>/dev/null)
   #if [[ $? != 0 ]]; then
-  #  sig=$(echo ${decoded[2]} | base64 -D)
+  #  sig=$(printf "%s" ${decoded[2]} | base64 -D)
   #fi
 
   if [ ! "$_DC_HTTP_REDACT" ]; then
-    dc::logger::info "[JWT] header: $(echo $DC_JWT_HEADER | jq '.')"
-    dc::logger::info "[JWT] payload: $(echo $DC_JWT_PAYLOAD | jq '.')"
+    dc::logger::info "[JWT] header: $(printf "%s" "$DC_JWT_HEADER" | jq '.')"
+    dc::logger::info "[JWT] payload: $(printf "%s" "$DC_JWT_PAYLOAD" | jq '.')"
     # TODO implement signature verification? not super useful...
-    # dc::logger::debug "[JWT] sig: $(echo $sig)"
+    # dc::logger::debug "[JWT] sig: $(printf "%s" $sig)"
   fi
 
   # Grab the access response
-  DC_JWT_ACCESS=$(echo $DC_JWT_PAYLOAD | jq '.access')
+  export DC_JWT_ACCESS
+  DC_JWT_ACCESS="$(printf "%s" "$DC_JWT_PAYLOAD" | jq '.access')"
 }

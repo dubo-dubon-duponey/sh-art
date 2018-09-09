@@ -2,8 +2,8 @@
 
 result=$(dc-libre dc::output::json "{}")
 exit=$?
-dc-tools::assert::equal $exit 0 "libre successful exit"
-dc-tools::assert::equal $result "{}"
+dc-tools::assert::equal "$exit" 0 "libre successful exit"
+dc-tools::assert::equal "$result" "{}"
 
 #. $_here/../../../bin/dc-libre --
 

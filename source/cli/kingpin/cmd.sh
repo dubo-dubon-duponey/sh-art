@@ -43,13 +43,15 @@ get::go(){
   fi
 
   cat <<- EOF > "$HOME/.posh_go"
+#!/usr/bin/env bash
 # ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★
 # ★ kingpin ＆ go     ★
 # ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★
 
 export GOPATH="\$HOME/Projects/Go"
 export PATH="\$GOPATH/bin:\${PATH}"
-[[ -s "\${POSH_BIN:-\$HOME/Applications/bin}/gvm/scripts/gvm" ]] && source "\${POSH_BIN:-\$HOME/Applications/bin}/gvm/scripts/gvm"
+# shellcheck source=/dev/null
+[ -s "\${POSH_BIN:-\$HOME/Applications/bin}/gvm/scripts/gvm" ] && . "\${POSH_BIN:-\$HOME/Applications/bin}/gvm/scripts/gvm"
 EOF
 # XXX ^ gvm will force add the last line to .profile regardless
 
@@ -84,16 +86,19 @@ get::node(){
   dc::depends::mac::on nvm
 
   cat <<-EOF > "$HOME/.posh_node"
+#!/usr/bin/env bash
 # ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★
 # ★ kingpin ＆ node   ★
 # ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★
 
 export NVM_DIR=\${POSH_BIN:-\$HOME/Applications/bin}/nvm
-. \$(brew --prefix nvm)/nvm.sh
+# shellcheck source=/dev/null
+. "\$(brew --prefix nvm)"/nvm.sh
 export NPM_CONFIG_CACHE=\${POSH_TMP:-\$HOME/tmp}/cache/npm
 export NPM_CONFIG_TMP=\${POSH_TMP:-\$HOME/tmp}/tmp/npm
 
-export PATH="\$(brew --prefix yarn)/bin:\${PATH}"
+PATH="\$(brew --prefix yarn)/bin:\${PATH}"
+export PATH
 # yarn global bin ends-up in brew/bin
 export YARN_CACHE_FOLDER="\${POSH_TMP:-\$HOME/tmp}/cache/yarn"
 EOF
@@ -125,12 +130,14 @@ get::python(){
   dc::depends::mac::on pyenv
 
   cat <<- EOF > ~/.posh_python
+#!/usr/bin/env bash
 # ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★
 # ★ kingpin ＆ python           ★
 # ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★
 
-export PYENV_ROOT="\$(brew --repository)/../pyenv"
-if command -v pyenv; then
+PYENV_ROOT="\$(brew --repository)/../pyenv"
+export PYENV_ROOT
+if command -v pyenv >/dev/null; then
   eval "\$(pyenv init -)"
 fi
 EOF

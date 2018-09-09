@@ -1,9 +1,10 @@
 # sh-art
 
-> just a piece of shcript - internally known as "dc" (short for "dubo (shell) core")
+> just a piece of shcript (aka "dubo core" or "dc")
 
 This project aims at providing a generic library facilitating the development
-of marginally complex command-line shell scripts, primarily driven by personal needs.
+of marginally complex command-line shell scripts in a consistent manner, primarily
+driven by personal needs.
 
 Specifically, it takes care of argument parsing and validation, logging, http, and other
 stuff.
@@ -16,6 +17,7 @@ And you need `jq` and `curl` installed if you plan on doing anything useful.
 
  * emphasize use of json ([you should really learn `jq`](https://stedolan.github.io/jq/manual/))
  * don't pollute stdout with random stuff
+ * aim for correctness (shellcheck pass), but not POSIX-ness
 
 ## Moar
 
@@ -25,13 +27,13 @@ And you need `jq` and `curl` installed if you plan on doing anything useful.
  
 ## Developping a new cli
 
-A. Out of tree:
+A. Out of tree, create a shell script:
 
 ```
 . PATH/TO/dc-library
 dc::commander::init
 
-# Now go do something useful
+# Now go do something useful (like looking at other cli or reading the docs)
 
 ```
 
@@ -45,36 +47,34 @@ B. In-tree, with builder / integration:
 
 Includes a basic test framework.
 
-1. write tests under "tests"
-2. call `./test`
+1. call `./lint`
+1. write tests under `tests/unit`
+1. call `./unit`
+1. write tests under `tests/integration/SOMETHING`
+1. call `build`, then `./integration SOMETHING` or simply `./integration`
 
 ## Why... the... name?
 
  * it's a portementeau: "sh" (short for "shell") + "art" (short for "I like it"), which somewhat makes sense
  * what did you think it meant?
- * if it was powershell instead of bash, it would probably have been named `phart`, which usually doesn't sound right
+ * if it was powershell instead of bash, it would probably have been named `phart`, which doesn't really sound right
 
 ## TODO & research
 
  * use stdin with curl
- * work on performance for `dc::string`
- * write integration tests for cli
+ * continue work on performance for `dc::string`
+ * continue integration tests for clis
  * finish porting remaining random scripts
  * https://gist.github.com/mathiasbynens/674099
- * consider moving to make to build (right now, it's effing slow)
+ * consider moving to `make`
  * fix imdb specs (array values)
  * add travis (test bash4 as well)
- * evaluate posix-ness
  * implement requirement verification (jq, ffprobe, curl, etc)
  * finish regander
  * movie-transform: add support for titles / year / director: https://multimedia.cx/eggs/supplying-ffmpeg-with-metadata/
  * explore using curl -w to build an HTTP perf/security testing tool
- * finish changing the string API to printf
- * move from echo to printf everywhere
- * investigate performance of string processing
+ * finish moving to printf
  * make a call on passing by reference or not for the string API: http://fvue.nl/wiki/Bash:_Passing_variables_by_reference
-
-### Research
 
 ```
 # Exit immediately on fail

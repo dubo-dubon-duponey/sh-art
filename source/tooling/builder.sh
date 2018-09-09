@@ -6,16 +6,14 @@ dc-tools::builder::append(){
 
   OIFS=$IFS
   IFS=$'\n'
-  cat "$source" | \
-    while read i
-    do
-      # Ignore lines starting with #
-      iscomment=$(echo "$i" | grep -E "^[ ]*#" )
-      if [ "$iscomment" ]; then
-        continue
-      fi
-      echo "$i"
-    done >> "$destination"
+  while read -r i
+  do
+    # Ignore lines starting with #
+    if printf "%s" "$i" | grep -q -E "^[ ]*#"; then
+      continue
+    fi
+    printf "%s\\n" "$i"
+  done < "$source" >> "$destination"
   IFS=$OIFS
 }
 
@@ -24,7 +22,8 @@ dc-tools::builder::header(){
   local shortdesc="${2:-another fancy piece of shcript}"
   local license="${3:-MIT license}"
   local owner="${4-dubo-dubon-duponey}"
-  local year=$(date +"%Y")
+  local year
+  year=$(date +"%Y")
 
   cat <<-EOF > "$destination"
 #!/usr/bin/env bash

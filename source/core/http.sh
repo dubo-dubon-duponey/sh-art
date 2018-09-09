@@ -91,7 +91,7 @@ dc::http::request(){
   DC_HTTP_REDIRECTED=
   local i
   for i in $DC_HTTP_HEADERS; do
-    read -r "DC_HTTP_HEADER_$i" < <(echo "")
+    read -r "DC_HTTP_HEADER_$i" < <(printf "")
   done
   DC_HTTP_HEADERS=
   DC_HTTP_BODY=

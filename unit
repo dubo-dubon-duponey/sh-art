@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+_here=$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)
+# shellcheck source=/dev/null
+. "$_here/source/tooling/assert.sh"
+
+tests::run::unit(){
+  # Force a fresh build
+  local k
+  for k in "$_here/source/core"/*.sh; do
+    # shellcheck source=/dev/null
+    . "$k"
+  done
+
+  for k in "$_here/source/extensions"/**/*.sh; do
+    # shellcheck source=/dev/null
+    . "$k"
+  done
+
+  # Run all tests
+  local p
+  while read -r p; do
+    printf "%s\\n" "Running unit test suite: $p"
+    # shellcheck source=/dev/null
+    . "$p"
+  done < <(ls "$_here/tests/unit/"*.sh)
+}
+
+tests::run::unit
