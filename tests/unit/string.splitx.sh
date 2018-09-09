@@ -1,99 +1,326 @@
 #!/usr/bin/env bash
 
-#### Split and splitN
+#### splitN
 
-# Split slices s into all substrings separated by sep and returns a slice of the substrings between those separators.
-haystack='1 1∞1 1 12'$'\r'$'\n''a 1 13'
-sep="1 1"
-result=()
-
-# read -r -a thing < <(echo "a b cc")
-#read -d '' -r -a thing < <(dc::string::split haystack sep)
-#read -r -d $'\0' -a thing < <(printf "%s\0%s\0%s" "a" "b" "c")
-#echo "${#thing[@]}"
-#exit
-
-while IFS= read -r -d '' -a foo; do
-  result[${#result[@]}]="$foo"
-done < <(dc::string::split haystack sep)
-
-dc-tools::assert::equal "${result[0]}" "" "[0]: '$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${result[1]}" "∞" "[1]: '$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${result[2]}" ' 12'$'\r'$'\na ' "[2]: '$haystack' split, sep '$sep'"
-exit
-dc-tools::assert::equal "${result[3]}" 3 "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${#result[@]}" 4 "'$haystack' split, sep '$sep'"
-
-dc::string::splitAfter haystack sep
-dc-tools::assert::equal "${result[0]}" "1 1" "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${result[1]}" "∞1 1" "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${result[2]}" ' 12'$'\r''
-1 1' "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${result[3]}" 3 "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${#result[@]}" 4 "'$haystack' split, sep '$sep'"
-
-dc::string::splitN haystack sep -1
-dc-tools::assert::equal "${result[0]}" "" "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${result[1]}" "∞" "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${result[2]}" ' 12'$'\r''
-' "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${result[3]}" 3 "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${#result[@]}" 4 "'$haystack' split, sep '$sep'"
-
-dc::string::splitN haystack sep 100
-dc-tools::assert::equal "${result[0]}" "" "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${result[1]}" "∞" "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${result[2]}" ' 12'$'\r''
-' "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${result[3]}" 3 "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${#result[@]}" 4 "'$haystack' split, sep '$sep'"
-
-dc::string::splitAfterN haystack sep 100
-dc-tools::assert::equal "${result[0]}" "1 1" "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${result[1]}" "∞1 1" "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${result[2]}" ' 12'$'\r''
-1 1' "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${result[3]}" 3 "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${#result[@]}" 4 "'$haystack' split, sep '$sep'"
-
-dc::string::splitN haystack sep 2
-dc-tools::assert::equal "${result[0]}" "" "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${result[1]}" "∞" "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${result[2]}" ' 12'$'\r''
-1 13' "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${#result[@]}" 3 "'$haystack' split, sep '$sep'"
-
-dc::string::splitAfterN haystack sep 2
-dc-tools::assert::equal "${result[0]}" "1 1" "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${result[1]}" "∞1 1" "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${result[2]}" ' 12'$'\r''
-1 13' "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${#result[@]}" 3 "'$haystack' split, sep '$sep'"
-
-
-# If s does not contain sep and sep is not empty, Split returns a slice of length 1 whose only element is s.
-haystack="∞ ∞ ∞ ∞"
-sep="1"
-dc::string::split haystack sep
-dc-tools::assert::equal "${result[0]}" "∞ ∞ ∞ ∞" "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${#result[@]}" 1 "'$haystack' split, sep '$sep'"
-
-dc::string::splitN haystack sep 1
-dc-tools::assert::equal "${result[0]}" "∞ ∞ ∞ ∞" "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${#result[@]}" 1 "'$haystack' split, sep '$sep'"
-
-dc::string::splitN haystack sep 0
-dc-tools::assert::equal "${result[@]}" "" "'$haystack' split, sep '$sep'"
-
-# If sep is empty, Split splits after each UTF-8 sequence. If both s and sep are empty, Split returns an empty slice.
-haystack="∞ 2 ∞ ∞"
-sep=""
-dc::string::split haystack sep
-dc-tools::assert::equal "${result[2]}" 2 "'$haystack' split, sep '$sep'"
-dc-tools::assert::equal "${#result[@]}" 7 "'$haystack' split, sep '$sep'"
-
-# If both haystack and separator are the empty string, return a zero length array
+##########################################
+# Null haystack and null sep
+##########################################
 haystack=
 sep=
-dc::string::split haystack sep
-dc-tools::assert::equal "${#result[@]}" 0 "'$haystack' split, sep '$sep'"
+
+count=0
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[*]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 0 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 0"
+
+count=3
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[*]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 0 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 3"
+
+count=-1
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[*]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 0 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 10"
+
+count=invalid$'\n'foo
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[*]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 0 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 10"
+
+##########################################
+# Null haystack and "whatever" sep
+##########################################
+haystack=
+sep=wha$'\n't$'\t'e$'\0'ver
+
+count=0
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[*]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 0 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 0"
+
+count=3
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[*]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 0 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 3"
+
+count=-1
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[*]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 0 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 10"
+
+count=invalid$'\n'foo
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[*]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 0 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 10"
+
+##########################################
+# Null separator and whatever haystack
+##########################################
+haystack=wha$'\n't$'\t'e$'\0'ver
+sep=
+
+count=0
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[*]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 0 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 0"
+
+count=3
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${#result[@]}" 3 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 3"
+dc-tools::assert::equal "${result[*]}" "w h a" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+
+count=-1
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[*]}" "w h a "$'\n'" t "$'\t'" e "$'\0'"v e r" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 10 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 10"
+
+count=invalid$'\n'foo
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[*]}" "w h a "$'\n'" t "$'\t'" e "$'\0'"v e r" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 10 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 10"
+
+##########################################
+# Non-null separator and haystack
+##########################################
+haystack=wha$'\n't$'\t'e$'\0'ver
+sep=a$'\n't
+
+count=0
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[*]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 0 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 0"
+
+count=3
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[0]}" wh "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${result[1]}" $'\t'e$'\0'ver "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 2 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 0"
+
+count=-1
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[0]}" wh "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${result[1]}" $'\t'e$'\0'ver "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 2 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 0"
+
+count=invalid$'\n'foo
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[0]}" wh "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${result[1]}" $'\t'e$'\0'ver "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 2 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 0"
+
+##########################################
+# Non-null separator and haystack, separator not part of the string
+##########################################
+haystack=wha$'\n't$'\t'e$'\0'ver
+sep=∞
+
+count=0
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[*]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 0 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 0"
+
+count=3
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[0]}" "$haystack" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 1 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 0"
+
+count=-1
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[0]}" "$haystack" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 1 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 0"
+
+count=invalid$'\n'foo
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[0]}" "$haystack" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 1 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 0"
+
+##########################################
+# Non-null separator and haystack, start with separator
+##########################################
+haystack=wha$'\n't$'\t'e$'\0'ver
+sep=wh
+
+count=0
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[*]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 0 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 0"
+
+count=3
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[0]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${result[1]}" a$'\n't$'\t'e$'\0'ver "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 2 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 0"
+
+count=-1
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[0]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${result[1]}" a$'\n't$'\t'e$'\0'ver "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 2 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 0"
+
+count=invalid$'\n'foo
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[0]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${result[1]}" a$'\n't$'\t'e$'\0'ver "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 2 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 0"
+
+##########################################
+# Non-null separator and haystack, end with separator
+##########################################
+haystack=wha$'\n't$'\t'e$'\0'ver
+sep=er
+
+count=0
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[*]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 0 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 0"
+
+count=3
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[0]}" wha$'\n't$'\t'e$'\0'v "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${result[1]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 2 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 0"
+
+count=-1
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[0]}" wha$'\n't$'\t'e$'\0'v "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${result[1]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 2 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 0"
+
+count=invalid$'\n'foo
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[0]}" wha$'\n't$'\t'e$'\0'v "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${result[1]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 2 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 0"
+
+##########################################
+# Non-null separator and haystack, more than one separator occurence, non-ASCII
+##########################################
+haystack="∞ a b c ∞ a b c ∞ a b c ∞"
+sep="∞"
+
+count=0
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[*]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 0 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 0"
+
+count=3
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[0]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${result[1]}" " a b c " "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${result[2]}" " a b c ∞ a b c ∞" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 3 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 0"
+
+count=-1
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[0]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${result[1]}" " a b c " "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${result[2]}" " a b c " "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${result[3]}" " a b c " "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${result[4]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 5 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 0"
+
+count=invalid$'\n'foo
+result=()
+while IFS= read -r -d '' i; do
+  result[${#result[@]}]="$i"
+done < <(dc::string::splitN haystack sep $count)
+dc-tools::assert::equal "${result[0]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${result[1]}" " a b c " "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${result[2]}" " a b c " "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${result[3]}" " a b c " "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${result[4]}" "" "splitN - haystack: $haystack, sep: $sep, count: $count -> result: "
+dc-tools::assert::equal "${#result[@]}" 5 "splitN - haystack: $haystack, sep: $sep, count: $count -> count: 0"

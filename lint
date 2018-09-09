@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+_here=$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)
+# shellcheck source=/dev/null
+. "$_here/source/tooling/shellcheck.sh"
+
+# Ensure shellcheck is installed
+dc-tools::sc::install
+# Run it on everything that is an executable shell script
+dc-tools::sc::run
+# Also run on it on .profile for good measure
+dc-tools::sc::check "$HOME/.profile"

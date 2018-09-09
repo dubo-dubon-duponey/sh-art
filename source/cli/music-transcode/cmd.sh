@@ -13,8 +13,8 @@ filename="$1"
 dc::fs::isfile "$filename"
 
 # Destination
-dc::argv::flag::validate destination
-destination=${DC_ARGV_DESTINATION} # :-$(dirname "$filename")}
+# dc::argv::flag::validate destination
+destination=${DC_ARGV_DESTINATION:-$(dirname "$filename")}
 
 # Must be writable, and create if doesn't exist
 dc::fs::isdir "$destination" writable create

@@ -93,7 +93,7 @@ extractTechSpecs(){
     # XXX broken: all values may potentially be arrays and that should be reflected in the output json
     if [ "$key" == "RUNTIME" ]; then
       IMDB_RUNTIME=()
-      while read -r i; do
+      while IFS= read -r -d '' i; do
         IMDB_RUNTIME[${#IMDB_RUNTIME[@]}]=$(printf "%s" "$i" | tr -d '\n' | tr -d '\t' | sed -E 's/.*[ (]([0-9]+ min)[[:space:])]*(.*)?$/\1 \2/' | sed -E 's/[[:space:]]*$//')
       done < <( dc::string::split value sep )
       continue

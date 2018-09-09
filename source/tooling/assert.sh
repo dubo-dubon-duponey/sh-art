@@ -6,7 +6,7 @@ dc-tools::assert::null(){
     context=" (context: $context)"
   fi
   if [ "$1" ]; then
-    echo "[$(date)] [ERROR] Expecting '$1' to be null$context"
+    printf "%s\\n" "[$(date)] [ERROR] Expecting '$1' to be null$context"
     exit 1
   fi
 }
@@ -17,7 +17,7 @@ dc-tools::assert::notnull(){
     context=" (context: $context)"
   fi
   if [ ! "$1" ]; then
-    echo "[$(date)] [ERROR] Expecting '$1' to not be null$context"
+    printf "%s\\n" "[$(date)] [ERROR] Expecting '$1' to not be null$context"
     exit 1
   fi
 }
@@ -28,7 +28,7 @@ dc-tools::assert::equal(){
     context=" (context: $context)"
   fi
   if [ "$1" != "$2" ]; then
-    echo "[$(date)] [ERROR] Expecting '$1' to be equal to '$2'$context"
+    printf "%s\\n" "[$(date)] [ERROR] Expecting '$1' to be equal to '$2'$context"
     exit 1
   fi
 }
@@ -39,7 +39,7 @@ dc-tools::assert::notequal(){
     context=" (context: $context)"
   fi
   if [ "$1" == "$2" ]; then
-    echo "[$(date)] [ERROR] Expecting '$1' to not be '$2'$context"
+    printf "%s\\n" "[$(date)] [ERROR] Expecting '$1' to not be '$2'$context"
     exit 1
   fi
 }

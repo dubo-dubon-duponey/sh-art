@@ -59,7 +59,7 @@ dc::argv::flag::validate()
   local regexp="$2"
   local gf="${3:--E}"
   if [ "$regexp" ]; then
-    if ! echo "${!var}" | grep "$gf" "$regexp"; then
+    if ! echo "${!var}" | grep -q "$gf" "$regexp"; then
       dc::logger::error "Flag $(echo "$1" | tr "_" "-" | tr '[:upper:]' '[:lower:]') is invalid. Must match $regexp - was: ${!var}"
       exit "$ERROR_ARGUMENT_INVALID"
     fi
@@ -76,7 +76,7 @@ dc::argv::arg::validate()
   local regexp="$2"
   local gf="${3:--E}"
   if [ "$regexp" ]; then
-    if ! echo "${!var}" | grep "$gf" "$regexp"; then
+    if ! echo "${!var}" | grep -q "$gf" "$regexp"; then
       dc::logger::error "Argument $1 is invalid. Must match $regexp."
       exit "$ERROR_ARGUMENT_INVALID"
     fi
