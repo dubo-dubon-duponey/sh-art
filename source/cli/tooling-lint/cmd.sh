@@ -2,7 +2,7 @@
 
 readonly CLI_VERSION="0.0.1"
 readonly CLI_LICENSE="MIT License"
-readonly CLI_DESC="shell script linting"
+readonly CLI_DESC="script linter (part of the dc-tooling suite)"
 readonly CLI_USAGE="[-s] file-or-directory"
 
 dc::commander::init

@@ -60,11 +60,11 @@ dc::argv::flag::validate()
   local gf="${3:--E}"
   if [ "$regexp" ]; then
     if ! echo "${!var}" | grep -q "$gf" "$regexp"; then
-      dc::logger::error "Flag $(echo "$1" | tr "_" "-" | tr '[:upper:]' '[:lower:]') is invalid. Must match $regexp - was: ${!var}"
+      dc::logger::error "Flag \"$(echo "$1" | tr "_" "-" | tr '[:upper:]' '[:lower:]')\" is invalid. Must match \"$regexp\". Value is: \"${!var}\"."
       exit "$ERROR_ARGUMENT_INVALID"
     fi
   elif [ ! "${!varexist}" ]; then
-    dc::logger::error "Flag $(echo "$1" | tr "_" "-" | tr '[:upper:]' '[:lower:]') is required."
+    dc::logger::error "Flag \"$(echo "$1" | tr "_" "-" | tr '[:upper:]' '[:lower:]')\" is required."
     exit "$ERROR_ARGUMENT_MISSING"
   fi
 }
@@ -77,11 +77,11 @@ dc::argv::arg::validate()
   local gf="${3:--E}"
   if [ "$regexp" ]; then
     if ! echo "${!var}" | grep -q "$gf" "$regexp"; then
-      dc::logger::error "Argument $1 is invalid. Must match $regexp."
+      dc::logger::error "Argument \"$1\" is invalid. Must match \"$regexp\". Value is: \"${!var}\"."
       exit "$ERROR_ARGUMENT_INVALID"
     fi
   elif [ ! "${!varexist}" ]; then
-    dc::logger::error "Argument $1 is missing."
+    dc::logger::error "Argument \"$1\" is missing."
     exit "$ERROR_ARGUMENT_MISSING"
   fi
 }
