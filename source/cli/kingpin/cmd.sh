@@ -140,7 +140,7 @@ get::python(){
   dc::depends::mac::on xz
   dc::depends::mac::on pyenv
 
-  cat <<- EOF > ~/.posh_python
+  cat <<- EOF > "$HOME/.posh_python"
 #!/usr/bin/env bash
 # ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★
 # ★ kingpin ＆ python           ★

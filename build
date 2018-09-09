@@ -20,6 +20,12 @@ library="$DC_PREFIX/lib/dc-sh-art"
 destination="$library"
 
 dc-tools::builder::header "$destination" "the library version" "MIT license" "dubo-dubon-duponey"
+cat <<- EOF >> "$destination"
+DC_VERSION="$(git describe --match 'v[0-9]*' --dirty='.m' --always)"
+DC_REVISION="$(git rev-parse HEAD)$(if ! git diff --no-ext-diff --quiet --exit-code; then echo ".m"; fi)"
+DC_BUILD_DATE="$(date -R)"
+EOF
+
 for k in "$_here/source/core"/*.sh; do
   dc-tools::builder::append "$k" "$destination"
 done
