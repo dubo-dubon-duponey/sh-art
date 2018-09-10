@@ -21,3 +21,5 @@ readonly ERROR_UNSUPPORTED=203
 readonly ERROR_FAILED=204
 # Expectations failed on a file (not readable, writable, doesn't exist, can't be created)
 readonly ERROR_FILESYSTEM=205
+# System requirements
+readonly ERROR_MISSING_REQUIREMENTS=206

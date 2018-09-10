@@ -9,7 +9,13 @@ readonly CLI_USAGE="[-s]"
 dc::commander::init
 
 # Depend on brew
-dc::depends::mac
+dc::require::platform::mac
+dc::require::mac::brew
+
+dc::depends::mac::on(){
+  # Install through brew
+  [ ! "$(brew list "$1" 2>/dev/null)" ] && brew install "$1"
+}
 
 # Arg 1 must be the digits section of a movie imdb id
 #dc::argv::arg::validate 1 "^tt[0-9]{7}$"
