@@ -30,8 +30,8 @@ dc::jwt::read(){
   #fi
 
   if [ ! "$_DC_HTTP_REDACT" ]; then
-    dc::logger::info "[JWT] header: $(printf "%s" "$DC_JWT_HEADER" | jq '.')"
-    dc::logger::info "[JWT] payload: $(printf "%s" "$DC_JWT_PAYLOAD" | jq '.')"
+    dc::logger::debug "[dc-jwt] decoded header: $(printf "%s" "$DC_JWT_HEADER" | jq '.')"
+    dc::logger::debug "[dc-jwt] decoded payload: $(printf "%s" "$DC_JWT_PAYLOAD" | jq '.')"
     # TODO implement signature verification? not super useful...
     # dc::logger::debug "[JWT] sig: $(printf "%s" $sig)"
   fi
@@ -39,4 +39,5 @@ dc::jwt::read(){
   # Grab the access response
   export DC_JWT_ACCESS
   DC_JWT_ACCESS="$(printf "%s" "$DC_JWT_PAYLOAD" | jq '.access')"
+  dc::logger::debug "[dc-jwt] access for: $DC_JWT_ACCESS"
 }

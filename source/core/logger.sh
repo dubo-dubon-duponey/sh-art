@@ -25,7 +25,8 @@ dc::configure::logger::setlevel() {
 
 dc::configure::logger::setlevel::debug(){
   # XXX test this
-  set -x
+  # Too noisy, not useful
+  # set -x
   dc::configure::logger::setlevel $DC_LOGGER_DEBUG
 }
 
