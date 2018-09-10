@@ -8,7 +8,7 @@
 # - as-is if "raw" ($2) is set
 # - through jq (adapts to being piped)
 dc::output::json() {
-  raw=$2
+  raw="$2"
   if [ -t 1 ]; then
     # Pretty it if we are not piped
     printf "%s" "$1" | jq
