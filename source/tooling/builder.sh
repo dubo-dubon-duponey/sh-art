@@ -9,9 +9,10 @@ dc-tools::builder::append(){
   while read -r i
   do
     # Ignore lines starting with #
-    if printf "%s" "$i" | grep -q -E "^[ ]*#"; then
-      continue
-    fi
+    # XXX breaks heredoc sections...
+    #if printf "%s" "$i" | grep -q -E "^[ ]*#"; then
+    #  continue
+    #fi
     printf "%s\\n" "$i"
   done < "$source" >> "$destination"
   IFS=$OIFS
