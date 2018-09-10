@@ -2,7 +2,7 @@
 
 dc-tools::sc::install() {
   if ! command -v shellcheck > /dev/null; then
-    dc::logger::warning "Shellcheck is not installed. Press enter to install now."
+    dc::logger::warning "[linter] shellcheck is not installed. Press enter to install now."
     dc::prompt::confirm
     # XXX not exactly portable
     brew install shellcheck
@@ -11,11 +11,12 @@ dc-tools::sc::install() {
 
 dc-tools::sc::filecheck(){
   if ! head -n1 "$1" | grep -q -E -w "sh|bash|ksh"; then
-    dc::logger::warning "Ignoring $1 (no recognized shebang)"
+    dc::logger::warning "[linter] ignoring $1 (no recognized shebang)"
     return
   fi
+  dc::logger::info "[linter] shellchecking \"$script\""
   if ! shellcheck -a -x "$1"; then # -s bash
-    dc::logger::error "Shellcheck failed on: \"$1\""
+    dc::logger::error "[linter] shellcheck failed on: \"$1\""
     export DC_SHELLCHECK_FAIL=true
   fi
 }
