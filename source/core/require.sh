@@ -39,5 +39,5 @@ dc::require::jq(){
     dc::logger::error "Please install jq for this shcript to work."
     exit "$ERROR_MISSING_REQUIREMENTS"
   fi
-  readonly DC_VERSION_JQ="$jqVersion"
+  readonly DC_VERSION_JQ="${jqVersion##*-}"
 }
