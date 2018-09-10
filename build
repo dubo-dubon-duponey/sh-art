@@ -35,7 +35,7 @@ libraryExt="${library}+ext"
 destination="$libraryExt"
 
 dc-tools::builder::header "$destination" "the library version, with extensions" "MIT license" "dubo-dubon-duponey"
-cat "$library" >> "$destination"
+dc-tools::builder::append "$library" "$destination"
 for k in "$_here/source/extensions"/**/*.sh; do
   dc-tools::builder::append "$k" "$destination"
 done
@@ -50,9 +50,9 @@ for i in "$_here/source/cli"/*; do
 
   dc-tools::builder::header "$destination" "another fancy piece of shcript" "MIT license" "dubo-dubon-duponey"
   if [ "$i" != "${i%-ext*}" ]; then
-    cat "$libraryExt" >> "$destination"
+    dc-tools::builder::append "$libraryExt" "$destination"
   else
-    cat "$library" >> "$destination"
+    dc-tools::builder::append "$library" "$destination"
   fi
 
   for k in "$i"/*.sh; do

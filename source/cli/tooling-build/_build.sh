@@ -6,14 +6,14 @@ dc-tools::build::append(){
 
   OIFS=$IFS
   IFS=$'\n'
+  local start
   while read -r i
   do
-    # Ignore lines starting with #
-    # XXX this breaks heredoc templates such as header below
-    # if printf "%s" "$i" | grep -q -E "^[ ]*#"; then
-    #  continue
-    # fi
-    printf "%s\\n" "$i"
+    # Ignore file headers
+    if [ "$start" ] || ! printf "%s" "$i" | grep -q -E "^[ ]*#"; then
+      printf "%s\\n" "$i"
+      start="done"
+    fi
   done < "$source" >> "$destination"
   IFS=$OIFS
 }

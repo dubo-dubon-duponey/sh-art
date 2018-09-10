@@ -3,17 +3,17 @@
 dc-tools::builder::append(){
   local source="$1"
   local destination="$2"
+  local start
+  local i
 
   OIFS=$IFS
   IFS=$'\n'
   while read -r i
   do
-    # Ignore lines starting with #
-    # XXX breaks heredoc sections...
-    #if printf "%s" "$i" | grep -q -E "^[ ]*#"; then
-    #  continue
-    #fi
-    printf "%s\\n" "$i"
+    if [ "$start" ] || ! printf "%s" "$i" | grep -q -E "^[ ]*#"; then
+      printf "%s\\n" "$i"
+      start="done"
+    fi
   done < "$source" >> "$destination"
   IFS=$OIFS
 }
