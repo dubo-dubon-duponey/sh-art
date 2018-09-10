@@ -119,7 +119,6 @@ dc::http::request(){
   fi
   curlOpts[${#curlOpts[@]}]="-o$filename"
 
-  echo "HEY $payloadFile"
   if [ "$payloadFile" ]; then
     curlOpts[${#curlOpts[@]}]="--data-binary"
     curlOpts[${#curlOpts[@]}]="@$payloadFile"
