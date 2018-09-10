@@ -99,7 +99,7 @@ dc::http::request(){
   # Grab the named parameters first
   local url="$1"
   local method="${2:-HEAD}"
-  # local payload="$3"
+  local payloadFile="$3"
   shift
   shift
   shift
@@ -118,6 +118,12 @@ dc::http::request(){
     curlOpts[${#curlOpts[@]}]="$method"
   fi
   curlOpts[${#curlOpts[@]}]="-o$filename"
+
+  echo "HEY $payloadFile"
+  if [ "$payloadFile" ]; then
+    curlOpts[${#curlOpts[@]}]="--data-binary"
+    curlOpts[${#curlOpts[@]}]="@$payloadFile"
+  fi
 
   local i
 
