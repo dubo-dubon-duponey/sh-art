@@ -23,13 +23,24 @@ dc-tools::build::header(){
   local shortdesc="${2:-another fancy piece of shcript}"
   local license="${3:-MIT license}"
   local owner="${4-dubo-dubon-duponey}"
+  local name
+  name="$(basename "$1")"
 
   cat <<-EOF > "$destination"
 #!/usr/bin/env bash
 ##########################################################################
-# $destination, $shortdesc
+# $name, $shortdesc
 # Released under $license
 # Copyright (c) $(date +"%Y") $owner
 ##########################################################################
+EOF
+}
+
+dc-tools::build::version(){
+  local destination="$1"
+  cat <<-EOF >> "$destination"
+DC_VERSION="$(git describe --match 'v[0-9]*' --dirty='.m' --always)"
+DC_REVISION="$(git rev-parse HEAD)$(if ! git diff --no-ext-diff --quiet --exit-code; then echo ".m"; fi)"
+DC_BUILD_DATE="$(date -R)"
 EOF
 }
