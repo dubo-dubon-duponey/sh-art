@@ -3,7 +3,7 @@
 _here=$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)
 
 # shellcheck source=/dev/null
-. "$_here/source/cli/tooling-build/_build.sh"
+. "$_here/source/cli-tooling/build/_build.sh"
 
 destination="$_here/bin/bootstrap"
 if [ ! -d "$destination" ]; then
@@ -18,7 +18,7 @@ for k in "$_here/source/core/"*.sh; do
   dc-tools::build::append "$k" "$destination"
 done
 
-for k in "$_here/source/cli/tooling-build/"*.sh; do
+for k in "$_here/source/cli-tooling/build/"*.sh; do
   dc-tools::build::append "$k" "$destination"
 done
 

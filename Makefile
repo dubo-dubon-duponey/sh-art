@@ -24,13 +24,17 @@ $(DC_MAKEFILE_DIR)/bin/bootstrap/dc-tooling-build: $(DC_MAKEFILE_DIR)/bootstrap
 $(DC_PREFIX)/lib/dc-sh-art: $(DC_MAKEFILE_DIR)/source/core/*.sh
 	$(DC_MAKEFILE_DIR)/bin/bootstrap/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="MIT license" --author="dubo-dubon-duponey" --with-git-info --description="the library version" $^
 
+# Builds the extensions
+$(DC_PREFIX)/lib/dc-sh-art-extensions: $(DC_MAKEFILE_DIR)/source/extensions/**/*.sh
+	$(DC_MAKEFILE_DIR)/bin/bootstrap/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="MIT license" --author="dubo-dubon-duponey" --description="extensions" $^
+
 # Builds all the CLIs that depend just on the main library
 $(DC_PREFIX)/bin/dc-%: $(DC_PREFIX)/lib/dc-sh-art $(DC_MAKEFILE_DIR)/source/cli/%
 	$(DC_MAKEFILE_DIR)/bin/bootstrap/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="MIT license" --author="dubo-dubon-duponey" --description="another fancy piece of shcript" $^
 
-# Builds the extensions
-$(DC_PREFIX)/lib/dc-sh-art-extensions: $(DC_MAKEFILE_DIR)/source/extensions/**/*.sh
-	$(DC_MAKEFILE_DIR)/bin/bootstrap/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="MIT license" --author="dubo-dubon-duponey" --description="extensions" $^
+# Builds all the tooling CLIs
+$(DC_PREFIX)/bin/dc-tooling-%: $(DC_PREFIX)/lib/dc-sh-art $(DC_MAKEFILE_DIR)/source/cli-tooling/%
+	$(DC_MAKEFILE_DIR)/bin/bootstrap/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="MIT license" --author="dubo-dubon-duponey" --description="another fancy piece of shcript" $^
 
 # Builds all the CLIs that depend on the main library and extensions
 $(DC_PREFIX)/bin/dc-%: $(DC_PREFIX)/lib/dc-sh-art $(DC_PREFIX)/lib/dc-sh-art-extensions $(DC_MAKEFILE_DIR)/source/cli-ext/%
@@ -45,6 +49,9 @@ init: $(DC_MAKEFILE_DIR)/bin/bootstrap/dc-tooling-build
 
 # High-level task to build the library, and extensions
 library: init $(DC_PREFIX)/lib/dc-sh-art $(DC_PREFIX)/lib/dc-sh-art-extensions
+
+# High-level task for embedders to build just the library and tooling
+embed: library $(patsubst source/cli-tooling/%/cmd.sh,$(DC_PREFIX)/bin/dc-tooling-%,$(wildcard source/cli-tooling/*/cmd.sh))
 
 # High-level task to build all
 binaries: library $(patsubst source/cli-ext/%/cmd.sh,$(DC_PREFIX)/bin/dc-%,$(wildcard source/cli-ext/*/cmd.sh)) \
