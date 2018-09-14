@@ -1,23 +1,21 @@
 # sh-art
 
-> just a piece of shcript (aka "dubo core" or "dc")
+> just a piece of shcript
 
-This project aims at providing a generic library facilitating the development
-of marginally complex command-line shell scripts in a consistent manner, primarily
-driven by personal needs.
+> also known as "dc" for "dubo core"
 
-Specifically, it takes care of argument parsing and validation, logging, http, and other
-stuff.
+Developing marginally complex command line utilities using bash in a consistent manner presents numerous challenges.
 
-Right now this is solely tested and used on macOS, using bash 3-something.
+This project aims at providing a generic library facilitating that, primarily driven by personal needs.
 
-And you need `jq` and `curl` installed if you plan on doing anything useful.
+Specifically, it takes care of argument parsing and validation, logging, http, string manipulation
+and other commodities.
 
 ## TL;DR
 
-`brew install sh_art`
+On mac: `brew install sh_art`
 
-Then use one of the binaries (`dc-something`).
+Then use one of the provided binaries to get a taste (named `dc-*`).
 
 Or start your own:
 
@@ -33,14 +31,33 @@ readonly CLI_USAGE="[-s] [--insecure] [--myflag] param1 param2"
 
 dc::commander::init
 
-# Now do something useful below (like looking at other cli or reading the docs)
+if [ "$DC_ARGE_MYFLAG" ]; then
+  dc::logger::info "Hey! You used --myflag. Did you try --help and --version as well?"
+fi
+
+dc::logger::debug "Let's make sure argument 1 is an integer"
+dc::argv::arg::validate 1 "[0-9]+"
+
+dc::logger::debug "Now, let's query something"
+dc::http::request "https://www.google.com" HEAD
+
+dc::logger::warning "We got something!"
+printf "%s" "$DC_HTTP_BODY"
+
+# ... Now go do something useful below (like, looking at other cli for inspiration, or reading the docs)
 ```
+
+## Requirements
+
+Right now this is solely tested and used on macOS, using bash 3-something.
+
+And you need `jq` and `curl` installed if you plan on doing anything useful.
 
 ## Design principles
 
- * emphasize use of json ([you should really learn `jq`](https://stedolan.github.io/jq/manual/))
- * don't pollute stdout with random stuff
- * aim for correctness (shellcheck pass), but not true POSIX-ness (too boring)
+ * emphasize use of json for cli output ([you should really learn `jq`](https://stedolan.github.io/jq/manual/))
+ * don't pollute stdout, use stderr for all logging
+ * aim for correctness (re: shellcheck), but not true POSIX-ness (too boring)
 
 ## Moar
 
@@ -50,22 +67,14 @@ dc::commander::init
  
 ## Developping a new cli
 
-A. Out of tree, create a shell script:
-
-```
-. PATH/TO/dc-library
-
-dc::commander::init
-
-# Now go do something useful (like looking at other cli or reading the docs)
-
-```
+A. Out of tree, see `TL;DR`.
 
 B. In-tree, with builder / integration:
 
 1. create a folder under cli named `mycli`, and add a shell script inside (look at others under cli for inspiration)
-2. debug it live by running `./debug mycli [flags] [arguments]`
-3. call `./build` to generate a standalone version under `bin/dc-mycli`
+2. call `make binaries` to build
+3. call `make lint` to enfore syntax checking
+3. create integration tests under `tests/integration` and run `make test`
 
 ## Tooling
 
