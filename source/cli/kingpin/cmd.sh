@@ -10,7 +10,7 @@ dc::commander::init
 
 # Depend on brew
 dc::require::platform::mac
-dc::require::mac::brew
+dc::require::brew
 
 dc::depends::mac::on(){
   # Install through brew

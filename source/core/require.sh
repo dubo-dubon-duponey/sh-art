@@ -11,24 +11,30 @@ dc::require::platform(){
 }
 
 dc::require::platform::mac(){
-  if [ $(uname) != "$DC_PLATFORM_MAC" ]; then
+  if [ "$(uname)" != "$DC_PLATFORM_MAC" ]; then
     dc::logger::error "This is working only on mac, sorry."
     exit "$ERROR_MISSING_REQUIREMENTS"
   fi
 }
 
 dc::require::platform::linux(){
-  if [ $(uname) != "$DC_PLATFORM_LINUX" ]; then
+  if [ "$(uname)" != "$DC_PLATFORM_LINUX" ]; then
     dc::logger::error "This is working only on linux, sorry."
     exit "$ERROR_MISSING_REQUIREMENTS"
   fi
 }
 
 dc::require::brew(){
-  # First and foremost, depend on brew (through tarmac)
   if [ ! "$(command -v brew)" ]; then
     dc::logger::error "You need homebrew for this to work. You can install it using the 'tarmac' helper with:"
     dc::logger::info "bash -c \$(curl -fsSL https://raw.github.com/dubo-dubon-duponey/tarmac/master/init)"
+    exit "$ERROR_MISSING_REQUIREMENTS"
+  fi
+}
+
+dc::require::git(){
+  if [ ! "$(command -v git)" ]; then
+    dc::logger::error "You need git for this to work."
     exit "$ERROR_MISSING_REQUIREMENTS"
   fi
 }
