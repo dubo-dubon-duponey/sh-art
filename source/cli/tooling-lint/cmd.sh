@@ -23,6 +23,7 @@ if [ -f "$1" ]; then
 fi
 
 dc-tools::sc::dircheck "$1"
+# XXX broken
 if [ "$DC_SHELLCHECK_FAIL" ]; then
   dc::logger::error "Shellcheck failed."
   exit "$ERROR_FAILED"
