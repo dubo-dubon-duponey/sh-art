@@ -54,6 +54,7 @@ A. Out of tree, create a shell script:
 
 ```
 . PATH/TO/dc-library
+
 dc::commander::init
 
 # Now go do something useful (like looking at other cli or reading the docs)
@@ -89,7 +90,6 @@ Includes a basic test framework.
  * continue integration tests for clis
  * finish porting remaining random scripts
  * https://gist.github.com/mathiasbynens/674099
- * consider moving to `make`
  * fix imdb specs (array values)
  * add travis (test bash4 as well)
  * implement requirement verification (jq, ffprobe, curl, etc)
@@ -100,6 +100,9 @@ Includes a basic test framework.
  * make a call on passing by reference or not for the string API: http://fvue.nl/wiki/Bash:_Passing_variables_by_reference
 
 ```
+https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
+set -euxo pipefail
+
 # Exit immediately on fail
 set -e
 # Also exit on pipe failures
