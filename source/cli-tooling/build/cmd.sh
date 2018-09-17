@@ -30,7 +30,7 @@ dc-tools::build::header "$destination" "${DC_ARGV_DESCRIPTION:-another fancy pie
 
 # Add git information
 if [ "$DC_ARGE_WITH_GIT_INFO" ]; then
-  dc-tools::build::version "$destination"
+  dc-tools::build::version "$destination" "$1"
 fi
 
 for item in "$@"; do
