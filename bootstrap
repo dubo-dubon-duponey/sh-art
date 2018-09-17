@@ -10,7 +10,7 @@ if [ ! -d "$destination" ]; then
   mkdir -p "$destination"
 fi
 
-destination="$destination/dc-tooling-build"
+destination="$destination/builder"
 
 dc-tools::build::header "$destination" "bootstrap builder" "MIT License" "dubo-dubon-duponey"
 
