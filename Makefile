@@ -1,11 +1,30 @@
+DC_MAKEFILE_DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
+
+# Output directory
 DC_PREFIX ?= $(shell pwd)
-DC_MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
-DC_MAKEFILE_DIR := $(patsubst %/,%,$(dir $(DC_MAKEFILE_PATH)))
 
-#    $@ evaluates to target name
-#    $< evaluates to first dependency
-#    $^ evaluates to all dependencies
+# Set to true to disable fancy / colored output
+NON_INTERACTIVE ?=
 
+# Fancy output if interactive
+ifndef NON_INTERACTIVE
+    NC := \033[0m
+    GREEN := \033[1;32m
+    ORANGE := \033[1;33m
+    BLUE := \033[1;34m
+    RED := \033[1;31m
+endif
+
+# Helper to put out nice title
+define title
+	@echo "$(GREEN)------------------------------------------------------------------------------------------------------------------------"
+	@printf "$(GREEN)%*s\n" $$(( ( $(shell echo "☆ $(1) ☆" | wc -c ) + 120 ) / 2 )) "☆ $(1) ☆"
+	@echo "$(GREEN)------------------------------------------------------------------------------------------------------------------------$(ORANGE)"
+endef
+
+#######################################################
+# Targets
+#######################################################
 all: build lint test
 
 # Make happy
@@ -17,10 +36,12 @@ all: build lint test
 
 # This builds the bootstrapping builder, and never refreshed unless clean is called
 $(DC_MAKEFILE_DIR)/bin/bootstrap/builder: $(DC_MAKEFILE_DIR)/bootstrap
+	$(call title, $@)
 	$(DC_MAKEFILE_DIR)/bootstrap
 
 # Then build the cli tools, using the bootstrapper
 $(DC_PREFIX)/bin/dc-tooling-%: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE_DIR)/source/cli-tooling/%
+	$(call title, $@)
 	$(DC_MAKEFILE_DIR)/bin/bootstrap/builder --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="MIT license" --author="dubo-dubon-duponey" --description="another fancy (tooling) piece of shcript" --with-git-info $^
 
 #######################################################
@@ -29,18 +50,22 @@ $(DC_PREFIX)/bin/dc-tooling-%: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE
 
 # Builds the main library
 $(DC_PREFIX)/lib/dc-sh-art: $(DC_MAKEFILE_DIR)/source/core/*.sh
+	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="MIT license" --author="dubo-dubon-duponey" --description="the library version" --with-git-info $^
 
 # Builds the extensions
 $(DC_PREFIX)/lib/dc-sh-art-extensions: $(DC_MAKEFILE_DIR)/source/extensions/**/*.sh
+	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="MIT license" --author="dubo-dubon-duponey" --description="extensions" $^
 
 # Builds all the CLIs that depend just on the main library
 $(DC_PREFIX)/bin/dc-%: $(DC_PREFIX)/lib/dc-sh-art $(DC_MAKEFILE_DIR)/source/cli/%
+	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="MIT license" --author="dubo-dubon-duponey" --description="another fancy piece of shcript" $^
 
 # Builds all the CLIs that depend on the main library and extensions
 $(DC_PREFIX)/bin/dc-%: $(DC_PREFIX)/lib/dc-sh-art $(DC_PREFIX)/lib/dc-sh-art-extensions $(DC_MAKEFILE_DIR)/source/cli-ext/%
+	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="MIT license" --author="dubo-dubon-duponey" --description="another fancy piece of shcript" $^
 
 #######################################################
@@ -59,19 +84,23 @@ build-binaries: build-library $(patsubst $(DC_MAKEFILE_DIR)/source/cli-ext/%/cmd
 
 # Git sanity
 lint-signed: $(DC_MAKEFILE_DIR)/bin/bootstrap/builder $(DC_PREFIX)/bin/dc-tooling-git
+	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-git $(DC_MAKEFILE_DIR)
 
 # Linter
 lint-code: $(DC_MAKEFILE_DIR)/bin/bootstrap/builder $(DC_PREFIX)/bin/dc-tooling-lint
+	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-lint .
 	$(DC_PREFIX)/bin/dc-tooling-lint ~/.profile
 
 # Unit tests
 test-unit: $(DC_MAKEFILE_DIR)/bin/bootstrap/builder $(DC_PREFIX)/bin/dc-tooling-test
+	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-test --type=unit --tests=$(DC_MAKEFILE_DIR)/tests/unit
 
 # Integration tests
 integration/%: $(DC_MAKEFILE_DIR)/bin/bootstrap/builder $(DC_PREFIX)/bin/dc-tooling-test
+	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-test --type=integration --tests=$(DC_MAKEFILE_DIR)/tests/$@
 
 test-integration: $(patsubst $(DC_MAKEFILE_DIR)/source/cli/%/cmd.sh,integration/%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli/*/cmd.sh))
@@ -82,5 +111,6 @@ test: test-unit test-integration
 
 # Simple clean: rm bin & lib
 clean:
+	$(call title, $@)
 	rm -Rf "${DC_PREFIX}/bin"
 	rm -Rf "${DC_PREFIX}/lib"
