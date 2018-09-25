@@ -49,14 +49,13 @@ dc::commander::version(){
 # The same goes for the *CLI_NAME*_LOG_AUTH environment variable
 
 dc::commander::init(){
-  local defaultllv
-  local defaultlav
   local loglevelvar
   local logauthvar
-  defaultllv="$(echo "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_LEVEL"
-  loglevelvar="${1:-${defaultllv}}"
-  defaultlav="$(echo "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_AUTH"
-  logauthvar="${2:-${defaultlav}}"
+  loglevelvar="$(echo "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_LEVEL"
+  logauthvar="$(echo "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_AUTH"
+
+  [ ! "${1+x}" ] || loglevelvar="$1"
+  [ ! "${2+x}" ] || logauthvar="$2"
 
   # If we have been asked for --help or -h, show help
   if [ -n "${DC_ARGV_HELP+x}" ] || [ -n "${DC_ARGV_H+x}" ]; then

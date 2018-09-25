@@ -94,18 +94,13 @@ Includes a basic test framework.
 
 ## TODO & research
 
- * use stdin with curl
  * continue work on performance for `dc::string`
- * continue integration tests for clis
  * finish porting remaining random scripts
  * https://gist.github.com/mathiasbynens/674099
  * fix imdb specs (array values)
- * add travis (test bash4 as well)
  * implement requirement verification (jq, ffprobe, curl, etc)
- * finish regander
  * movie-transform: add support for titles / year / director: https://multimedia.cx/eggs/supplying-ffmpeg-with-metadata/
  * explore using curl -w to build an HTTP perf/security testing tool
- * finish moving to printf
  * make a call on passing by reference or not for the string API: http://fvue.nl/wiki/Bash:_Passing_variables_by_reference
 
 ```

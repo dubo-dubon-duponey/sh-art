@@ -36,8 +36,10 @@ else
 fi
 
 # Now, run these tests
+# XXX arg
+_type=$type
 while read -r k; do
-  printf "%s\\n" "Running $type test suite: $k"
+  printf "%s\\n" "Running $_type test suite: $k"
   # shellcheck source=/dev/null
   . "$k"
 done < <(
