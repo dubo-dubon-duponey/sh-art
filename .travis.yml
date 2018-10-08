@@ -1,0 +1,33 @@
+language: bash
+
+env:
+  - SHUNIT_COLOR='always'
+
+script:
+  - make build
+  - make test-unit
+  - make test-integration
+
+os:
+  - linux
+  - osx
+
+addons:
+  apt:
+    packages:
+      - ksh
+      - zsh
+
+matrix:
+  include:
+    - os: osx
+    - os: linux
+      dist: precise
+      script:
+        - make lint
+    - os: linux
+      dist: trusty
+    - os: linux
+      dist: xenial
+    - os: linux
+      dist: bionic
