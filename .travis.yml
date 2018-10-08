@@ -5,6 +5,7 @@ env:
 
 script:
   - make build
+  - make lint
   - make test-unit
   - make test-integration
 
@@ -22,12 +23,6 @@ matrix:
   include:
     - os: osx
     - os: linux
-      dist: precise
-      script:
-        - make lint
-    - os: linux
       dist: trusty
     - os: linux
       dist: xenial
-    - os: linux
-      dist: bionic
