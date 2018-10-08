@@ -7,6 +7,7 @@ readonly CLI_USAGE="[-s] [--insecure] [--image=(show|dump)] imdbID"
 
 # Boot
 dc::commander::init
+dc::require::jq
 
 # Arg 1 must be the digits section of a movie imdb id
 dc::argv::arg::validate 1 "^tt[0-9]{7}$"

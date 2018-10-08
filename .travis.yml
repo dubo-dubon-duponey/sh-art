@@ -8,13 +8,13 @@ script:
   - make test-unit
   - make test-integration
 
-#os:
-#  - linux
-#  - osx
-
-#addons:
-#  apt:
-#    packages:
+addons:
+  homebrew:
+    packages:
+    - jq
+  apt:
+    packages:
+      - jq
 #      - ksh
 #      - zsh
 

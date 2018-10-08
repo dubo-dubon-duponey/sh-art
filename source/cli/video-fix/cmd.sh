@@ -7,6 +7,7 @@ readonly CLI_USAGE="[-s] [--destination=folder] [--delete] filename"
 
 # Boot
 dc::commander::init
+dc::require::jq
 
 dc::logger::info "$1"
 
