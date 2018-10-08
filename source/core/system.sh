@@ -11,7 +11,7 @@ portable::mktemp(){
   mktemp -q "${TMPDIR:-/tmp}/$1.XXXXXX" 2>/dev/null || mktemp -q
 }
 
-portable::base64Decode(){
+portable::base64d(){
   local os="$(uname)"
 
   case "$os" in

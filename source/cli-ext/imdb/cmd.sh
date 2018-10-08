@@ -22,7 +22,7 @@ dc-ext::sqlite::ensure "dchttp" "method TEXT, url TEXT, content BLOB, PRIMARY KE
 
 # Request the main page and get the body
 dc-ext::http::request-cache "https://www.imdb.com/title/$1/" GET
-body="$(printf "%s" "$DC_HTTP_BODY" | base64 -D | tr '\n' ' ')"
+body="$(printf "%s" "$DC_HTTP_BODY" | portable::base64d | tr '\n' ' ')"
 
 # Extract the shema.org section, then the original title and picture url
 schema=$(printf "%s" "$body" | sed -E 's/.*<script type="application\/ld[+]json">([^<]+).*/\1/')
@@ -46,7 +46,7 @@ if [ "$DC_ARGE_IMAGE" ]; then
     printf "\\033]1337;File=name=%s;inline=1;preserveAspectRatio=true;width=50:%s\\a" "$1" "$DC_HTTP_BODY"
     exit
   fi
-  printf "%s" "$DC_HTTP_BODY" | base64 -D
+  printf "%s" "$DC_HTTP_BODY" | portable::base64d
   exit
 fi
 
@@ -108,7 +108,7 @@ extractTechSpecs(){
 }
 
 # Extract the specs
-extractTechSpecs "$(printf "%s" "$DC_HTTP_BODY" | base64 -D | tr -d '\n')"
+extractTechSpecs "$(printf "%s" "$DC_HTTP_BODY" | portable::base64d | tr -d '\n')"
 
 # Piss everything out in nice-ish json
 heads=
