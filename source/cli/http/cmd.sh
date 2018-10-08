@@ -6,6 +6,7 @@ readonly CLI_DESC="like curl, in a nicer json-way"
 readonly CLI_USAGE="[-s] [--insecure] url [method] [payload] [...headers]"
 
 dc::commander::init
+dc::require::jq
 
 # XXX "$(<some_file)" to pass stdin?
 # URL METHOD PAYLOAD HEADERS

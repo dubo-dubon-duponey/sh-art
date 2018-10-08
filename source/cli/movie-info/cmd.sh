@@ -7,6 +7,7 @@ readonly CLI_USAGE="[-s] filename"
 
 # Boot
 dc::commander::init
+dc::require::jq
 
 # Argument 1 is mandatory and must be a readable file
 dc::fs::isfile "$1"
