@@ -8,15 +8,15 @@ script:
   - make test-unit
   - make test-integration
 
-os:
-  - linux
-  - osx
+#os:
+#  - linux
+#  - osx
 
-addons:
-  apt:
-    packages:
-      - ksh
-      - zsh
+#addons:
+#  apt:
+#    packages:
+#      - ksh
+#      - zsh
 
 matrix:
   include:
