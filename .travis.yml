@@ -12,10 +12,12 @@ script:
 addons:
   homebrew:
     packages:
-    - jq
+      - jq
+      - shellcheck
   apt:
     packages:
       - jq
+      - shellcheck
 #      - ksh
 #      - zsh
 
