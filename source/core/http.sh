@@ -113,7 +113,7 @@ dc::http::request(){
     filename=/dev/null
     curlOpts[${#curlOpts[@]}]="-I"
   else
-    filename="$(mktemp -t dc::http::request)"
+    filename="$(portable::mktemp dc::http::request)"
     curlOpts[${#curlOpts[@]}]="-X"
     curlOpts[${#curlOpts[@]}]="$method"
   fi
