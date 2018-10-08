@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ## Builder
 readonly CLI_VERSION="0.0.1"
-readonly CLI_LICENSE="MIT License"
+readonly CLI_LICENSE="MIT License (includes shunit2, released under the Apache License)"
 readonly CLI_DESC="basic unit and integration testing (part of the dc-tooling suite)"
 readonly CLI_USAGE="[-s] [--type=unit|integration] --test=test_dirs_or_files source_files_or_directories"
 
@@ -30,6 +30,7 @@ if [ "$type" == "unit" ]; then
   done
 else
   # Integration, treat the argument as the path where to find the binaries
+  # XXX this is super counter intuitive
   for k in "$@"; do
     PATH="$k:$PATH"
   done
