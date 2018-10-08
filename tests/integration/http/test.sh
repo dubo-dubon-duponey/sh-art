@@ -58,7 +58,7 @@ result=$(dc-http -s https://registry-1.docker.io/v2 "GET")
 exit=$?
 status="$(printf "%s" "$result" | jq -rc .status)"
 redirected="$(printf "%s" "$result" | jq -rc .redirected)"
-body="$(printf "%s" "$result" | jq -rc .body | base64 -D)"
+body="$(printf "%s" "$result" | jq -rc .body | portable::base64d)"
 headers="$(printf "%s" "$result" | jq -rc .headers)"
 dc-tools::assert::equal "$exit" "0"
 dc-tools::assert::equal "$status" "401"

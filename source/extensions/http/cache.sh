@@ -21,7 +21,7 @@ dc-ext::http::request-cache(){
   else
     DC_HTTP_STATUS=200
     export DC_HTTP_CACHE=hit
-    DC_HTTP_BODY="$result" # $(echo $result | base64 -D)"
+    DC_HTTP_BODY="$result" # $(echo $result | portable::base64d)"
   fi
 
 }
