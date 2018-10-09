@@ -27,7 +27,7 @@ do
   # Now, Get the name
   name=${name%=*}
   # Clean up the name: replace dash by underscore and uppercase everything
-  name=$(echo "$name" | tr "-" "_" | tr '[:lower:]' '[:upper:]')
+  name=$(printf "%s" "$name" | tr "-" "_" | tr '[:lower:]' '[:upper:]')
 
   # Set the variable
   _f="DC_ARGV_$name"
@@ -54,17 +54,17 @@ dc::argv::flag::validate()
 {
   local var
   local varexist
-  var="DC_ARGV_$(echo "$1" | tr "-" "_" | tr '[:lower:]' '[:upper:]')"
-  varexist="DC_ARGE_$(echo "$1" | tr "-" "_" | tr '[:lower:]' '[:upper:]')"
+  var="DC_ARGV_$(printf "%s" "$1" | tr "-" "_" | tr '[:lower:]' '[:upper:]')"
+  varexist="DC_ARGE_$(printf "%s" "$1" | tr "-" "_" | tr '[:lower:]' '[:upper:]')"
   local regexp="$2"
   local gf="${3:--E}"
   if [ "$regexp" ]; then
-    if ! echo "${!var}" | grep -q "$gf" "$regexp"; then
-      dc::logger::error "Flag \"$(echo "$1" | tr "_" "-" | tr '[:upper:]' '[:lower:]')\" is invalid. Must match \"$regexp\". Value is: \"${!var}\"."
+    if ! printf "%s" "${!var}" | grep -q "$gf" "$regexp"; then
+      dc::logger::error "Flag \"$(printf "%s" "$1" | tr "_" "-" | tr '[:upper:]' '[:lower:]')\" is invalid. Must match \"$regexp\". Value is: \"${!var}\"."
       exit "$ERROR_ARGUMENT_INVALID"
     fi
   elif [ ! "${!varexist}" ]; then
-    dc::logger::error "Flag \"$(echo "$1" | tr "_" "-" | tr '[:upper:]' '[:lower:]')\" is required."
+    dc::logger::error "Flag \"$(printf "%s" "$1" | tr "_" "-" | tr '[:upper:]' '[:lower:]')\" is required."
     exit "$ERROR_ARGUMENT_MISSING"
   fi
 }
@@ -76,7 +76,7 @@ dc::argv::arg::validate()
   local regexp="$2"
   local gf="${3:--E}"
   if [ "$regexp" ]; then
-    if ! echo "${!var}" | grep -q "$gf" "$regexp"; then
+    if ! printf "%s" "${!var}" | grep -q "$gf" "$regexp"; then
       dc::logger::error "Argument \"$1\" is invalid. Must match \"$regexp\". Value is: \"${!var}\"."
       exit "$ERROR_ARGUMENT_INVALID"
     fi
