@@ -76,6 +76,7 @@ setit(){
 get::node(){
   dc::logger::info "Installing node development environment"
   # nvm is an alias - as such, it's lost if we don't source
+  # shellcheck source=/dev/null
   . "$HOME/.profile"
   if command -v nvm >/dev/null; then
     dc::logger::info "nvm already installed"
@@ -168,4 +169,4 @@ EOF
   dc::logger::info "Done with python"
 }
 
-get::$1
+get::"$1"

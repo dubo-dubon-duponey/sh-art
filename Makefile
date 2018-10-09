@@ -89,7 +89,7 @@ lint-signed: $(DC_MAKEFILE_DIR)/bin/bootstrap/builder $(DC_PREFIX)/bin/dc-toolin
 
 # Linter
 #	XXX broken for now $(DC_PREFIX)/bin/dc-tooling-lint $(DC_PREFIX)/bin
-lint-code: $(DC_MAKEFILE_DIR)/bin/bootstrap/builder $(DC_PREFIX)/bin/dc-tooling-lint
+lint-code: $(DC_MAKEFILE_DIR)/bin/bootstrap/builder $(DC_PREFIX)/bin/dc-tooling-lint build-library
 	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-lint $(DC_MAKEFILE_DIR)/bootstrap
 	$(DC_PREFIX)/bin/dc-tooling-lint $(DC_MAKEFILE_DIR)/source
