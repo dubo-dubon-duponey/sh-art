@@ -51,8 +51,8 @@ dc::commander::version(){
 dc::commander::init(){
   local loglevelvar
   local logauthvar
-  loglevelvar="$(echo "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_LEVEL"
-  logauthvar="$(echo "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_AUTH"
+  loglevelvar="$(printf "%s" "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_LEVEL"
+  logauthvar="$(printf "%s" "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_AUTH"
 
   [ ! "${1+x}" ] || loglevelvar="$1"
   [ ! "${2+x}" ] || logauthvar="$2"
@@ -79,7 +79,7 @@ dc::commander::init(){
     dc::configure::logger::mute
   else
     # Configure the logger from the LOG_LEVEL env variable
-    case "$(echo "${!loglevelvar}" | tr '[:lower:]' '[:upper:]')" in
+    case "$(printf "%s" "${!loglevelvar}" | tr '[:lower:]' '[:upper:]')" in
       DEBUG)
         dc::configure::logger::setlevel::debug
       ;;

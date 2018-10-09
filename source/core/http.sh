@@ -147,7 +147,7 @@ dc::http::request(){
 
   while read -r i; do
     # Ignoring the leading character, and trim for content
-    line=$(echo "${i:1}" | sed -E "s/^[[:space:]]*//" | sed -E "s/[[:space:]]*\$//")
+    line=$(printf "%s" "${i:1}" | sed -E "s/^[[:space:]]*//" | sed -E "s/[[:space:]]*\$//")
     # Ignore empty content
     [ "$line" ] || continue
 
@@ -161,12 +161,12 @@ dc::http::request(){
 
         # This is a header
         if [[ "$line" == *":"* ]]; then
-          key=$(echo "${line%%:*}" | tr "-" "_" | tr '[:lower:]' '[:upper:]')
+          key=$(printf "%s" "${line%%:*}" | tr "-" "_" | tr '[:lower:]' '[:upper:]')
           value=${line#*: }
 
           if [ ! "$isRedirect" ]; then
             [ ! "$DC_HTTP_HEADERS" ] && DC_HTTP_HEADERS=$key || DC_HTTP_HEADERS="$DC_HTTP_HEADERS $key"
-            read -r "DC_HTTP_HEADER_$key" < <(echo "$value")
+            read -r "DC_HTTP_HEADER_$key" < <(printf "%s" "$value")
           elif [ "$key" == "LOCATION" ]; then
             DC_HTTP_REDIRECTED=$value
           fi
@@ -179,7 +179,7 @@ dc::http::request(){
 
         # Not a header, then it's a status line
         isRedirect=
-        DC_HTTP_STATUS=$(echo "$line" | grep -E "^HTTP/[0-9.]+ [0-9]+")
+        DC_HTTP_STATUS=$(printf "%s" "$line" | grep -E "^HTTP/[0-9.]+ [0-9]+")
         if [ ! "$DC_HTTP_STATUS" ]; then
           dc::logger::warning "Ignoring random curl output: $i"
           continue
@@ -229,7 +229,7 @@ _dc::http::logcommand() {
     # If we redact, filter out sensitive headers
     if [ "$_DC_HTTP_REDACT" ]; then
       case "${_DC_HTTP_PROTECTED_HEADERS[*]}" in
-        *$(echo ${i%%:*} | tr '[:upper:]' '[:lower:]')*)
+        *$(printf "%s" ${i%%:*} | tr '[:upper:]' '[:lower:]')*)
           output="$output \"${i%%:*}: REDACTED\""
           continue
         ;;
