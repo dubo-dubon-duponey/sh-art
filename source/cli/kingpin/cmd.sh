@@ -3,7 +3,7 @@
 readonly CLI_VERSION="0.0.1"
 readonly CLI_LICENSE="MIT License"
 readonly CLI_DESC="a ridiculously stupid bootstrapper to setup pyenv, nvm, and gvm, and their most useful accompanying versions"
-readonly CLI_USAGE="[-s]"
+readonly CLI_USAGE="[-s] go|node|python"
 
 # Boot
 dc::commander::init
@@ -11,20 +11,12 @@ dc::commander::init
 # Depend on brew
 dc::require::platform::mac
 dc::require::brew
+dc::argv::arg::validate 1 "(go|node|python)"
 
 dc::depends::mac::on(){
   # Install through brew
   [ ! "$(brew list "$1" 2>/dev/null)" ] && brew install "$1"
 }
-
-# Arg 1 must be the digits section of a movie imdb id
-#dc::argv::arg::validate 1 "^tt[0-9]{7}$"
-# Validate flag
-#if [ "$DC_ARGV_IMAGE" ]; then
-#  dc::argv::flag::validate image "^(?:show|dump)$"
-#fi
-
-# XXX require brew at this point
 
 kingpin::dev::refresh(){
   local _here
@@ -32,7 +24,6 @@ kingpin::dev::refresh(){
   curl -s -S -L -o "$_here/.gvm-installer"  https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer
   chmod u+x "$_here/.gvm-installer"
 }
-
 
 get::go(){
   dc::logger::info "Installing golang development environment"
@@ -84,8 +75,11 @@ setit(){
 
 get::node(){
   dc::logger::info "Installing node development environment"
+  # nvm is an alias - as such, it's lost if we don't source
+  # shellcheck source=/dev/null
+  . "$HOME/.profile"
   if command -v nvm >/dev/null; then
-    dc::logger::info "gvm already installed"
+    dc::logger::info "nvm already installed"
     return
   fi
   ## About node version management:
@@ -137,7 +131,7 @@ EOF
 get::python(){
   dc::logger::info "Installing python development environment"
   if command -v pyenv >/dev/null; then
-    dc::logger::info "gvm already installed"
+    dc::logger::info "pyenv already installed"
     return
   fi
 
@@ -175,6 +169,4 @@ EOF
   dc::logger::info "Done with python"
 }
 
-get::go
-get::node
-get::python
+get::"$1"
