@@ -6,7 +6,7 @@ transmogrify::do(){
   local destination="$2"
   local audconvert=$3
   local removelist
-  read -r -a removelist< <(echo "$4")
+  read -r -a removelist< <(printf "%s" "$4")
   shift
   shift
   shift
