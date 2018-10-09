@@ -11,6 +11,8 @@ dc::commander::init
 # Depend on brew
 dc::require::platform::mac
 dc::require::brew
+dc::require::git
+
 dc::argv::arg::validate 1 "(go|node|python)"
 
 dc::depends::mac::on(){
