@@ -40,5 +40,5 @@ dc::prompt::credentials() {
   # Otherwise, ask for password
   read -r -s -p "$3" "$4"
   # Just to avoid garbling the output
-  >&2 echo
+  >&2 printf "\\n"
 }

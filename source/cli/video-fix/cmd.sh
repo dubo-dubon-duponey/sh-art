@@ -23,42 +23,42 @@ dc::logger::debug "$data"
 #dc::logger::info "$(echo $data | jq -rc '.tracks[] | select(.type == "subtitles")')"
 
 # Basic info
-CONTAINER=$(echo "$data" | jq -r .container)
-FAST=$(echo "$data" | jq -r .fast)
-DURATION=$(echo "$data" | jq -r .duration)
+CONTAINER=$(printf "%s" "$data" | jq -r .container)
+FAST=$(printf "%s" "$data" | jq -r .fast)
+DURATION=$(printf "%s" "$data" | jq -r .duration)
 
 if [ "$DURATION" == "0" ]; then
   dc::logger::error " > No duration! Exiting."
   exit "$ERROR_FAILED"
 fi
 
-ALL_VIDEO_COUNT=$(echo "$data" | jq -r '.video | length')
-REQUIRED_VIDEO_COUNT=$(echo "$data" | jq -r '[.video[] | select(.codec == "h264")] | length')
+ALL_VIDEO_COUNT=$(printf "%s" "$data" | jq -r '.video | length')
+REQUIRED_VIDEO_COUNT=$(printf "%s" "$data" | jq -r '[.video[] | select(.codec == "h264")] | length')
 
 # "All audio" count
-ALL_AUDIO_COUNT=$(echo "$data" | jq -r '.audio | length')
+ALL_AUDIO_COUNT=$(printf "%s" "$data" | jq -r '.audio | length')
 
 # "Audio that we need" count (AAC or AC-3)
-REQUIRED_AUDIO=$(echo "$data" | jq '[.audio[] | select((.codec == "aac") or (.codec == "ac3"))]')
-REQUIRED_AUDIO_COUNT=$(echo "$REQUIRED_AUDIO" | jq -r '. | length')
-REQUIRED_AUDIO_SHOW=$(echo "$REQUIRED_AUDIO" | jq -r '.[] | (.id|tostring) + ": " + .codec + ", " + .language')
+REQUIRED_AUDIO=$(printf "%s" "$data" | jq '[.audio[] | select((.codec == "aac") or (.codec == "ac3"))]')
+REQUIRED_AUDIO_COUNT=$(printf "%s" "$REQUIRED_AUDIO" | jq -r '. | length')
+REQUIRED_AUDIO_SHOW=$(printf "%s" "$REQUIRED_AUDIO" | jq -r '.[] | (.id|tostring) + ": " + .codec + ", " + .language')
 
 # Anything but DTS, AAC and AC3 must be removed
-MUST_REMOVE_AUDIO=$(echo "$data" | jq '[.audio[] | select((.codec == "aac"|not) and (.codec == "ac3"|not) and (.codec == "dts"|not))]')
+MUST_REMOVE_AUDIO=$(printf "%s" "$data" | jq '[.audio[] | select((.codec == "aac"|not) and (.codec == "ac3"|not) and (.codec == "dts"|not))]')
 # MUST_REMOVE_AUDIO_COUNT=$(echo "$MUST_REMOVE_AUDIO" | jq -r '. | length')
 # MUST_REMOVE_AUDIO_SHOW=$(echo "$MUST_REMOVE_AUDIO" | jq -r '.[] | (.id|tostring) + ": " + .codec + ", " + .language')
 
 # Anything but AAC and AC3 could be used as a source for conversion (because if we already have AAC or AC3, we do not need to convert)
-MAY_CONVERT_AUDIO=$(echo "$data" | jq '[.audio[] | select((.codec == "aac"|not) and (.codec == "ac3"|not))]')
-MAY_CONVERT_AUDIO_COUNT=$(echo "$MAY_CONVERT_AUDIO" | jq -r '. | length')
-MAY_CONVERT_AUDIO_SHOW=$(echo "$MAY_CONVERT_AUDIO" | jq -r '.[] | (.id|tostring) + ": " + .codec + ", " + .language')
+MAY_CONVERT_AUDIO=$(printf "%s" "$data" | jq '[.audio[] | select((.codec == "aac"|not) and (.codec == "ac3"|not))]')
+MAY_CONVERT_AUDIO_COUNT=$(printf "%s" "$MAY_CONVERT_AUDIO" | jq -r '. | length')
+MAY_CONVERT_AUDIO_SHOW=$(printf "%s" "$MAY_CONVERT_AUDIO" | jq -r '.[] | (.id|tostring) + ": " + .codec + ", " + .language')
 
 # Subs
-ALL_SUBTITLES=$(echo "$data" | jq '.subtitles')
-ALL_SUBTITLES_COUNT=$(echo "$ALL_SUBTITLES" | jq -r '. | length')
+ALL_SUBTITLES=$(printf "%s" "$data" | jq '.subtitles')
+ALL_SUBTITLES_COUNT=$(printf "%s" "$ALL_SUBTITLES" | jq -r '. | length')
 
 # Other stuff
-OTHER_COUNT=$(echo "$data" | jq -r '.other | length')
+OTHER_COUNT=$(printf "%s" "$data" | jq -r '.other | length')
 
 
 #CONVERT_SUBTITLES=$(echo $data | jq '.subtitles[] | select((.codec == "SubRip/SRT") or (.codec == "SubStationAlpha"))')
@@ -104,7 +104,7 @@ fi
 
 if [ "$OTHER_COUNT" != 0 ]; then
   dc::logger::warning " > Other stuff in there!"
-  dc::logger::debug "$(echo "$data" | jq '.other')"
+  dc::logger::debug "$(printf "%s" "$data" | jq '.other')"
 fi
 
 if [ "$CONTAINER" != "mov,mp4,m4a,3gp,3g2,mj2" ]; then
@@ -128,12 +128,12 @@ if [ "$REQUIRED_AUDIO_COUNT" == 0 ] && [ "$ALL_AUDIO_COUNT" != 0 ]; then
       dc::logger::error "Hey! We asked a question!"
       exit "$ERROR_FAILED"
     fi
-    if [ "$(echo "$data" | jq -r --arg id "$MUST_CONVERT_AUDIO" '.audio | select(.id == $id) | length')" == 0 ]; then
+    if [ "$(printf "%s" "$data" | jq -r --arg id "$MUST_CONVERT_AUDIO" '.audio | select(.id == $id) | length')" == 0 ]; then
       dc::logger::error "Wrrooooonnng!"
       exit "$ERROR_FAILED"
     fi
   else
-    MUST_CONVERT_AUDIO=$(echo "$MAY_CONVERT_AUDIO" | jq -rc '.[] | (.id | tostring)')
+    MUST_CONVERT_AUDIO=$(printf "%s" "$MAY_CONVERT_AUDIO" | jq -rc '.[] | (.id | tostring)')
   fi
 fi
 
@@ -143,12 +143,12 @@ fi
 # EXTRACT=( $(echo "$ALL_SUBTITLES" | jq -rc '.[] | select(.codec == "dvd_subtitle"|not) | (.id|tostring) + ":" + (.id|tostring) + "." + .language + "." + .codec' | sed -E 's/subrip/srt/g' | sed -E 's/microdvd/sub/g' | sed -E 's/sami/smi/g' | sed -E 's/mov_text/srt/g') )
 while read -r i; do
   EXTRACT[${#EXTRACT[@]}]="$i"
-done < <(echo "$ALL_SUBTITLES" | jq -rc '.[] | select(.codec == "dvd_subtitle"|not) | (.id|tostring) + ":" + (.id|tostring) + "." + .language + "." + .codec' \
+done < <(printf "%s" "$ALL_SUBTITLES" | jq -rc '.[] | select(.codec == "dvd_subtitle"|not) | (.id|tostring) + ":" + (.id|tostring) + "." + .language + "." + .codec' \
   | sed -E 's/subrip/srt/g' | sed -E 's/microdvd/sub/g' | sed -E 's/sami/smi/g' | sed -E 's/mov_text/srt/g')
 
 
 
-ALERT_SUBS=$(echo "$ALL_SUBTITLES" | jq -rc '[.[] | select(.codec == "dvd_subtitle")] | length')
+ALERT_SUBS=$(printf "%s" "$ALL_SUBTITLES" | jq -rc '[.[] | select(.codec == "dvd_subtitle")] | length')
 # EXTRACT=( $(echo $ALL_SUBTITLES | jq -rc '.[] | (.id | tostring)') )
 
 if [ "$ALERT_SUBS" -ge 1 ]; then
@@ -174,10 +174,10 @@ REMOVE=$REMOVE_AUDIO
 ALSO_REMOVE=()
 while read -r i; do
   ALSO_REMOVE[${#ALSO_REMOVE[@]}]="$i"
-done < <(echo "$MUST_REMOVE_AUDIO" | jq -rc '.[] | (.id | tostring)')
+done < <(printf "%s" "$MUST_REMOVE_AUDIO" | jq -rc '.[] | (.id | tostring)')
 while read -r i; do
   ALSO_REMOVE[${#ALSO_REMOVE[@]}]="$i"
-done < <(echo "$ALL_SUBTITLES" | jq -rc '.[] | (.id | tostring)')
+done < <(printf "%s" "$ALL_SUBTITLES" | jq -rc '.[] | (.id | tostring)')
 
 
 if [ "${ALSO_REMOVE[*]}" ]; then
@@ -198,7 +198,6 @@ fi
 CONVERT=$MUST_CONVERT_AUDIO
 
 if [ "$CONTAIN" ] || [ "$OPTIMIZE" ] || [ "$CONVERT" ] || [ "$REMOVE" ] || [ "${EXTRACT[*]}" ]; then
-  echo debug media-transform --convert="\"$CONVERT\"" --remove="\"$REMOVE\"" --extract="\"${EXTRACT[*]}\"" "\"$1\""
   ./debug media-transform --convert="$CONVERT" --remove="$REMOVE" --extract="${EXTRACT[*]}" "$1"
   dc::logger::info " > Done"
   # dc::prompt::confirm
