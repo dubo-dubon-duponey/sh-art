@@ -7,13 +7,13 @@ relogic::mkvinfo(){
 
   mkvquality=
 
-  if [ ! "$(echo "$data" | jq -rc '.duration')" ]; then
+  if [ ! "$(printf "%s" "$data" | jq -rc '.duration')" ]; then
     return
   fi
-  if [ "$(echo "$data" | jq -rc '.duration')" == 0 ]; then
+  if [ "$(printf "%s" "$data" | jq -rc '.duration')" == 0 ]; then
     return
   fi
-  if [ "$(echo "$data" | jq -rc '.video[0].width')" == "null" ]; then
+  if [ "$(printf "%s" "$data" | jq -rc '.video[0].width')" == "null" ]; then
     return
   fi
 
@@ -22,18 +22,18 @@ relogic::mkvinfo(){
   # echo $data
   # echo "in"
   #dc::output::json "$data"
-  mkvquality="$(echo "$data" | jq -rc '.video[] | "(" + (.id|tostring) + ")-" + .codec + "-" + (.width|tostring) + "x" + (.height|tostring)')"
-  mkvquality="$mkvquality-$(echo "$data" | jq -rc '.audio[] | "(" + (.id|tostring) + ")-" + .codec + "-" + .language')"
-  duration="$(echo "$data" | jq -rc '(.size|tonumber) / (.duration|tonumber) / .video[0].width / .video[0].height')"
-  duration="$(echo "scale=2;$duration/1" | bc)"
+  mkvquality="$(printf "%s" "$data" | jq -rc '.video[] | "(" + (.id|tostring) + ")-" + .codec + "-" + (.width|tostring) + "x" + (.height|tostring)')"
+  mkvquality="$mkvquality-$(printf "%s" "$data" | jq -rc '.audio[] | "(" + (.id|tostring) + ")-" + .codec + "-" + .language')"
+  duration="$(printf "%s" "$data" | jq -rc '(.size|tonumber) / (.duration|tonumber) / .video[0].width / .video[0].height')"
+  duration="$(printf "%s" "scale=2;$duration/1" | bc)"
   mkvquality="$mkvquality-$duration"
 
   local c
   local w
   local h
-  c="$(echo "$data" | jq -rc '.video[] | .codec')"
-  w="$(echo "$data" | jq -rc '.video[] | (.width|tostring)')"
-  h="$(echo "$data" | jq -rc '.video[] | (.height|tostring)')"
+  c="$(printf "%s" "$data" | jq -rc '.video[] | .codec')"
+  w="$(printf "%s" "$data" | jq -rc '.video[] | (.width|tostring)')"
+  h="$(printf "%s" "$data" | jq -rc '.video[] | (.height|tostring)')"
   if [ "$c" == "h264" ]; then
     if [ "$h" -le 500 ] && [ "$w" -le 600 ]; then
       dc::logger::error "This movie is h264 but LD: $1"
@@ -58,12 +58,12 @@ relogic::mkvinfo(){
   local jitter=0
   local matching
 
-  checkDuration="$(echo "$data" | jq -rc '(.duration|tonumber) / 60 | floor')"
+  checkDuration="$(printf "%s" "$data" | jq -rc '(.duration|tonumber) / 60 | floor')"
   for i in "$@"; do
     #echo "> $i"
     #echo "> $checkDuration"
-    delta=$(echo "scale=0;$checkDuration - ${i%% min*}" | bc)
-    jitter=$(echo "scale=0;($checkDuration - ${i%% min*}) * 100 / ${i%% min*}" | bc)
+    delta=$(printf "%s" "scale=0;$checkDuration - ${i%% min*}" | bc)
+    jitter=$(printf "%s" "scale=0;($checkDuration - ${i%% min*}) * 100 / ${i%% min*}" | bc)
 
     if { [ "$delta" -ge 2 ] || [ "$delta" -le -2 ]; } && { [ "$jitter" -ge 2 ] || [ "$jitter" -le -2 ]; }; then
       dc::logger::warning "Moving on"

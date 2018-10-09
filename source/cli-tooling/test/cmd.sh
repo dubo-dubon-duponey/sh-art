@@ -47,6 +47,6 @@ done < <(
   if [ -d "$DC_ARGV_TESTS" ]; then
     ls "$DC_ARGV_TESTS/"*.sh
   else
-    echo "$DC_ARGV_TESTS"
+    printf "%s" "$DC_ARGV_TESTS"
   fi
 )

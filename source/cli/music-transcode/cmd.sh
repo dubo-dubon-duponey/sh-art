@@ -37,7 +37,7 @@ codec=${DC_ARGV_CODEC:-ALAC}
 ar=( "-hide_banner" "-v" 8 "-i" "$1" "-vn" "-codec:a" )
 
 # Process the codec
-case "$(echo "$codec" | tr '[:lower:]' '[:upper:]')" in
+case "$(printf "%s" "$codec" | tr '[:lower:]' '[:upper:]')" in
   MP3)
     dc::logger::debug "Codec: MP3 320k"
     codec="libmp3lame -b:a 320k"
