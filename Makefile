@@ -98,14 +98,16 @@ lint-code: $(DC_MAKEFILE_DIR)/bin/bootstrap/builder $(DC_PREFIX)/bin/dc-tooling-
 	$(DC_PREFIX)/bin/dc-tooling-lint ~/.profile
 
 # Unit tests
-test-unit: $(DC_MAKEFILE_DIR)/bin/bootstrap/builder $(DC_PREFIX)/bin/dc-tooling-test
+unit/%: $(DC_MAKEFILE_DIR)/bin/bootstrap/builder $(DC_PREFIX)/bin/dc-tooling-test
 	$(call title, $@)
-	$(DC_PREFIX)/bin/dc-tooling-test --type=unit --tests=$(DC_MAKEFILE_DIR)/tests/unit
+	$(DC_PREFIX)/bin/dc-tooling-test $(DC_MAKEFILE_DIR)/tests/$@
+
+test-unit: $(patsubst $(DC_MAKEFILE_DIR)/tests/unit/%,unit/%,$(wildcard $(DC_MAKEFILE_DIR)/tests/unit/*.sh)) \
 
 # Integration tests
 integration/%: $(DC_MAKEFILE_DIR)/bin/bootstrap/builder $(DC_PREFIX)/bin/dc-tooling-test
 	$(call title, $@)
-	$(DC_PREFIX)/bin/dc-tooling-test --type=integration --tests=$(DC_MAKEFILE_DIR)/tests/$@ "$(DC_PREFIX)/bin"
+	PATH=$(DC_PREFIX)/bin:${PATH} $(DC_PREFIX)/bin/dc-tooling-test $(DC_MAKEFILE_DIR)/tests/$@/*
 
 test-integration: $(patsubst $(DC_MAKEFILE_DIR)/source/cli/%/cmd.sh,integration/%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli/*/cmd.sh)) \
 	$(patsubst $(DC_MAKEFILE_DIR)/source/cli-ext/%/cmd.sh,integration/%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli-ext/*/cmd.sh))

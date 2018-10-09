@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 
-result=$(dc-libre dc::output::json "{}")
-exit=$?
-dc-tools::assert::equal "$exit" 0 "libre successful exit"
-dc-tools::assert::equal "$result" "{}"
+testLibre(){
+  result=$(dc-libre dc::output::json "{}")
+  exit=$?
+  dc-tools::assert::equal "libre successful exit" "$exit" 0
+  dc-tools::assert::equal "$result" "{}"
+}
 
 #. $_here/../../../bin/dc-libre --
 
