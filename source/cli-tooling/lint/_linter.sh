@@ -23,13 +23,11 @@ dc-tools::sc::filecheck(){
 
 dc-tools::sc::dircheck(){
 # XXX neither approach are satisfying...
-# XXX broken: doesn't exit on error
-# set -euxo pipefail would be a solution... but wouldn't run all checks anymore
 #  git ls-tree -r HEAD | grep -E '^1007|.*\..*sh$' | awk '{print $4}' | grep -v tests
-  find "$1" -type f \( -perm +111 -o -iname "*.sh" \) -not -iname ".*" -not -path "*/.git/*" -not -path "*/xxx*" | while read -r script; do
+  while read -r script; do
     if ! dc-tools::sc::filecheck "$script"; then
       # XXX subshell modification is not going to bubble up...
       export DC_SHELLCHECK_FAIL=true
     fi
-  done
+  done < <(find "$1" -type f \( -perm +111 -o -iname "*.sh" \) -not -iname ".*" -not -path "*/.git/*" -not -path "*/xxx*")
 }

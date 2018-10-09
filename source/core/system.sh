@@ -12,9 +12,7 @@ portable::mktemp(){
 }
 
 portable::base64d(){
-  local os="$(uname)"
-
-  case "$os" in
+  case "$(uname)" in
     Darwin)
       base64 -D
     ;;
