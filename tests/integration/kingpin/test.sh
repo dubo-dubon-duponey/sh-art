@@ -19,5 +19,5 @@ testKingpin(){
   exit=$?
   dc-tools::assert::equal "$exit" "0"
 
-  [ "$(uname)" == Darwin ] || startSkipping
+  [ "$(uname)" == Darwin ] || stopSkipping
 }
