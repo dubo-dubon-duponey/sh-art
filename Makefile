@@ -107,7 +107,8 @@ integration/%: $(DC_MAKEFILE_DIR)/bin/bootstrap/builder $(DC_PREFIX)/bin/dc-tool
 	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-test --type=integration --tests=$(DC_MAKEFILE_DIR)/tests/$@ "$(DC_PREFIX)/bin"
 
-test-integration: $(patsubst $(DC_MAKEFILE_DIR)/source/cli/%/cmd.sh,integration/%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli/*/cmd.sh))
+test-integration: $(patsubst $(DC_MAKEFILE_DIR)/source/cli/%/cmd.sh,integration/%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli/*/cmd.sh)) \
+	$(patsubst $(DC_MAKEFILE_DIR)/source/cli-ext/%/cmd.sh,integration/%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli-ext/*/cmd.sh))
 
 build: build-library build-binaries
 lint: lint-code lint-signed
