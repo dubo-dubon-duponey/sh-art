@@ -18,7 +18,7 @@ parent="$(dirname "$1")"
 dc::logger::info "Processing $directory"
 
 # Extract id from directory
-imdbID="$(echo "$directory" | sed -E 's/.*(tt[0-9]{7}).*/\1/')"
+imdbID="$(printf "%s" "$directory" | sed -E 's/.*(tt[0-9]{7}).*/\1/')"
 
 # Fetch data
 if ! imdb=$(./debug imdb "$imdbID"); then
@@ -26,11 +26,11 @@ if ! imdb=$(./debug imdb "$imdbID"); then
   exit "$ERROR_FAILED"
 fi
 
-imdbYear="$(echo "$imdb" | jq -rc .year)"
-imdbTitle="$(echo "$imdb" | jq -rc .title)"
-imdbOriginal="$(echo "$imdb" | jq -rc .original)"
+imdbYear="$(printf "%s" "$imdb" | jq -rc .year)"
+imdbTitle="$(printf "%s" "$imdb" | jq -rc .title)"
+imdbOriginal="$(printf "%s" "$imdb" | jq -rc .original)"
 
-IFS=$'\n' read -r -d '' -a imdbRuntime < <(echo "$imdb" | jq -rc .runtime[])
+IFS=$'\n' read -r -d '' -a imdbRuntime < <(printf "%s" "$imdb" | jq -rc .runtime[])
 
 
 parse::newfilename(){
@@ -57,22 +57,22 @@ parse::newfilename(){
   # For non bonus & non alternate, snif out parts, discs and episodes
   if ! grep -q -I "^Bonus" "$filename" && ! grep -q -I "^Alternate" "$filename"; then
     if grep -q ", part [2-9]" "$filename"; then
-      part="$(echo "$oldtitle" | sed -E 's/.*(, part [0-9]).*/\1/')"
+      part="$(printf "%s" "$oldtitle" | sed -E 's/.*(, part [0-9]).*/\1/')"
     fi
     if grep -q ", disc [2-9]" "$filename"; then
-      disc="$(echo "$oldtitle" | sed -E 's/.*(, disc [0-9]).*/\1/')"
+      disc="$(printf "%s" "$oldtitle" | sed -E 's/.*(, disc [0-9]).*/\1/')"
     fi
     local episode=
     if grep -q "[,]? E[0-9][0-9]" "$filename"; then
-      episode="$(echo "$oldtitle" | sed -E 's/.*([,]? E[0-9]+).*/\1/')"
+      episode="$(printf "%s" "$oldtitle" | sed -E 's/.*([,]? E[0-9]+).*/\1/')"
     fi
     if [ "$extension" == "srt" ] || [ "$extension" == "sub" ] || [ "$extension" == "idx" ] || [ "$extension" == "rar" ] || [ "$extension" == "ass" ] || [ "$extension" == "smi" ] || [ "$extension" == "sami" ]; then
       local ln=
-      lnMatch="$(echo "$oldtitle" | grep -Ei "[, ._(-]+(?:chinese|chinese-traditional|croatian|danish|dutch|english|french|german|greek|hebrew|italian|japanese|polish|portuguese|russian|romanian|spanish|swedish|turkish|vietnamese|br|bra|chi|deu|de|dut|eng|en|esp|es|fra|fre|fr|ger|gre|hu|it|ita|nl|nwg|por|pt-br|ptb|ptbr|pt|ro|rum|spa|swe)[)]*.$extension")"
+      lnMatch="$(printf "%s" "$oldtitle" | grep -Ei "[, ._(-]+(?:chinese|chinese-traditional|croatian|danish|dutch|english|french|german|greek|hebrew|italian|japanese|polish|portuguese|russian|romanian|spanish|swedish|turkish|vietnamese|br|bra|chi|deu|de|dut|eng|en|esp|es|fra|fre|fr|ger|gre|hu|it|ita|nl|nwg|por|pt-br|ptb|ptbr|pt|ro|rum|spa|swe)[)]*.$extension")"
       if [ ! "$lnMatch" ]; then
         dc::logger::error "No language for subtitle $oldname"
       else
-        ln="$(echo "$oldtitle" | gsed -E 's/.+[, ._(-]+(chinese|chinese-traditional|croatian|danish|dutch|english|french|german|greek|hebrew|italian|japanese|polish|portuguese|russian|romanian|spanish|swedish|turkish|vietnamese|br|bra|chi|deu|de|dut|eng|en|esp|es|fra|fre|fr|ger|gre|hu|it|ita|nl|nwg|por|pt-br|ptb|ptbr|pt|ro|rum|spa|swe)[)]*\.[a-z0-9]+/.\1/i')"
+        ln="$(printf "%s" "$oldtitle" | gsed -E 's/.+[, ._(-]+(chinese|chinese-traditional|croatian|danish|dutch|english|french|german|greek|hebrew|italian|japanese|polish|portuguese|russian|romanian|spanish|swedish|turkish|vietnamese|br|bra|chi|deu|de|dut|eng|en|esp|es|fra|fre|fr|ger|gre|hu|it|ita|nl|nwg|por|pt-br|ptb|ptbr|pt|ro|rum|spa|swe)[)]*\.[a-z0-9]+/.\1/i')"
       fi
     fi
   fi
@@ -117,7 +117,7 @@ finalquality=
 
 # XXX don't forget to reimplement filesystem safe escaping
 
-runtime=$(echo "${imdbRuntime[*]}" | sed -E 's/ min//g')
+runtime=$(printf "%s" "${imdbRuntime[*]}" | sed -E 's/ min//g')
 
 mkvquality=
 
