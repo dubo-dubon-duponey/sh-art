@@ -9,6 +9,17 @@ readonly CLI_USAGE="[-s] filename"
 dc::commander::init
 dc::require::jq
 
+if [ ! "$(command -v ffprobe)" ]; then
+  dc::logger::error "You need ffprobe for this to work (part of ffmpeg)."
+  exit "$ERROR_MISSING_REQUIREMENTS"
+fi
+
+if [ ! "$(command -v ffprobe)" ]; then
+  dc::logger::error "You need mp4info for this to work (part of bento)."
+  exit "$ERROR_MISSING_REQUIREMENTS"
+fi
+
+
 # Argument 1 is mandatory and must be a readable file
 dc::fs::isfile "$1"
 
