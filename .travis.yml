@@ -12,14 +12,16 @@ script:
 addons:
   homebrew:
     packages:
-      - jq
-      - shellcheck
+    - jq
+    - shellcheck
+    - bento4
+    - ffmpeg
   apt:
     packages:
-      - jq
-      - shellcheck
-#      - ksh
-#      - zsh
+    - jq
+    - shellcheck
+    - bento4
+    - ffmpeg
 
 matrix:
   include:
