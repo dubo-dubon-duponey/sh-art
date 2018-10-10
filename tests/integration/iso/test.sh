@@ -7,17 +7,17 @@ testMkISO(){
   iso="$(portable::mktemp mkisotest) ∞ fancy"
   local vname="fancy ∞ name"
 
-  dc-iso --name="$vname" --file="$iso" --source="$(pwd)" create
+  dc-iso -s --name="$vname" --file="$iso" --source="$(pwd)" create
   exit=$?
   dc-tools::assert::equal "$exit" "0"
 
-  dc-iso --file="$iso" mount
+  dc-iso -s --file="$iso" mount
   exit=$?
   dc-tools::assert::equal "$exit" "0"
 
-  dc-iso --name="$vname" unmount
+  dc-iso -s --name="$vname" unmount
   exit=$?
   dc-tools::assert::equal "$exit" "0"
 
-  [ "$(uname)" == Darwin ] || stopSkipping
+  [ "$(uname)" == Darwin ] || endSkipping
 }
