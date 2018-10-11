@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
 
-testKingpin(){
+testMkISO(){
   [ "$(uname)" == Darwin ] || startSkipping
 
-  dc-kingpin -s "BOGUS"
-  exit=$?
-  dc-tools::assert::equal "$exit" "$ERROR_ARGUMENT_INVALID"
+  local iso
+  iso="$(portable::mktemp mkisotest) ∞ fancy"
+  local vname="fancy ∞ name"
 
-  dc-kingpin -s "go"
-  exit=$?
-  dc-tools::assert::equal "$exit" "0"
-
-  dc-kingpin -s "node"
+  dc-iso -s --name="$vname" --file="$iso" --source="$(pwd)" create
   exit=$?
   dc-tools::assert::equal "$exit" "0"
 
-  dc-kingpin -s "python"
+  dc-iso -s --file="$iso" mount
+  exit=$?
+  dc-tools::assert::equal "$exit" "0"
+
+  dc-iso -s --name="$vname" unmount
   exit=$?
   dc-tools::assert::equal "$exit" "0"
 
