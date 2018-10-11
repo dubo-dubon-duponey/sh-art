@@ -29,5 +29,10 @@ dc-tools::sc::dircheck(){
       # XXX subshell modification is not going to bubble up...
       export DC_SHELLCHECK_FAIL=true
     fi
-  done < <(find "$1" -type f \( -perm +111 -o -iname "*.sh" \) -not -iname ".*" -not -path "*/.git/*" -not -path "*/xxx*")
+  done < <(
+    # Damn you, GNU
+    if ! find "$1" -type f \( -perm /111 -o -iname "*.sh" \) -not -iname ".*" -not -path "*/.git/*" -not -path "*/xxx*" 2>/dev/null; then
+      find "$1" -type f \( -perm +111 -o -iname "*.sh" \) -not -iname ".*" -not -path "*/.git/*" -not -path "*/xxx*" 2>/dev/null
+    fi
+  )
 }

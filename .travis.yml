@@ -12,19 +12,26 @@ script:
 addons:
   homebrew:
     packages:
-      - jq
-      - shellcheck
+    - jq
+    - shellcheck
+    - bento4
+    - ffmpeg
   apt:
     packages:
-      - jq
-      - shellcheck
-#      - ksh
-#      - zsh
+    - jq
+    - shellcheck
 
 matrix:
   include:
     - os: osx
     - os: linux
       dist: trusty
+      # Older version of shellcheck does not support -a
+      script:
+      - make build
+      - make test-unit
+      - make test-integration
     - os: linux
       dist: xenial
+      before_install:
+      - sudo apt-get install -y ffmpeg
