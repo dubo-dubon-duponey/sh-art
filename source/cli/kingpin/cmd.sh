@@ -11,19 +11,29 @@ dc::commander::init
 # Depend on brew
 dc::require::platform::mac
 dc::require::brew
+dc::require::git
+
 dc::argv::arg::validate 1 "(go|node|python)"
 
-dc::depends::mac::on(){
+_ensure_install(){
   # Install through brew
   [ ! "$(brew list "$1" 2>/dev/null)" ] && brew install "$1"
 }
 
-kingpin::dev::refresh(){
-  local _here
-  _here=$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)
-  curl -s -S -L -o "$_here/.gvm-installer"  https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer
-  chmod u+x "$_here/.gvm-installer"
+_profile_link(){
+  local posh="$1"
+  if ! grep -q "$posh" "$HOME/.profile"; then
+    printf "%s\\n" "# shellcheck source=$HOME/$posh" >> "$HOME/.profile"
+    printf "%s\\n" ". \"\$HOME/$posh\"" >> "$HOME/.profile"
+  fi
 }
+
+#kingpin::dev::refresh(){
+#  local _here
+#  _here=$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)
+#  curl -s -S -L -o "$_here/.gvm-installer"  https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer
+#  chmod u+x "$_here/.gvm-installer"
+#}
 
 get::go(){
   dc::logger::info "Installing golang development environment"
@@ -32,8 +42,8 @@ get::go(){
     return
   fi
 
-  dc::depends::mac::on go
-  dc::depends::mac::on dep
+  _ensure_install go
+  _ensure_install dep
 
   local _here
   _here=$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)
@@ -55,7 +65,7 @@ export PATH="\$GOPATH/bin:\${PATH}"
 EOF
 # XXX ^ gvm will force add the last line to .profile regardless
 
-  helpers::profile_link .posh_go
+  _profile_link .posh_go
   # shellcheck source=/dev/null
   . "$HOME/.profile"
 
@@ -66,7 +76,7 @@ EOF
   dc::logger::info "Done with golang"
 }
 
-setit(){
+_setit(){
   nvm install "$1"
   nvm use "$1"
   npm install -g yarn
@@ -88,9 +98,9 @@ get::node(){
   # https://github.com/tj/n
   # https://github.com/creationix/nvm
 
-  dc::depends::mac::on node
-  dc::depends::mac::on yarn
-  dc::depends::mac::on nvm
+  _ensure_install node
+  _ensure_install yarn
+  _ensure_install nvm
 
   cat <<-EOF > "$HOME/.posh_node"
 #!/usr/bin/env bash
@@ -110,7 +120,7 @@ export PATH
 export YARN_CACHE_FOLDER="\${POSH_TMP:-\$HOME/tmp}/cache/yarn"
 EOF
 
-  helpers::profile_link .posh_node
+  _profile_link .posh_node
   # shellcheck source=/dev/null
   . "$HOME/.profile"
 
@@ -120,9 +130,9 @@ EOF
   yarn global add gulp slush ember-cli create-react-app
 
   # Additional versions
-  setit lts/boron
-  setit lts/carbon
-  setit 10
+  _setit lts/boron
+  _setit lts/carbon
+  _setit 10
   nvm alias default 10
 
   dc::logger::info "Done with node"
@@ -136,9 +146,9 @@ get::python(){
   fi
 
   # From https://github.com/pyenv/pyenv/wiki/Common-build-problems#requirements
-  dc::depends::mac::on readline
-  dc::depends::mac::on xz
-  dc::depends::mac::on pyenv
+  _ensure_install readline
+  _ensure_install xz
+  _ensure_install pyenv
 
   cat <<- EOF > "$HOME/.posh_python"
 #!/usr/bin/env bash
@@ -153,7 +163,7 @@ if command -v pyenv >/dev/null; then
 fi
 EOF
 
-  helpers::profile_link .posh_python
+  _profile_link .posh_python
   # shellcheck source=/dev/null
   . "$HOME/.profile"
 
