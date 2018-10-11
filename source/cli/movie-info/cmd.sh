@@ -50,7 +50,9 @@ info::ffprobe(){
     fast=false
   fi
 
+  # Grrrrrr
   fast=${fast:-false}
+  [ "$fast" != "null" ] || fast=false
 
   duration=$(printf "%s" "$data" | jq '.format | select(.duration != null) | .duration | tonumber | floor')
   if [ ! "$duration" ]; then
