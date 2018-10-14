@@ -10,7 +10,7 @@ dc::commander::init
 dc::require::jq
 
 if [ ! "$(command -v ffprobe)" ]; then
-  dc::logger::error "You need ffprobe or avprobe for this to work (part of ffmpeg)."
+  dc::logger::error "You need ffprobe for this to work (part of ffmpeg)."
   exit "$ERROR_MISSING_REQUIREMENTS"
 fi
 

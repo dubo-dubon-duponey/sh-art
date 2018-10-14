@@ -21,7 +21,7 @@ dc::logger::info "Processing $directory"
 imdbID="$(printf "%s" "$directory" | sed -E 's/.*(tt[0-9]{7}).*/\1/')"
 
 # Fetch data
-if ! imdb=$(./debug imdb "$imdbID"); then
+if ! imdb=$(dc-imdb "$imdbID"); then
   dc::logger::error "Could not retrieve information from imdb for id $imdbID and directory $directory. Aborting!"
   exit "$ERROR_FAILED"
 fi
@@ -32,11 +32,11 @@ imdbOriginal="$(printf "%s" "$imdb" | jq -rc .original)"
 
 IFS=$'\n' read -r -d '' -a imdbRuntime < <(printf "%s" "$imdb" | jq -rc .runtime[])
 
-
 relogic::mkvinfo(){
-  local data
-  data="$(./debug movie-info -s "$1")"
+  local file="$1"
   shift
+  local data
+  data="$(dc-movie-info -s "$file")"
 
   mkvquality=
 
@@ -58,7 +58,7 @@ relogic::mkvinfo(){
   mkvquality="$(printf "%s" "$data" | jq -rc '.video[] | "(" + (.id|tostring) + ")-" + .codec + "-" + (.width|tostring) + "x" + (.height|tostring)')"
   mkvquality="$mkvquality-$(printf "%s" "$data" | jq -rc '.audio[] | "(" + (.id|tostring) + ")-" + .codec + "-" + .language')"
   duration="$(printf "%s" "$data" | jq -rc '(.size|tonumber) / (.duration|tonumber) / .video[0].width / .video[0].height')"
-  duration="$(printf "%s" "scale=2;$duration/1" | bc)"
+  duration="$(printf "%s\\n" "scale=2;$duration/1" | bc)"
   mkvquality="$mkvquality-$duration"
 
   local c
@@ -69,19 +69,19 @@ relogic::mkvinfo(){
   h="$(printf "%s" "$data" | jq -rc '.video[] | (.height|tostring)')"
   if [ "$c" == "h264" ]; then
     if [ "$h" -le 500 ] && [ "$w" -le 600 ]; then
-      dc::logger::error "This movie is h264 but LD: $1"
+      dc::logger::error "This movie is h264 but LD: $file"
     elif [ "$h" -le 576 ] || [ "$w" -le 720 ]; then
-      dc::logger::warning "This movie is h264 but MD: $1"
+      dc::logger::warning "This movie is h264 but MD: $file"
     else
-      dc::logger::info "This movie is h264 and HD: $1"
+      dc::logger::info "This movie is h264 and HD: $file"
     fi
   else
     if [ "$h" -le 500 ] && [ "$w" -le 600 ]; then
-      dc::logger::error "This movie is NOT h264 ($c) and LD: $1"
+      dc::logger::error "This movie is NOT h264 ($c) and LD: $file"
     elif [ "$h" -le 576 ] || [ "$w" -le 720 ]; then
-      dc::logger::warning "This movie is NOT h264 ($c) and MD: $1"
+      dc::logger::warning "This movie is NOT h264 ($c) and MD: $file"
     else
-      dc::logger::warning "This movie is NOT h264 ($c) but it's HD: $1"
+      dc::logger::warning "This movie is NOT h264 ($c) but it's HD: $file"
     fi
   fi
 
@@ -95,8 +95,8 @@ relogic::mkvinfo(){
   for i in "$@"; do
     #echo "> $i"
     #echo "> $checkDuration"
-    delta=$(printf "%s" "scale=0;$checkDuration - ${i%% min*}" | bc)
-    jitter=$(printf "%s" "scale=0;($checkDuration - ${i%% min*}) * 100 / ${i%% min*}" | bc)
+    delta=$(printf "%s\\n" "scale=0;$checkDuration - ${i%% min*}" | bc)
+    jitter=$(printf "%s\\n" "scale=0;($checkDuration - ${i%% min*}) * 100 / ${i%% min*}" | bc)
 
     if { [ "$delta" -ge 2 ] || [ "$delta" -le -2 ]; } && { [ "$jitter" -ge 2 ] || [ "$jitter" -le -2 ]; }; then
       dc::logger::warning "Moving on"
@@ -132,26 +132,27 @@ parse::newfilename(){
   local oldtitle="$oldname" #"$(echo $oldname | sed -E 's/( [^\[]+).*/\1/')"
 
   # Check if bonus or alternate and in that case, don't touch
-  if grep -q -I "^Bonus" "$filename" || grep -q -I "^Alternate" "$filename"; then
+  if grep -q -I "^Bonus" "$parent/$oldname" || grep -q -I "^Alternate" "$parent/$oldname"; then
     newtitle="${oldtitle%.*}"
   fi
 
   local part=
   local disc=
+  local episode=
+  local ln=
   # For non bonus & non alternate, snif out parts, discs and episodes
-  if ! grep -q -I "^Bonus" "$filename" && ! grep -q -I "^Alternate" "$filename"; then
-    if grep -q ", part [2-9]" "$filename"; then
+  if ! grep -q -I "^Bonus" "$parent/$oldname" && ! grep -q -I "^Alternate" "$parent/$oldname"; then
+    if grep -q ", part [2-9]" "$parent/$oldname"; then
       part="$(printf "%s" "$oldtitle" | sed -E 's/.*(, part [0-9]).*/\1/')"
     fi
-    if grep -q ", disc [2-9]" "$filename"; then
+    if grep -q ", disc [2-9]" "$parent/$oldname"; then
       disc="$(printf "%s" "$oldtitle" | sed -E 's/.*(, disc [0-9]).*/\1/')"
     fi
-    local episode=
-    if grep -q "[,]? E[0-9][0-9]" "$filename"; then
+    if grep -q "[,]? E[0-9][0-9]" "$parent/$oldname"; then
       episode="$(printf "%s" "$oldtitle" | sed -E 's/.*([,]? E[0-9]+).*/\1/')"
     fi
+
     if [ "$extension" == "srt" ] || [ "$extension" == "sub" ] || [ "$extension" == "idx" ] || [ "$extension" == "rar" ] || [ "$extension" == "ass" ] || [ "$extension" == "smi" ] || [ "$extension" == "sami" ]; then
-      local ln=
       lnMatch="$(printf "%s" "$oldtitle" | grep -Ei "[, ._(-]+(?:chinese|chinese-traditional|croatian|danish|dutch|english|french|german|greek|hebrew|italian|japanese|polish|portuguese|russian|romanian|spanish|swedish|turkish|vietnamese|br|bra|chi|deu|de|dut|eng|en|esp|es|fra|fre|fr|ger|gre|hu|it|ita|nl|nwg|por|pt-br|ptb|ptbr|pt|ro|rum|spa|swe)[)]*.$extension")"
       if [ ! "$lnMatch" ]; then
         dc::logger::error "No language for subtitle $oldname"
@@ -173,7 +174,6 @@ parse::newfilename(){
     fi
     dc::prompt::confirm
     mv "$parent/$oldname" "$parent/$newname"
-
   fi
 }
 
