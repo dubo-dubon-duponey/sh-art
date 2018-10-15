@@ -9,7 +9,7 @@ readonly CLI_USAGE="[-s] [--destination=folder] [--delete] filename"
 dc::commander::init
 dc::require::jq
 
-if [ ! "$(command -v dc-movie-info)" ] || [ ! "$(command -v dc-movie-grify)" ]; then
+if ! command -v dc-movie-info >/dev/null || ! command -v dc-movie-grify >/dev/null; then
   dc::logger::error "You need dc-movie-info and dc-movie-grify for this to work."
   exit "$ERROR_MISSING_REQUIREMENTS"
 fi

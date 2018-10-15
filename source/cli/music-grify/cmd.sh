@@ -8,7 +8,7 @@ readonly CLI_USAGE="[-s] [--delete/-d] [--destination=folder] [--codec=ALAC|FLAC
 # Boot
 dc::commander::init
 
-if [ ! "$(command -v ffmpeg)" ]; then
+if ! command -v ffmpeg >/dev/null; then
   dc::logger::error "You need ffmpeg for this to work."
   exit "$ERROR_MISSING_REQUIREMENTS"
 fi

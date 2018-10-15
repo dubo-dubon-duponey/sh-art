@@ -42,16 +42,18 @@ dc::logger::debug "Now, let's query something"
 dc::http::request "https://www.google.com" HEAD
 
 dc::logger::warning "We got something!"
-printf "%s" "$DC_HTTP_BODY"
+cat "$DC_HTTP_BODY"
 
 # ... Now go do something useful below (like, looking at other cli for inspiration, or reading the docs)
 ```
 
 ## Requirements
 
-Right now this is solely tested and used on macOS, using bash 3-something.
+Right now this is tested macOS, Ubuntu 14.04, 16.04, 18.04, Debian stable and testing, and Alpine.
 
-And you need `jq` and `curl` installed if you plan on doing anything useful.
+You need `jq` and `curl` installed if you plan on doing anything useful.
+
+Some of the binaries also require `git`, `file`, `sqlite`, `shellcheck`, `make` and `ffmpeg`.
 
 ## Design principles
 
@@ -72,24 +74,13 @@ A. Out of tree, see `TL;DR`.
 B. In-tree, with builder / integration:
 
 1. create a folder under cli named `mycli`, and add a shell script inside (look at others under cli for inspiration)
-2. call `make binaries` to build
-3. call `make lint` to enfore syntax checking
+2. call `make build` to build
+3. call `make lint` to enforce syntax checking
 3. create integration tests under `tests/integration` and run `make test`
-
-## Tooling
-
-Includes a basic test framework.
-
-1. call `./lint`
-1. write tests under `tests/unit`
-1. call `./unit`
-1. write tests under `tests/integration/SOMETHING`
-1. call `build`, then `./integration SOMETHING` or simply `./integration`
 
 ## Why... the... name?
 
- * it's a portementeau: "sh" (short for "shell") + "art" (short for "I like it"), which somewhat makes sense
- * what did you think it meant?
+ * it's a portementeau: "sh" (short for "shell") + "art" (short for "I like it"), which somewhat makes sense - what did you think it meant?
  * if it was powershell instead of bash, it would probably have been named `phart`, which doesn't really sound right
 
 ## TODO & research
@@ -103,6 +94,7 @@ Includes a basic test framework.
  * explore using curl -w to build an HTTP perf/security testing tool
  * make a call on passing by reference or not for the string API: http://fvue.nl/wiki/Bash:_Passing_variables_by_reference
 
+<!--
 ```
 https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -euxo pipefail
@@ -137,3 +129,4 @@ sgr0 	Turn off all attributes
 setaf <value> 	Set foreground color
 setab <value> 	Set background color
 ```
+-->
