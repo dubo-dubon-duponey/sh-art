@@ -153,7 +153,7 @@ parse::newfilename(){
     fi
 
     if [ "$extension" == "srt" ] || [ "$extension" == "sub" ] || [ "$extension" == "idx" ] || [ "$extension" == "rar" ] || [ "$extension" == "ass" ] || [ "$extension" == "smi" ] || [ "$extension" == "sami" ]; then
-      lnMatch="$(printf "%s" "$oldtitle" | grep -Ei "[, ._(-]+(?:chinese|chinese-traditional|croatian|danish|dutch|english|french|german|greek|hebrew|italian|japanese|polish|portuguese|russian|romanian|spanish|swedish|turkish|vietnamese|br|bra|chi|deu|de|dut|eng|en|esp|es|fra|fre|fr|ger|gre|hu|it|ita|nl|nwg|por|pt-br|ptb|ptbr|pt|ro|rum|spa|swe)[)]*.$extension")"
+      lnMatch="$(printf "%s" "$oldtitle" | grep -Ei "[, ._(-]+(chinese|chinese-traditional|croatian|danish|dutch|english|french|german|greek|hebrew|italian|japanese|polish|portuguese|russian|romanian|spanish|swedish|turkish|vietnamese|br|bra|chi|deu|de|dut|eng|en|esp|es|fra|fre|fr|ger|gre|hu|it|ita|nl|nwg|por|pt-br|ptb|ptbr|pt|ro|rum|spa|swe)[)]*.$extension")"
       if [ ! "$lnMatch" ]; then
         dc::logger::error "No language for subtitle $oldname"
       else

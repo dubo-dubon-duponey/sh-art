@@ -33,10 +33,10 @@ if [ "$DC_ARGV_CONVERT" ]; then
   dc::argv::flag::validate convert "^[0-9]$"
 fi
 if [ "$DC_ARGV_REMOVE" ]; then
-  dc::argv::flag::validate remove "^[0-9]+(?: [0-9]+)*$"
+  dc::argv::flag::validate remove "^[0-9]+( [0-9]+)*$"
 fi
 if [ "$DC_ARGV_EXTRACT" ]; then
-  dc::argv::flag::validate extract "^[0-9]+:[^ ]+(?: [0-9]+:[^ ]+)*$"
+  dc::argv::flag::validate extract "^[0-9]+:[^ ]+( [0-9]+:[^ ]+)*$"
 fi
 
 
