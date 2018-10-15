@@ -23,8 +23,8 @@ fi
 
 dc::logger::debug "$data"
 
-#| jq -rc '.tracks[] | select(.type == "audio")')"
-#dc::logger::info "$(echo $data | jq -rc '.tracks[] | select(.type == "subtitles")')"
+#| jq -r -c '.tracks[] | select(.type == "audio")')"
+#dc::logger::info "$(echo $data | jq -r -c '.tracks[] | select(.type == "subtitles")')"
 
 # Basic info
 CONTAINER=$(printf "%s" "$data" | jq -r .container)
@@ -137,23 +137,23 @@ if [ "$REQUIRED_AUDIO_COUNT" == 0 ] && [ "$ALL_AUDIO_COUNT" != 0 ]; then
       exit "$ERROR_FAILED"
     fi
   else
-    MUST_CONVERT_AUDIO=$(printf "%s" "$MAY_CONVERT_AUDIO" | jq -rc '.[] | (.id | tostring)')
+    MUST_CONVERT_AUDIO=$(printf "%s" "$MAY_CONVERT_AUDIO" | jq -r -c '.[] | (.id | tostring)')
   fi
 fi
 
 # XXX subtitle collision here: sami microdvd
 
 # XXX EXTRA CAREFUL HERE
-# EXTRACT=( $(echo "$ALL_SUBTITLES" | jq -rc '.[] | select(.codec == "dvd_subtitle"|not) | (.id|tostring) + ":" + (.id|tostring) + "." + .language + "." + .codec' | sed -E 's/subrip/srt/g' | sed -E 's/microdvd/sub/g' | sed -E 's/sami/smi/g' | sed -E 's/mov_text/srt/g') )
+# EXTRACT=( $(echo "$ALL_SUBTITLES" | jq -r -c '.[] | select(.codec == "dvd_subtitle"|not) | (.id|tostring) + ":" + (.id|tostring) + "." + .language + "." + .codec' | sed -E 's/subrip/srt/g' | sed -E 's/microdvd/sub/g' | sed -E 's/sami/smi/g' | sed -E 's/mov_text/srt/g') )
 while read -r i; do
   EXTRACT[${#EXTRACT[@]}]="$i"
-done < <(printf "%s" "$ALL_SUBTITLES" | jq -rc '.[] | select(.codec == "dvd_subtitle"|not) | (.id|tostring) + ":" + (.id|tostring) + "." + .language + "." + .codec' \
+done < <(printf "%s" "$ALL_SUBTITLES" | jq -r -c '.[] | select(.codec == "dvd_subtitle"|not) | (.id|tostring) + ":" + (.id|tostring) + "." + .language + "." + .codec' \
   | sed -E 's/subrip/srt/g' | sed -E 's/microdvd/sub/g' | sed -E 's/sami/smi/g' | sed -E 's/mov_text/srt/g')
 
 
 
-ALERT_SUBS=$(printf "%s" "$ALL_SUBTITLES" | jq -rc '[.[] | select(.codec == "dvd_subtitle")] | length')
-# EXTRACT=( $(echo $ALL_SUBTITLES | jq -rc '.[] | (.id | tostring)') )
+ALERT_SUBS=$(printf "%s" "$ALL_SUBTITLES" | jq -r -c '[.[] | select(.codec == "dvd_subtitle")] | length')
+# EXTRACT=( $(echo $ALL_SUBTITLES | jq -r -c '.[] | (.id | tostring)') )
 
 if [ "$ALERT_SUBS" -ge 1 ]; then
   dc::logger::error " > This file contains unprocessable subtitles that will get dropped. You should extract out of band with mkvextract tracks \"$1\" X:\"$1\""
@@ -164,7 +164,7 @@ fi
 # Manual answer to removal question
 REMOVE=$REMOVE_AUDIO
 # Must remove audio files
-#ALSO_REMOVE=( $(echo "$MUST_REMOVE_AUDIO" | jq -rc '.[] | (.id | tostring)') )
+#ALSO_REMOVE=( $(echo "$MUST_REMOVE_AUDIO" | jq -r -c '.[] | (.id | tostring)') )
 #if [ "${ALSO_REMOVE[*]}" ]; then
 #  if [ "$REMOVE" ]; then
 #    REMOVE="$REMOVE ${ALSO_REMOVE[*]}"
@@ -173,15 +173,15 @@ REMOVE=$REMOVE_AUDIO
 #  fi
 #fi
 
-# ALSO_REMOVE=( $(echo "$ALL_SUBTITLES" | jq -rc '.[] | (.id | tostring)') )
+# ALSO_REMOVE=( $(echo "$ALL_SUBTITLES" | jq -r -c '.[] | (.id | tostring)') )
 # XXX EXTRA CARE
 ALSO_REMOVE=()
 while read -r i; do
   ALSO_REMOVE[${#ALSO_REMOVE[@]}]="$i"
-done < <(printf "%s" "$MUST_REMOVE_AUDIO" | jq -rc '.[] | (.id | tostring)')
+done < <(printf "%s" "$MUST_REMOVE_AUDIO" | jq -r -c '.[] | (.id | tostring)')
 while read -r i; do
   ALSO_REMOVE[${#ALSO_REMOVE[@]}]="$i"
-done < <(printf "%s" "$ALL_SUBTITLES" | jq -rc '.[] | (.id | tostring)')
+done < <(printf "%s" "$ALL_SUBTITLES" | jq -r -c '.[] | (.id | tostring)')
 
 
 if [ "${ALSO_REMOVE[*]}" ]; then

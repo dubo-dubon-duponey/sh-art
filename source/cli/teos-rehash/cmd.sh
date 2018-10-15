@@ -26,11 +26,11 @@ if ! imdb=$(dc-imdb "$imdbID"); then
   exit "$ERROR_FAILED"
 fi
 
-imdbYear="$(printf "%s" "$imdb" | jq -rc .year)"
-imdbTitle="$(printf "%s" "$imdb" | jq -rc .title)"
-imdbOriginal="$(printf "%s" "$imdb" | jq -rc .original)"
+imdbYear="$(printf "%s" "$imdb" | jq -r -c .year)"
+imdbTitle="$(printf "%s" "$imdb" | jq -r -c .title)"
+imdbOriginal="$(printf "%s" "$imdb" | jq -r -c .original)"
 
-IFS=$'\n' read -r -d '' -a imdbRuntime < <(printf "%s" "$imdb" | jq -rc .runtime[])
+IFS=$'\n' read -r -d '' -a imdbRuntime < <(printf "%s" "$imdb" | jq -r -c .runtime[])
 
 relogic::mkvinfo(){
   local file="$1"
@@ -40,13 +40,13 @@ relogic::mkvinfo(){
 
   mkvquality=
 
-  if [ ! "$(printf "%s" "$data" | jq -rc '.duration')" ]; then
+  if [ ! "$(printf "%s" "$data" | jq -r -c '.duration')" ]; then
     return
   fi
-  if [ "$(printf "%s" "$data" | jq -rc '.duration')" == 0 ]; then
+  if [ "$(printf "%s" "$data" | jq -r -c '.duration')" == 0 ]; then
     return
   fi
-  if [ "$(printf "%s" "$data" | jq -rc '.video[0].width')" == "null" ]; then
+  if [ "$(printf "%s" "$data" | jq -r -c '.video[0].width')" == "null" ]; then
     return
   fi
 
@@ -55,18 +55,18 @@ relogic::mkvinfo(){
   # echo $data
   # echo "in"
   #dc::output::json "$data"
-  mkvquality="$(printf "%s" "$data" | jq -rc '.video[] | "(" + (.id|tostring) + ")-" + .codec + "-" + (.width|tostring) + "x" + (.height|tostring)')"
-  mkvquality="$mkvquality-$(printf "%s" "$data" | jq -rc '.audio[] | "(" + (.id|tostring) + ")-" + .codec + "-" + .language')"
-  duration="$(printf "%s" "$data" | jq -rc '(.size|tonumber) / (.duration|tonumber) / .video[0].width / .video[0].height')"
+  mkvquality="$(printf "%s" "$data" | jq -r -c '.video[] | "(" + (.id|tostring) + ")-" + .codec + "-" + (.width|tostring) + "x" + (.height|tostring)')"
+  mkvquality="$mkvquality-$(printf "%s" "$data" | jq -r -c '.audio[] | "(" + (.id|tostring) + ")-" + .codec + "-" + .language')"
+  duration="$(printf "%s" "$data" | jq -r -c '(.size|tonumber) / (.duration|tonumber) / .video[0].width / .video[0].height')"
   duration="$(printf "%s\\n" "scale=2;$duration/1" | bc)"
   mkvquality="$mkvquality-$duration"
 
   local c
   local w
   local h
-  c="$(printf "%s" "$data" | jq -rc '.video[] | .codec')"
-  w="$(printf "%s" "$data" | jq -rc '.video[] | (.width|tostring)')"
-  h="$(printf "%s" "$data" | jq -rc '.video[] | (.height|tostring)')"
+  c="$(printf "%s" "$data" | jq -r -c '.video[] | .codec')"
+  w="$(printf "%s" "$data" | jq -r -c '.video[] | (.width|tostring)')"
+  h="$(printf "%s" "$data" | jq -r -c '.video[] | (.height|tostring)')"
   if [ "$c" == "h264" ]; then
     if [ "$h" -le 500 ] && [ "$w" -le 600 ]; then
       dc::logger::error "This movie is h264 but LD: $file"
@@ -91,7 +91,7 @@ relogic::mkvinfo(){
   local jitter=0
   local matching
 
-  checkDuration="$(printf "%s" "$data" | jq -rc '(.duration|tonumber) / 60 | floor')"
+  checkDuration="$(printf "%s" "$data" | jq -r -c '(.duration|tonumber) / 60 | floor')"
   for i in "$@"; do
     #echo "> $i"
     #echo "> $checkDuration"
