@@ -32,7 +32,7 @@ filename="${filename%.*}"
 
 # Validate codec if present
 if [ "$DC_ARGE_CODEC" ]; then
-  dc::argv::flag::validate codec "^(?:alac|flac|mp3|mp3-v0|mp3-v2)$" "-Ei"
+  dc::argv::flag::validate codec "^(alac|flac|mp3|mp3-v0|mp3-v2)$" "-Ei"
 fi
 
 # Alac by default

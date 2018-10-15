@@ -13,7 +13,7 @@ dc::require::jq
 dc::argv::arg::validate 1 "^tt[0-9]{7}$"
 # Validate flag
 if [ "$DC_ARGV_IMAGE" ]; then
-  dc::argv::flag::validate image "^(?:show|dump)$"
+  dc::argv::flag::validate image "^(show|dump)$"
 fi
 
 # Init sqlite
