@@ -13,7 +13,7 @@ dc-ext::http::request-cache(){
       exit "$ERROR_NETWORK"
     fi
     if [ "$DC_HTTP_STATUS" == 200 ]; then
-      result="$(base64 -i "$DC_HTTP_BODY")"
+      result="$(base64 "$DC_HTTP_BODY")"
       dc-ext::sqlite::insert "dchttp" "url, method, content" "'$url', '$method', '$result'"
       DC_HTTP_BODY="$result"
       # "$(cat $DC_HTTP_BODY)"
