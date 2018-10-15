@@ -9,15 +9,6 @@ display_error() {
 	exit 1
 }
 
-update_profile() {
-	[ -f "$1" ] || return 1
-
-	grep -F "$source_line" "$1" > /dev/null 2>&1
-	if [ $? -ne 0 ]; then
-		echo -e "\n$source_line" >> "$1"
-	fi
-}
-
 check_existing_go() {
 
 	if [ "$GOROOT" = "" ]; then
@@ -32,14 +23,14 @@ check_existing_go() {
 	mkdir -p "$GVM_DEST/$GVM_NAME/environments" &> /dev/null || display_error "Failed to create environment directory"
 	mkdir -p "$GVM_DEST/$GVM_NAME/pkgsets/system/global" &> /dev/null || display_error "Failed to create new package set"
 	mkdir -p "$GVM_DEST/$GVM_NAME/gos/system" &> /dev/null || display_error "Failed to create new Go folder"
-	cat << EOF > $GVM_DEST/$GVM_NAME/environments/system
+	cat << EOF > "$GVM_DEST/$GVM_NAME/environments/system"
 # Automatically generated file. DO NOT EDIT!
 export GVM_ROOT; GVM_ROOT="$GVM_DEST/$GVM_NAME"
 export gvm_go_name; gvm_go_name="system"
 export gvm_pkgset_name; gvm_pkgset_name="global"
 export GOROOT; GOROOT="$GOROOT"
 export GOPATH; GOPATH="$GVM_DEST/$GVM_NAME/pkgsets/system/global"
-export PATH; PATH="$GVM_DEST/$GVM_NAME/pkgsets/system/global/bin:$GOROOT/bin:$GVM_ROOT/bin:\$PATH"
+export PATH; PATH="$GVM_DEST/$GVM_NAME/pkgsets/system/global/bin:$GOROOT/bin:\$GVM_ROOT/bin:\$PATH"
 EOF
 }
 
@@ -87,39 +78,22 @@ install_gvm(){
 
   # GVM_DEST may be a non-relative path
   # i.e: gvm-installer master foo
-  pushd . > /dev/null
+  pushd . > /dev/null || exit
 
-  cd "$GVM_DEST/$GVM_NAME" && git checkout --quiet "$BRANCH" 2> /dev/null ||	display_error "Failed to checkout $BRANCH branch"
+  cd "$GVM_DEST/$GVM_NAME" || exit
 
-  popd > /dev/null
+  git checkout --quiet "$BRANCH" 2> /dev/null || display_error "Failed to checkout $BRANCH branch"
+
+  popd > /dev/null || exit
 
   [ -z "$GVM_NO_GIT_BAK" ] && mv "$GVM_DEST/$GVM_NAME/.git" "$GVM_DEST/$GVM_NAME/git.bak"
 
-  source_line="[[ -s \"${GVM_DEST}/$GVM_NAME/scripts/gvm\" ]] && source \"${GVM_DEST}/$GVM_NAME/scripts/gvm\""
   source_file="${GVM_DEST}/$GVM_NAME/scripts/gvm"
-
-  if [ -z "$GVM_NO_UPDATE_PROFILE" ] ; then
-    if [ -n "$ZSH_NAME" ]; then
-      update_profile "$HOME/.zshrc"
-    elif [ "$(uname)" == "Linux" ]; then
-      update_profile "$HOME/.bashrc" || update_profile "$HOME/.bash_profile"
-    elif [ "$(uname)" == "Darwin" ]; then
-      update_profile "$HOME/.profile" || update_profile "$HOME/.bash_profile"
-    fi
-  fi
-
-  if [ -z "$GVM_NO_UPDATE_PROFILE" ] && [ "$?" != "0" ]; then
-    echo "Unable to locate profile settings file(Something like $HOME/.bashrc or $HOME/.bash_profile)"
-    echo
-    echo " You will have to manually add the following line:"
-    echo
-    echo "  $source_line"
-    echo
-  fi
 
   echo "export GVM_ROOT=$GVM_DEST/$GVM_NAME" > "$GVM_DEST/$GVM_NAME/scripts/gvm"
   echo ". \$GVM_ROOT/scripts/gvm-default" >> "$GVM_DEST/$GVM_NAME/scripts/gvm"
   check_existing_go
+  # shellcheck source=/dev/null
   [[ -s "$GVM_DEST/$GVM_NAME/scripts/gvm" ]] && source "$GVM_DEST/$GVM_NAME/scripts/gvm"
   echo "Installed GVM v${GVM_VERSION}"
   echo

@@ -39,11 +39,11 @@ testHTTPRedirect(){
   # Redirect
   result=$(dc-http -s https://google.com "HEAD")
   exit=$?
-  status="$(printf "%s" "$result" | jq -rc .status)"
-  redirected="$(printf "%s" "$result" | jq -rc .redirected)"
-  body="$(printf "%s" "$result" | jq -rc .body)"
-  headers="$(printf "%s" "$result" | jq -rc .headers)"
-  server="$(printf "%s" "$headers" | jq -rc .SERVER)"
+  status="$(printf "%s" "$result" | jq -r -c .status)"
+  redirected="$(printf "%s" "$result" | jq -r -c .redirected)"
+  body="$(printf "%s" "$result" | jq -r -c .body)"
+  headers="$(printf "%s" "$result" | jq -r -c .headers)"
+  server="$(printf "%s" "$headers" | jq -r -c .SERVER)"
   dc-tools::assert::equal "$exit" "0"
   dc-tools::assert::equal "$status" "200"
   dc-tools::assert::equal "$redirected" "https://www.google.com/"
@@ -55,10 +55,10 @@ testHTTPValidHEAD(){
   # Valid HEAD request
   result=$(dc-http -s https://www.google.com "HEAD")
   exit=$?
-  status="$(printf "%s" "$result" | jq -rc .status)"
-  redirected="$(printf "%s" "$result" | jq -rc .redirected)"
-  body="$(printf "%s" "$result" | jq -rc .body)"
-  headers="$(printf "%s" "$result" | jq -rc .headers)"
+  status="$(printf "%s" "$result" | jq -r -c .status)"
+  redirected="$(printf "%s" "$result" | jq -r -c .redirected)"
+  body="$(printf "%s" "$result" | jq -r -c .body)"
+  headers="$(printf "%s" "$result" | jq -r -c .headers)"
   dc-tools::assert::equal "$exit" "0"
   dc-tools::assert::equal "$status" "200"
   dc-tools::assert::equal "$redirected" ""
@@ -69,10 +69,10 @@ testHTTPValidGET(){
   # Valid GET request
   result=$(dc-http -s https://registry-1.docker.io/v2 "GET")
   exit=$?
-  status="$(printf "%s" "$result" | jq -rc .status)"
-  redirected="$(printf "%s" "$result" | jq -rc .redirected)"
-  body="$(printf "%s" "$result" | jq -rc .body | portable::base64d)"
-  headers="$(printf "%s" "$result" | jq -rc .headers)"
+  status="$(printf "%s" "$result" | jq -r -c .status)"
+  redirected="$(printf "%s" "$result" | jq -r -c .redirected)"
+  body="$(printf "%s" "$result" | jq -r -c .body | portable::base64d)"
+  headers="$(printf "%s" "$result" | jq -r -c .headers)"
   dc-tools::assert::equal "$exit" "0"
   dc-tools::assert::equal "$status" "401"
   dc-tools::assert::equal "$redirected" "/v2/"
