@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 testMovieInfo(){
-  [ "$(command -v ffprobe)" ] || startSkipping
+  command -v ffprobe >/dev/null || startSkipping
 
   local result
 
@@ -33,5 +33,5 @@ testMovieInfo(){
   dc-tools::assert::equal "$exit" "0"
   dc-tools::assert::equal "$result" "$expected"
 
-  [ "$(command -v ffprobe)" ] || endSkipping
+  command -v ffprobe >/dev/null || endSkipping
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 testMovieGrify(){
-  [ "$(command -v ffmpeg)" ] || startSkipping
+  command -v ffmpeg >/dev/null || startSkipping
 
   local result
 
@@ -17,5 +17,5 @@ testMovieGrify(){
 
   [ ! -f "tests/integration/movie-grify/movie.mp4" ] || rm "tests/integration/movie-grify/movie.mp4"
 
-  [ "$(command -v ffmpeg)" ] || endSkipping
+  command -v ffmpeg >/dev/null || endSkipping
 }
