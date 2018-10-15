@@ -45,7 +45,7 @@ info::ffprobe(){
     exit "$ERROR_FAILED"
   fi
 
-  if ! fast=$(mp4info --format json "$1" | jq -rc .file.fast_start 2>/dev/null); then
+  if ! fast=$(mp4info --format json "$1" 2>/dev/null | jq -rc .file.fast_start); then
     dc::logger::error "mp4info errored out or is not available. faststart information will be inaccurate."
     fast=false
   fi

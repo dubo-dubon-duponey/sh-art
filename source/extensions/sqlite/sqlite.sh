@@ -19,12 +19,12 @@ dc-ext::sqlite::ensure(){
 # echo "create table if not exists testable (method TEXT, url TEXT, content BLOB, PRIMARY KEY(method, url))" | sqlite3 test.db
   local table="$1"
   local description="$2"
-  printf "%s" "create table if not exists $table ($description)" | sqlite3 "$_DC_EXT_SQLITE_DB"
+  printf "%s" "create table if not exists $table ($description);" | sqlite3 "$_DC_EXT_SQLITE_DB"
 }
 
 dc-ext::sqlite::select(){
   local table="$1"
-  printf "%s" "select $2 from $table where $3" | sqlite3 "$_DC_EXT_SQLITE_DB"
+  printf "%s" "select $2 from $table where $3;" | sqlite3 "$_DC_EXT_SQLITE_DB"
 }
 
 dc-ext::sqlite::insert(){
@@ -33,11 +33,11 @@ dc-ext::sqlite::insert(){
   local values="$3"
   shift
   shift
-  printf "%s" "INSERT INTO $table ($fields) VALUES ($values)" | sqlite3 "$_DC_EXT_SQLITE_DB"
+  printf "%s" "INSERT INTO $table ($fields) VALUES ($values);" | sqlite3 "$_DC_EXT_SQLITE_DB"
 }
 
 dc-ext::sqlite::delete(){
   local table="$1"
   local condition="$2"
-  printf "%s" "DELETE from $table where $condition" | sqlite3 "$_DC_EXT_SQLITE_DB"
+  printf "%s" "DELETE from $table where $condition;" | sqlite3 "$_DC_EXT_SQLITE_DB"
 }
