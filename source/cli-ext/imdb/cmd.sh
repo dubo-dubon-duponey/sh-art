@@ -13,7 +13,7 @@ dc::require::jq
 dc::argv::arg::validate 1 "^tt[0-9]{7}$"
 # Validate flag
 if [ "$DC_ARGV_IMAGE" ]; then
-  dc::argv::flag::validate image "^(?:show|dump)$"
+  dc::argv::flag::validate image "^(show|dump)$"
 fi
 
 # Init sqlite
@@ -26,8 +26,8 @@ body="$(printf "%s" "$DC_HTTP_BODY" | portable::base64d | tr '\n' ' ')"
 
 # Extract the shema.org section, then the original title and picture url
 schema=$(printf "%s" "$body" | sed -E 's/.*<script type="application\/ld[+]json">([^<]+).*/\1/')
-IMDB_ORIGINAL_TITLE=$(printf "%s" "$schema" | jq -rc .name)
-IMDB_PICTURE=$(printf "%s" "$schema" | jq -rc .image)
+IMDB_ORIGINAL_TITLE=$(printf "%s" "$schema" | jq -r -c .name)
+IMDB_PICTURE=$(printf "%s" "$schema" | jq -r -c .image)
 [ "$IMDB_PICTURE" != "null" ] || IMDB_PICTURE=
 
 # If we are being asked about the image, go for it, using fancy iterm extensions if they are here
