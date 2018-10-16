@@ -45,11 +45,9 @@ get::go(){
   _ensure_install go
   _ensure_install dep
 
-  local _here
-  _here=$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)
   local dest="${POSH_BIN:-"$HOME/Applications/bin"}"
   if [ ! -e "$dest/gvm" ]; then
-    "$_here"/.gvm-installer "" "$dest"
+    install_gvm "" "$dest"
   fi
 
   cat <<- EOF > "$HOME/.posh_go"

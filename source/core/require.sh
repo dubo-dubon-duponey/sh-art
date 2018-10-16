@@ -25,7 +25,7 @@ dc::require::platform::linux(){
 }
 
 dc::require::brew(){
-  if [ ! "$(command -v brew)" ]; then
+  if ! command -v brew >/dev/null; then
     dc::logger::error "You need homebrew for this to work. You can install it using the 'tarmac' helper with:"
     dc::logger::info "bash -c \$(curl -fsSL https://raw.github.com/dubo-dubon-duponey/tarmac/master/init)"
     exit "$ERROR_MISSING_REQUIREMENTS"
@@ -33,7 +33,7 @@ dc::require::brew(){
 }
 
 dc::require::git(){
-  if [ ! "$(command -v git)" ]; then
+  if ! command -v git >/dev/null; then
     dc::logger::error "You need git for this to work."
     exit "$ERROR_MISSING_REQUIREMENTS"
   fi

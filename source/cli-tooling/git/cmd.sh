@@ -15,7 +15,7 @@ for commit in ${allcommits}; do
   dc::logger::debug "Analyzing $commit"
   if [ -z "$(git log -1 --format='format:' --name-status "$commit")" ]; then
     # no content (ie, Merge commit, etc)
-    dc::logger::warn "Ignoring commit"
+    dc::logger::warning "Ignoring commit $commit"
     continue
   fi
   if ! git log -1 --format='format:%B' "$commit" | grep -qE "$regex"; then

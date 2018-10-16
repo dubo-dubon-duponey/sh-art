@@ -8,6 +8,11 @@ readonly CLI_USAGE="[-s] [--delete/-d] [--destination=folder] [--codec=ALAC|FLAC
 # Boot
 dc::commander::init
 
+if ! command -v ffmpeg >/dev/null; then
+  dc::logger::error "You need ffmpeg for this to work."
+  exit "$ERROR_MISSING_REQUIREMENTS"
+fi
+
 filename="$1"
 
 # Argument 1 is mandatory and must be a readable file
@@ -27,7 +32,7 @@ filename="${filename%.*}"
 
 # Validate codec if present
 if [ "$DC_ARGE_CODEC" ]; then
-  dc::argv::flag::validate codec "^(?:alac|flac|mp3|mp3-v0|mp3-v2)$" "-Ei"
+  dc::argv::flag::validate codec "^(alac|flac|mp3|mp3-v0|mp3-v2)$" "-Ei"
 fi
 
 # Alac by default
