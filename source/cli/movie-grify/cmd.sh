@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# https://trac.ffmpeg.org/wiki/Encode/AAC
 readonly CLI_VERSION="0.0.1"
 readonly CLI_LICENSE="MIT License"
 readonly CLI_DESC="because I never remember how to use ffmpeg"
@@ -7,6 +8,11 @@ readonly CLI_USAGE="[-s] [--destination=folder] [--delete] [--convert=X] [--remo
 
 # Boot
 dc::commander::init
+
+if ! command -v ffmpeg >/dev/null; then
+  dc::logger::error "You need ffmpeg for this to work."
+  exit "$ERROR_MISSING_REQUIREMENTS"
+fi
 
 # Argument 1 is mandatory and must be a readable file
 dc::fs::isfile "$1"
@@ -28,10 +34,10 @@ if [ "$DC_ARGV_CONVERT" ]; then
   dc::argv::flag::validate convert "^[0-9]$"
 fi
 if [ "$DC_ARGV_REMOVE" ]; then
-  dc::argv::flag::validate remove "^[0-9]+(?: [0-9]+)*$"
+  dc::argv::flag::validate remove "^[0-9]+( [0-9]+)*$"
 fi
 if [ "$DC_ARGV_EXTRACT" ]; then
-  dc::argv::flag::validate extract "^[0-9]+:[^ ]+(?: [0-9]+:[^ ]+)*$"
+  dc::argv::flag::validate extract "^[0-9]+:[^ ]+( [0-9]+:[^ ]+)*$"
 fi
 
 

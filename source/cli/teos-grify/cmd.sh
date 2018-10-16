@@ -9,18 +9,22 @@ readonly CLI_USAGE="[-s] [--destination=folder] [--delete] filename"
 dc::commander::init
 dc::require::jq
 
-dc::logger::info "$1"
+if ! command -v dc-movie-info >/dev/null || ! command -v dc-movie-grify >/dev/null; then
+  dc::logger::error "You need dc-movie-info and dc-movie-grify for this to work."
+  exit "$ERROR_MISSING_REQUIREMENTS"
+fi
 
+dc::logger::info "Analyzing $1"
 
-
-if ! data="$(./debug movie-info -s "$1")"; then
+if ! data="$(dc-movie-info -s "$1")"; then
   dc::logger::error " > Media info analysis failed. Exiting."
   exit "$ERROR_FAILED"
 fi
 
 dc::logger::debug "$data"
-#| jq -rc '.tracks[] | select(.type == "audio")')"
-#dc::logger::info "$(echo $data | jq -rc '.tracks[] | select(.type == "subtitles")')"
+
+#| jq -r -c '.tracks[] | select(.type == "audio")')"
+#dc::logger::info "$(echo $data | jq -r -c '.tracks[] | select(.type == "subtitles")')"
 
 # Basic info
 CONTAINER=$(printf "%s" "$data" | jq -r .container)
@@ -38,18 +42,18 @@ REQUIRED_VIDEO_COUNT=$(printf "%s" "$data" | jq -r '[.video[] | select(.codec ==
 # "All audio" count
 ALL_AUDIO_COUNT=$(printf "%s" "$data" | jq -r '.audio | length')
 
-# "Audio that we need" count (AAC or AC-3)
-REQUIRED_AUDIO=$(printf "%s" "$data" | jq '[.audio[] | select((.codec == "aac") or (.codec == "ac3"))]')
+# "Audio that we need" count (DTS, AAC or AC-3)
+REQUIRED_AUDIO=$(printf "%s" "$data" | jq '[.audio[] | select((.codec == "aac") or (.codec == "ac3") or (.codec == "dts"))]')
 REQUIRED_AUDIO_COUNT=$(printf "%s" "$REQUIRED_AUDIO" | jq -r '. | length')
 REQUIRED_AUDIO_SHOW=$(printf "%s" "$REQUIRED_AUDIO" | jq -r '.[] | (.id|tostring) + ": " + .codec + ", " + .language')
 
-# Anything but DTS, AAC and AC3 must be removed
+# Anything but DTS, AAC and AC3 should be removed
 MUST_REMOVE_AUDIO=$(printf "%s" "$data" | jq '[.audio[] | select((.codec == "aac"|not) and (.codec == "ac3"|not) and (.codec == "dts"|not))]')
 # MUST_REMOVE_AUDIO_COUNT=$(echo "$MUST_REMOVE_AUDIO" | jq -r '. | length')
 # MUST_REMOVE_AUDIO_SHOW=$(echo "$MUST_REMOVE_AUDIO" | jq -r '.[] | (.id|tostring) + ": " + .codec + ", " + .language')
 
-# Anything but AAC and AC3 could be used as a source for conversion (because if we already have AAC or AC3, we do not need to convert)
-MAY_CONVERT_AUDIO=$(printf "%s" "$data" | jq '[.audio[] | select((.codec == "aac"|not) and (.codec == "ac3"|not))]')
+# Anything but DTS AAC and AC3 could be used as a source for conversion (because if we already have DTS AAC or AC3, we do not need to convert)
+MAY_CONVERT_AUDIO=$(printf "%s" "$data" | jq '[.audio[] | select((.codec == "aac"|not) and (.codec == "ac3"|not) and (.codec == "dts"|not))]')
 MAY_CONVERT_AUDIO_COUNT=$(printf "%s" "$MAY_CONVERT_AUDIO" | jq -r '. | length')
 MAY_CONVERT_AUDIO_SHOW=$(printf "%s" "$MAY_CONVERT_AUDIO" | jq -r '.[] | (.id|tostring) + ": " + .codec + ", " + .language')
 
@@ -133,34 +137,34 @@ if [ "$REQUIRED_AUDIO_COUNT" == 0 ] && [ "$ALL_AUDIO_COUNT" != 0 ]; then
       exit "$ERROR_FAILED"
     fi
   else
-    MUST_CONVERT_AUDIO=$(printf "%s" "$MAY_CONVERT_AUDIO" | jq -rc '.[] | (.id | tostring)')
+    MUST_CONVERT_AUDIO=$(printf "%s" "$MAY_CONVERT_AUDIO" | jq -r -c '.[] | (.id | tostring)')
   fi
 fi
 
 # XXX subtitle collision here: sami microdvd
 
 # XXX EXTRA CAREFUL HERE
-# EXTRACT=( $(echo "$ALL_SUBTITLES" | jq -rc '.[] | select(.codec == "dvd_subtitle"|not) | (.id|tostring) + ":" + (.id|tostring) + "." + .language + "." + .codec' | sed -E 's/subrip/srt/g' | sed -E 's/microdvd/sub/g' | sed -E 's/sami/smi/g' | sed -E 's/mov_text/srt/g') )
+# EXTRACT=( $(echo "$ALL_SUBTITLES" | jq -r -c '.[] | select(.codec == "dvd_subtitle"|not) | (.id|tostring) + ":" + (.id|tostring) + "." + .language + "." + .codec' | sed -E 's/subrip/srt/g' | sed -E 's/microdvd/sub/g' | sed -E 's/sami/smi/g' | sed -E 's/mov_text/srt/g') )
 while read -r i; do
   EXTRACT[${#EXTRACT[@]}]="$i"
-done < <(printf "%s" "$ALL_SUBTITLES" | jq -rc '.[] | select(.codec == "dvd_subtitle"|not) | (.id|tostring) + ":" + (.id|tostring) + "." + .language + "." + .codec' \
+done < <(printf "%s" "$ALL_SUBTITLES" | jq -r -c '.[] | select(.codec == "dvd_subtitle"|not) | (.id|tostring) + ":" + (.id|tostring) + "." + .language + "." + .codec' \
   | sed -E 's/subrip/srt/g' | sed -E 's/microdvd/sub/g' | sed -E 's/sami/smi/g' | sed -E 's/mov_text/srt/g')
 
 
 
-ALERT_SUBS=$(printf "%s" "$ALL_SUBTITLES" | jq -rc '[.[] | select(.codec == "dvd_subtitle")] | length')
-# EXTRACT=( $(echo $ALL_SUBTITLES | jq -rc '.[] | (.id | tostring)') )
+ALERT_SUBS=$(printf "%s" "$ALL_SUBTITLES" | jq -r -c '[.[] | select(.codec == "dvd_subtitle")] | length')
+# EXTRACT=( $(echo $ALL_SUBTITLES | jq -r -c '.[] | (.id | tostring)') )
 
 if [ "$ALERT_SUBS" -ge 1 ]; then
   dc::logger::error " > This file contains unprocessable subtitles that will get dropped. You should extract out of band with mkvextract tracks \"$1\" X:\"$1\""
-  dc::logger::warning " > Press enter to continue (warning again: this sub will be removed)"
+  dc::logger::warning " > Press enter to continue (warning again: this sub WILL BE REMOVED)"
   dc::prompt::confirm
 fi
 
 # Manual answer to removal question
 REMOVE=$REMOVE_AUDIO
 # Must remove audio files
-#ALSO_REMOVE=( $(echo "$MUST_REMOVE_AUDIO" | jq -rc '.[] | (.id | tostring)') )
+#ALSO_REMOVE=( $(echo "$MUST_REMOVE_AUDIO" | jq -r -c '.[] | (.id | tostring)') )
 #if [ "${ALSO_REMOVE[*]}" ]; then
 #  if [ "$REMOVE" ]; then
 #    REMOVE="$REMOVE ${ALSO_REMOVE[*]}"
@@ -169,15 +173,15 @@ REMOVE=$REMOVE_AUDIO
 #  fi
 #fi
 
-# ALSO_REMOVE=( $(echo "$ALL_SUBTITLES" | jq -rc '.[] | (.id | tostring)') )
+# ALSO_REMOVE=( $(echo "$ALL_SUBTITLES" | jq -r -c '.[] | (.id | tostring)') )
 # XXX EXTRA CARE
 ALSO_REMOVE=()
 while read -r i; do
   ALSO_REMOVE[${#ALSO_REMOVE[@]}]="$i"
-done < <(printf "%s" "$MUST_REMOVE_AUDIO" | jq -rc '.[] | (.id | tostring)')
+done < <(printf "%s" "$MUST_REMOVE_AUDIO" | jq -r -c '.[] | (.id | tostring)')
 while read -r i; do
   ALSO_REMOVE[${#ALSO_REMOVE[@]}]="$i"
-done < <(printf "%s" "$ALL_SUBTITLES" | jq -rc '.[] | (.id | tostring)')
+done < <(printf "%s" "$ALL_SUBTITLES" | jq -r -c '.[] | (.id | tostring)')
 
 
 if [ "${ALSO_REMOVE[*]}" ]; then
@@ -198,7 +202,7 @@ fi
 CONVERT=$MUST_CONVERT_AUDIO
 
 if [ "$CONTAIN" ] || [ "$OPTIMIZE" ] || [ "$CONVERT" ] || [ "$REMOVE" ] || [ "${EXTRACT[*]}" ]; then
-  ./debug media-transform --convert="$CONVERT" --remove="$REMOVE" --extract="${EXTRACT[*]}" "$1"
+  dc-movie-grify --destination="$DC_ARGV_DESTINATION" --convert="$CONVERT" --remove="$REMOVE" --extract="${EXTRACT[*]}" "$1"
   dc::logger::info " > Done"
   # dc::prompt::confirm
 else

@@ -9,12 +9,12 @@ readonly CLI_USAGE="[-s] filename"
 dc::commander::init
 dc::require::jq
 
-if [ ! "$(command -v ffprobe)" ]; then
-  dc::logger::error "You need ffprobe or avprobe for this to work (part of ffmpeg)."
+if ! command -v ffprobe >/dev/null; then
+  dc::logger::error "You need ffprobe for this to work (part of ffmpeg)."
   exit "$ERROR_MISSING_REQUIREMENTS"
 fi
 
-if [ ! "$(command -v mp4info)" ]; then
+if ! command -v mp4info >/dev/null; then
   dc::logger::error "You need mp4info for this to work fully (part of bento)."
 fi
 
@@ -45,7 +45,7 @@ info::ffprobe(){
     exit "$ERROR_FAILED"
   fi
 
-  if ! fast=$(mp4info --format json "$1" | jq -rc .file.fast_start 2>/dev/null); then
+  if ! fast=$(mp4info --format json "$1" 2>/dev/null | jq -r -c .file.fast_start); then
     dc::logger::error "mp4info errored out or is not available. faststart information will be inaccurate."
     fast=false
   fi
