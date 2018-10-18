@@ -37,6 +37,8 @@ EOF
 }
 
 dc-tools::build::version(){
+  dc::require git
+
   local destination="$1"
   local source
   source="$(dirname "$2")"
