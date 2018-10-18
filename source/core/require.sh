@@ -47,3 +47,54 @@ dc::require::jq(){
   fi
   readonly DC_VERSION_JQ="${jqVersion##*-}"
 }
+
+dc::require(){
+  local binary="$1"
+  local versionFlag="$2"
+  local version="$3"
+  local varname
+  varname=_DC_DEPENDENCIES_B_$(printf "%s" "$binary" | tr '[:lower:]' '[:upper:]')
+  if [ ! ${!varname+x} ]; then
+    if ! command -v "$binary" >/dev/null; then
+      dc::logger::error "You need $binary for this to work."
+      exit "$ERROR_MISSING_REQUIREMENTS"
+    fi
+    read -r "${varname?}" < <(printf "true")
+  fi
+  if [ ! "$versionFlag" ]; then
+    return
+  fi
+  varname=DC_DEPENDENCIES_V_$(printf "%s" "$binary" | tr '[:lower:]' '[:upper:]')
+  if [ ! ${!varname+x} ]; then
+    read -r "${varname?}" < <($binary "$versionFlag" 2>/dev/null | sed -E 's/^[^0-9.]+([0-9]+[.][0-9]+).*/\1/')
+  fi
+  if [[ "$version" > "${!varname}" ]]; then
+    dc::logger::error "You need $binary (version >= $version) for this to work (you currently have ${!varname})."
+    exit "$ERROR_MISSING_REQUIREMENTS"
+  fi
+}
+
+dc::optional(){
+  local binary="$1"
+  local versionFlag="$2"
+  local version="$3"
+  local varname
+  varname=_DC_DEPENDENCIES_B_$(printf "%s" "$binary" | tr '[:lower:]' '[:upper:]')
+  if [ ! ${!varname+x} ]; then
+    if ! command -v "$binary" >/dev/null; then
+      dc::logger::warning "Optional binary $binary is recommended for this."
+      return
+    fi
+    read -r "${varname?}" < <(printf "true")
+  fi
+  if [ ! "$versionFlag" ]; then
+    return
+  fi
+  varname=DC_DEPENDENCIES_V_$(printf "%s" "$binary" | tr '[:lower:]' '[:upper:]')
+  if [ ! ${!varname+x} ]; then
+    read -r "${varname?}" < <($binary "$versionFlag" 2>/dev/null | sed -E 's/^[^0-9.]+([0-9]+[.][0-9]+).*/\1/')
+  fi
+  if [[ "$version" > "${!varname}" ]]; then
+    dc::logger::warning "Optional $binary (version >= $version) is recommended, but you have it as ${!varname})."
+  fi
+}

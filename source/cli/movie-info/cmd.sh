@@ -6,8 +6,8 @@ readonly CLI_DESC="spits out information about media files in a json format (dur
 readonly CLI_USAGE="[-s] filename"
 
 # Boot
+dc::require jq
 dc::commander::init
-dc::require::jq
 
 if ! command -v ffprobe >/dev/null; then
   dc::logger::error "You need ffprobe for this to work (part of ffmpeg)."
