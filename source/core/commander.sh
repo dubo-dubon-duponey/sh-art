@@ -13,28 +13,47 @@ readonly DC_CLI_VERSION=unknown
 readonly DC_CLI_LICENSE="MIT license"
 readonly DC_CLI_DESC="A fancy piece of shcript"
 readonly DC_CLI_USAGE="$DC_CLI_NAME [flags] argument"
+readonly DC_CLI_LONG='flag foo: bar
+argument: thing'
 
 # The method being called when the "help" flag is used (by default --help or -h) is passed to the script
 # Override this method in your script to define your own help
 dc::commander::help(){
-  local name=$1
-  local version=$2
-  local license=$3
-  local shortdesc=$4
-  local shortusage=$5
-  printf "%s, version %s, released under %s\\n" "$name" "$version" "$license"
-  printf "\\t> %s\\n" "$shortdesc"
-  printf "\\n"
-  printf "Usage\\n"
-  printf "\\t> %s %s\\n" "$name" "$shortusage"
+  local name="$1"
+  local version="$2"
+  local license="$3"
+  local shortdesc="$4"
+  local shortusage="$5"
+  local long="$6"
+
+  dc::output::h1 "$name"
+  dc::output::quote "$shortdesc"
+
+  dc::output::h2 "Version"
+  dc::output::text "$version"
+  dc::output::break
+
+  dc::output::h2 "License"
+  dc::output::text "$license"
+  dc::output::break
+
+  dc::output::h2 "Usage"
+  dc::output::text "$name $shortusage"
+  dc::output::break
+  if [ "$long" ]; then
+    dc::output::h2 "Options"
+    local v
+    while read -r v; do
+      dc::output::bullet "$v"
+    done < <(printf "%s" "$long")
+  fi
+  dc::output::break
 }
 
 # The method being called when the "version" flag is used (by default --version or -v) is passed to the script
 # Override this method in your script to define your own version output
 dc::commander::version(){
-  local name=$1
-  local version=$2
-  printf "%s %s\\n" "$name" "$version"
+  printf "%s %s\\n" "$1" "$2"
 }
 
 # This is the entrypoint you should call in your script
@@ -64,7 +83,8 @@ dc::commander::init(){
       "${CLI_VERSION:-${DC_CLI_VERSION}}" \
       "${CLI_LICENSE:-${DC_CLI_LICENSE}}" \
       "${CLI_DESC:-${DC_CLI_DESC}}" \
-      "${CLI_USAGE:-${DC_CLI_USAGE}}"
+      "${CLI_USAGE:-${DC_CLI_USAGE}}" \
+      "${CLI_OPTS}"
     exit
   fi
 

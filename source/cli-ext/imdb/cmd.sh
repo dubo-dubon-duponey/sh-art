@@ -4,10 +4,15 @@ readonly CLI_VERSION="0.0.1"
 readonly CLI_LICENSE="MIT License"
 readonly CLI_DESC="imdb client, with caching"
 readonly CLI_USAGE="[-s] [--insecure] [--image=(show|dump)] imdbID"
+readonly CLI_OPTS='-s            silence all logging
+--insecure    disable TLS verification (DANGER)
+--image=dump  retrieve the cover image and print it to stdout
+--image=show  retrieve the image and display it (iterm2 only)
+imdbID        the id of the movie (eg: tt0000001)'
 
 # Boot
+dc::require jq --version 1 5
 dc::commander::init
-dc::require::jq
 
 # Arg 1 must be the digits section of a movie imdb id
 dc::argv::arg::validate 1 "^tt[0-9]{7}$"
