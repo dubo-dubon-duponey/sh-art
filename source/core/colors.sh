@@ -14,3 +14,4 @@ readonly DC_COLOR_BLUE=4
 readonly DC_COLOR_MAGENTA=5
 readonly DC_COLOR_CYAN=6
 readonly DC_COLOR_WHITE=7
+readonly DC_COLOR_DEFAULT=9

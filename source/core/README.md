@@ -240,9 +240,8 @@ Simple helpers to output stuff to stdout.
 ### Methods
 
 ```
-# Output through jq for formatted, fancy visuals, unless forced to "raw" by passing
-# a second parameter, in which case the output is printed "as-is".
-dc::output::json "json" [true]
+# Output through jq for formatted, fancy visuals.
+dc::output::json "{}"
 ```
 
 ### prompt
