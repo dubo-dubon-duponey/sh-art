@@ -150,9 +150,10 @@ dc::output::json() {
   exit "$ERROR_ARGUMENT_INVALID"
 }
 
-#
+###############################
 # Private helpers
-#
+###############################
+
 # Private hook to ease testing
 _DC_OUTPUT_JSON_JQ=jq
 
@@ -160,6 +161,7 @@ _dc::style(){
   local vName="DC_STYLE_$1[@]"
   local i
   for i in "${!vName}"; do
-    [ "$TERM" ] && [ -t 1 ] && >&1 tput "$i"
+    # shellcheck disable=SC2086
+    [ "$TERM" ] && [ -t 1 ] && >&1 tput $i
   done
 }
