@@ -7,9 +7,6 @@ readonly CLI_USAGE="[-s] --name=foo [--destination=.] [--license=MIT license] [-
 
 dc::commander::init
 
-# Need git
-dc::require::git
-
 # Need a non-null name
 dc::argv::flag::validate name ".+"
 

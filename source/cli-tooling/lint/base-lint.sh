@@ -1,14 +1,5 @@
 #!/usr/bin/env bash
 
-dc-tools::sc::install() {
-  if ! command -v shellcheck > /dev/null; then
-    dc::logger::warning "[linter] shellcheck is not installed. Press enter to install now."
-    dc::prompt::confirm
-    # XXX not exactly portable
-    brew install shellcheck
-  fi
-}
-
 dc-tools::sc::filecheck(){
   if ! head -n1 "$1" | grep -q -E -w "sh|bash|ksh"; then
     dc::logger::warning "[linter] ignoring $1 (no recognized shebang)"

@@ -6,7 +6,7 @@ readonly CLI_DESC="git helpers (part of the dc-tooling suite)"
 readonly CLI_USAGE="[-s] file-or-directory"
 
 dc::commander::init
-dc::require::git
+dc::require git
 
 allcommits="$(git log --format=%H -C "$1")"
 regex="^Signed-off-by: ([^<]+) <([^<>@]+@[^<>]+)>( \\(github: ([a-zA-Z0-9][a-zA-Z0-9-]+)\\))?$"
