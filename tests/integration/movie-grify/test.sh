@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 testMovieGrify(){
-  command -v ffmpeg >/dev/null || startSkipping
+  if ! _=$(dc::require ffmpeg "-version" 3.0); then
+    startSkipping
+  fi
 
   local result
 
@@ -10,12 +12,14 @@ testMovieGrify(){
 
   # [ ! -f "tests/integration/movie-grify/movie.mp4" ] || rm "tests/integration/movie-grify/movie.mp4"
   # XXX remove conversion for libfdk_aac is not on linuxes --convert=1
-  result=$(DC_MOVIE_GRIFY_LOG_LEVEL=debug dc-movie-grify --destination=tests/integration/movie-grify --remove=1 tests/integration/movie-grify/movie.avi)
+  result=$(dc-movie-grify -s --destination=tests/integration/movie-grify --remove=1 tests/integration/movie-grify/movie.avi)
   local exit=$?
   dc-tools::assert::equal "$exit" "0"
   dc-tools::assert::equal "$result" ""
 
   [ ! -f "tests/integration/movie-grify/movie.mp4" ] || rm "tests/integration/movie-grify/movie.mp4"
 
-  command -v ffmpeg >/dev/null || endSkipping
+  if ! _=$(dc::require ffmpeg "-version" 3.0); then
+    endSkipping
+  fi
 }

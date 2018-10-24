@@ -11,6 +11,8 @@ DC_JWT_PAYLOAD=
 DC_JWT_ACCESS=
 
 dc::jwt::read(){
+  dc::require jq
+
   export DC_JWT_TOKEN="$1"
 
   local decoded
@@ -18,15 +20,15 @@ dc::jwt::read(){
   #local sig
 
   # XXX WTFFFFF base64
-  if ! DC_JWT_HEADER="$(printf "%s" "${decoded[0]}==" | portable::base64d 2>/dev/null)"; then
-    DC_JWT_HEADER="$(printf "%s" "${decoded[0]}" | portable::base64d)"
+  if ! DC_JWT_HEADER="$(printf "%s" "${decoded[0]}==" | dc::portable::base64d 2>/dev/null)"; then
+    DC_JWT_HEADER="$(printf "%s" "${decoded[0]}" | dc::portable::base64d)"
   fi
-  if ! DC_JWT_PAYLOAD="$(printf "%s" "${decoded[1]}==" | portable::base64d 2>/dev/null)"; then
-    DC_JWT_PAYLOAD="$(printf "%s" "${decoded[1]}" | portable::base64d)"
+  if ! DC_JWT_PAYLOAD="$(printf "%s" "${decoded[1]}==" | dc::portable::base64d 2>/dev/null)"; then
+    DC_JWT_PAYLOAD="$(printf "%s" "${decoded[1]}" | dc::portable::base64d)"
   fi
-  #sig=$(printf "%s" ${decoded[2]}== | portable::base64d 2>/dev/null)
+  #sig=$(printf "%s" ${decoded[2]}== | dc::portable::base64d 2>/dev/null)
   #if [[ $? != 0 ]]; then
-  #  sig=$(printf "%s" ${decoded[2]} | portable::base64d)
+  #  sig=$(printf "%s" ${decoded[2]} | dc::portable::base64d)
   #fi
 
   if [ ! "$_DC_HTTP_REDACT" ]; then

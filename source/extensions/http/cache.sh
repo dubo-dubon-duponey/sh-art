@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 
-dc-ext::http::request-cache(){
+dc-ext::http-cache::init(){
+  dc-ext::sqlite::ensure "dchttp" "method TEXT, url TEXT, content BLOB, PRIMARY KEY(method, url)"
+}
+
+dc-ext::http-cache::request(){
   local url="$1"
   local method="$2"
   local result
   result=$(dc-ext::sqlite::select "dchttp" "content" "method='$method' AND url='$url'")
   DC_HTTP_CACHE=miss
   if [ ! "$result" ]; then
-    dc::http::request "$url" GET
+    dc::http::request "$url" "$method"
     if [ "$DC_HTTP_STATUS" != 200 ]; then
       dc::logger::error "Failed fetching for $url"
       exit "$ERROR_NETWORK"
@@ -21,7 +25,7 @@ dc-ext::http::request-cache(){
   else
     DC_HTTP_STATUS=200
     export DC_HTTP_CACHE=hit
-    DC_HTTP_BODY="$result" # $(echo $result | portable::base64d)"
+    DC_HTTP_BODY="$result" # $(echo $result | dc::portable::base64d)"
   fi
 
 }

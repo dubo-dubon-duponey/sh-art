@@ -24,26 +24,65 @@ dc::require::platform::linux(){
   fi
 }
 
-dc::require::brew(){
-  if ! command -v brew >/dev/null; then
-    dc::logger::error "You need homebrew for this to work. You can install it using the 'tarmac' helper with:"
-    dc::logger::info "bash -c \$(curl -fsSL https://raw.github.com/dubo-dubon-duponey/tarmac/master/init)"
+dc::require(){
+  local binary="$1"
+  local versionFlag="$2"
+  local version="$3"
+  local varname
+  varname=_DC_DEPENDENCIES_B_$(printf "%s" "$binary" | tr '[:lower:]' '[:upper:]')
+  if [ ! ${!varname+x} ]; then
+    if ! command -v "$binary" >/dev/null; then
+      dc::logger::error "You need $binary for this to work."
+      exit "$ERROR_MISSING_REQUIREMENTS"
+    fi
+    read -r "${varname?}" < <(printf "true")
+  fi
+  if [ ! "$versionFlag" ]; then
+    return
+  fi
+  varname=DC_DEPENDENCIES_V_$(printf "%s" "$binary" | tr '[:lower:]' '[:upper:]')
+  if [ ! ${!varname+x} ]; then
+    while read -r "${varname?}"; do
+      if printf "%s" "${!varname}" | grep -qE "^[^0-9.]*([0-9]+[.][0-9]+).*"; then
+        break
+      fi
+    # XXX interestingly, some application will output the result on stdout (jq version 1.3 is such an example)
+    # This is broken behavior, that we do not try to workaround here
+    done < <($binary "$versionFlag" 2>/dev/null)
+    read -r "${varname?}" < <(printf "%s" "${!varname}" | sed -E 's/^[^0-9.]*([0-9]+[.][0-9]+).*/\1/')
+  fi
+  if [[ "$version" > "${!varname}" ]]; then
+    dc::logger::error "You need $binary (version >= $version) for this to work (you currently have ${!varname})."
     exit "$ERROR_MISSING_REQUIREMENTS"
   fi
 }
 
-dc::require::git(){
-  if ! command -v git >/dev/null; then
-    dc::logger::error "You need git for this to work."
-    exit "$ERROR_MISSING_REQUIREMENTS"
+dc::optional(){
+  local binary="$1"
+  local versionFlag="$2"
+  local version="$3"
+  local varname
+  varname=_DC_DEPENDENCIES_B_$(printf "%s" "$binary" | tr '[:lower:]' '[:upper:]')
+  if [ ! ${!varname+x} ]; then
+    if ! command -v "$binary" >/dev/null; then
+      dc::logger::warning "Optional binary $binary is recommended for this."
+      return
+    fi
+    read -r "${varname?}" < <(printf "true")
   fi
-}
-
-dc::require::jq(){
-  local jqVersion
-  if ! jqVersion="$(jq --version 2>/dev/null)"; then
-    dc::logger::error "Please install jq for this shcript to work."
-    exit "$ERROR_MISSING_REQUIREMENTS"
+  if [ ! "$versionFlag" ]; then
+    return
   fi
-  readonly DC_VERSION_JQ="${jqVersion##*-}"
+  varname=DC_DEPENDENCIES_V_$(printf "%s" "$binary" | tr '[:lower:]' '[:upper:]')
+  if [ ! ${!varname+x} ]; then
+    while read -r "${varname?}"; do
+      if printf "%s" "${!varname}" | grep -qE "^[^0-9.]*([0-9]+[.][0-9]+).*"; then
+        break
+      fi
+    done < <($binary "$versionFlag" 2>/dev/null)
+    read -r "${varname?}" < <(printf "%s" "${!varname}" | sed -E 's/^[^0-9.]*([0-9]+[.][0-9]+).*/\1/')
+  fi
+  if [[ "$version" > "${!varname}" ]]; then
+    dc::logger::warning "Optional $binary (version >= $version) is recommended, but you have it as ${!varname})."
+  fi
 }
