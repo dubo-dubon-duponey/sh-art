@@ -84,7 +84,7 @@ dc::commander::declare::arg(){
   local long="$fancy"
   long=$(printf "%-20s" "$long")
   if [ "$optional" ]; then
-    long="$long (optional)"
+    long="$long  (optional)"
   else
     long="$long            "
   fi

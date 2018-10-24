@@ -1,19 +1,22 @@
 #!/usr/bin/env bash
 
 # https://trac.ffmpeg.org/wiki/Encode/AAC
-readonly CLI_VERSION="0.0.1"
+readonly CLI_VERSION="0.1.0"
 readonly CLI_LICENSE="MIT License"
 readonly CLI_DESC="because I never remember how to use ffmpeg"
-readonly CLI_USAGE="[-s] [--destination=folder] [--delete] [--convert=X] [--remove=X Y Z] [--extract=X:ln.ext Y:ln.ext Z:ln.ext] filename"
 
 # Initialize
 dc::commander::initialize
-
-# Requirements
-dc::require ffmpeg "-version" "3.0"
-
+dc::commander::declare::flag destination ".+" "optional" "where to put the converted file - will default to the same directory if left unspecified"
+dc::commander::declare::flag delete "" "optional" "delete original file after successful conversion if specified"
+dc::commander::declare::flag convert "^[0-9]$" "optional" "track identifier to convert to AAC (typically, an audio track)"
+dc::commander::declare::flag remove "^[0-9]+( [0-9]+)*$" "optional" "one or many (space separated) track identifiers to remove"
+dc::commander::declare::flag extract "^[0-9]+:[^ ]+( [0-9]+:[^ ]+)*$" "optional" "one or many (space separated) streams to extract on the side, with their final format (eg: 4:en.sub)"
+dc::commander::declare::arg 1 ".+" "" "filename" "media file to process"
 # Start commander
 dc::commander::boot
+# Requirements
+dc::require ffmpeg "-version" "3.0"
 
 # Argument 1 is mandatory and must be a readable file
 dc::fs::isfile "$1"
