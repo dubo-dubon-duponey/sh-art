@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 ## Builder
-readonly CLI_VERSION="0.1.0"
-readonly CLI_LICENSE="MIT License"
 readonly CLI_DESC="a lightweight script builder"
 
 dc::commander::initialize
