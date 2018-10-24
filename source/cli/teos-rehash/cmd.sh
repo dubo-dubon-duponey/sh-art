@@ -2,11 +2,18 @@
 
 readonly CLI_VERSION="0.0.1"
 readonly CLI_LICENSE="MIT License"
-readonly CLI_DESC="fancy movies organizer"
-readonly CLI_USAGE="[-s] [--insecure] [--no-network] source-directory"
+readonly CLI_DESC="movies filesystem organizer"
+readonly CLI_USAGE="[-s] [--insecure] source-directory"
 
 # Boot
-dc::commander::init
+dc::commander::initialize
+dc::commander::declare::arg 1 ".+" "" "directory" "the directory to analyze. The name must contain an imdb identifier (eg: tt0000001)"
+# Start commander
+dc::commander::boot
+
+# Requirements
+dc::require dc-imdb
+dc::require dc-movie-info
 
 # Argument 1 is mandatory and must be a readable directory
 dc::fs::isdir "$1"

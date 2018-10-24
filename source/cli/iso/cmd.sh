@@ -5,10 +5,16 @@ readonly CLI_LICENSE="MIT License"
 readonly CLI_DESC="because I never remember makehybrid"
 readonly CLI_USAGE="[-s] [--file=name] [--name=name] [--source=source-directory] create|mount|unmount"
 
-dc::commander::init
+# Initialize
+dc::commander::initialize
+
+# Requirements
 dc::require::platform::mac
 
 dc::argv::arg::validate 1 "(create|mount|unmount)"
+
+# Start commander
+dc::commander::boot
 
 directory=${DC_ARGV_SOURCE:-$(pwd)}
 dc::fs::isdir "$directory"

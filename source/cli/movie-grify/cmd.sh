@@ -6,13 +6,14 @@ readonly CLI_LICENSE="MIT License"
 readonly CLI_DESC="because I never remember how to use ffmpeg"
 readonly CLI_USAGE="[-s] [--destination=folder] [--delete] [--convert=X] [--remove=X Y Z] [--extract=X:ln.ext Y:ln.ext Z:ln.ext] filename"
 
-# Boot
-dc::commander::init
+# Initialize
+dc::commander::initialize
 
-if ! command -v ffmpeg >/dev/null; then
-  dc::logger::error "You need ffmpeg for this to work."
-  exit "$ERROR_MISSING_REQUIREMENTS"
-fi
+# Requirements
+dc::require ffmpeg
+
+# Start commander
+dc::commander::boot
 
 # Argument 1 is mandatory and must be a readable file
 dc::fs::isfile "$1"

@@ -1,25 +1,18 @@
 #!/usr/bin/env bash
 
-readonly CLI_VERSION="0.0.1"
+readonly CLI_VERSION="0.1.0"
 readonly CLI_LICENSE="MIT License"
-readonly CLI_DESC="imdb client, with caching"
-readonly CLI_USAGE="[-s] [--insecure] [--image=(show|dump)] imdbID"
-readonly CLI_OPTS='-s            silence all logging
---insecure    disable TLS verification (DANGER)
---image=dump  retrieve the cover image and print it to stdout
---image=show  retrieve the image and display it (iterm2 only)
-imdbID        the id of the movie (eg: tt0000001)'
+readonly CLI_DESC="imdb json client, with caching"
 
-# Boot
+# Init
+dc::commander::initialize
+# Flags
+dc::commander::declare::flag image "^(show|dump)$" "optional" "retrieve the cover image and print it to stdout ('dump') or display it (iterm2 only, 'show')"
+dc::commander::declare::arg 1 "^tt[0-9]{7}$" "" "imdbID" "the id of the movie (eg: tt0000001)"
+# Start commander
+dc::commander::boot
+# Requirements
 dc::require jq --version 1 5
-dc::commander::init
-
-# Arg 1 must be the digits section of a movie imdb id
-dc::argv::arg::validate 1 "^tt[0-9]{7}$"
-# Validate flag
-if [ "$DC_ARGV_IMAGE" ]; then
-  dc::argv::flag::validate image "^(show|dump)$"
-fi
 
 # Init sqlite
 dc-ext::sqlite::init "$HOME/tmp/dc-client-imdb/cache.db"

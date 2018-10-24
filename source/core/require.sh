@@ -24,30 +24,6 @@ dc::require::platform::linux(){
   fi
 }
 
-dc::require::brew(){
-  if ! command -v brew >/dev/null; then
-    dc::logger::error "You need homebrew for this to work. You can install it using the 'tarmac' helper with:"
-    dc::logger::info "bash -c \$(curl -fsSL https://raw.github.com/dubo-dubon-duponey/tarmac/master/init)"
-    exit "$ERROR_MISSING_REQUIREMENTS"
-  fi
-}
-
-dc::require::git(){
-  if ! command -v git >/dev/null; then
-    dc::logger::error "You need git for this to work."
-    exit "$ERROR_MISSING_REQUIREMENTS"
-  fi
-}
-
-dc::require::jq(){
-  local jqVersion
-  if ! jqVersion="$(jq --version 2>/dev/null)"; then
-    dc::logger::error "Please install jq for this shcript to work."
-    exit "$ERROR_MISSING_REQUIREMENTS"
-  fi
-  readonly DC_VERSION_JQ="${jqVersion##*-}"
-}
-
 dc::require(){
   local binary="$1"
   local versionFlag="$2"

@@ -1,17 +1,20 @@
 #!/usr/bin/env bash
 ## Builder
-readonly CLI_VERSION="0.0.1"
+readonly CLI_VERSION="0.1.0"
 readonly CLI_LICENSE="MIT License"
-readonly CLI_DESC="script builder & runner (part of the dc-tooling suite)"
-readonly CLI_USAGE="[-s] --name=foo [--destination=.] [--license=MIT license] [--author=dubo-dubon-duponey] [--with-git-info] [--description=another fancy piece of shcript] file_or_directory [...file_or_directory]"
+readonly CLI_DESC="a lightweight script builder"
 
-dc::commander::init
-
+dc::commander::initialize
 # Need a non-null name
-dc::argv::flag::validate name ".+"
-
-# Need at least one source
-dc::argv::arg::validate 1 ".+"
+dc::commander::declare::flag name ".+" "" "Name of the script to be produced"
+dc::commander::declare::flag destination ".+" "optional" "Output directory. Default to ./bin if left unspecified"
+dc::commander::declare::flag author ".+" "optional" "Name of the author"
+dc::commander::declare::flag license ".+" "optional" "Script final license. MIT if unspecified"
+dc::commander::declare::flag description ".+" "optional" "A short project description to be added to the license header"
+dc::commander::declare::flag with-git-info "" "optional" "Will prepend DC_VERSION, DC_REVISION and DC_BUILD_DATE variables"
+dc::commander::declare::arg 1 ".+" "" "source [...source]" "Source file (or directory) to use to generate the final script. Add as many as required. If specifying a directory, *.sh files will be used (not recursive)"
+# Start commander
+dc::commander::boot
 
 # If we have an explicit destination, use that, otherwise, fallback to cwd/bin
 destination="${DC_ARGV_DESTINATION:-./bin}"

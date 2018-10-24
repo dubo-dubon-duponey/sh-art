@@ -11,6 +11,8 @@ DC_JWT_PAYLOAD=
 DC_JWT_ACCESS=
 
 dc::jwt::read(){
+  dc::require jq
+
   export DC_JWT_TOKEN="$1"
 
   local decoded
