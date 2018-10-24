@@ -10,7 +10,7 @@ readonly CLI_USAGE="[-s] [--destination=folder] [--delete] [--convert=X] [--remo
 dc::commander::initialize
 
 # Requirements
-dc::require ffmpeg
+dc::require ffmpeg "-version" "3.0"
 
 # Start commander
 dc::commander::boot
