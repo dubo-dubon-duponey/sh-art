@@ -4,10 +4,10 @@ DC_MAKEFILE_DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))
 DC_PREFIX ?= $(shell pwd)
 
 # Set to true to disable fancy / colored output
-NON_INTERACTIVE ?=
+DC_NO_FANCY ?=
 
 # Fancy output if interactive
-ifndef NON_INTERACTIVE
+ifndef DC_NO_FANCY
     NC := \033[0m
     GREEN := \033[1;32m
     ORANGE := \033[1;33m

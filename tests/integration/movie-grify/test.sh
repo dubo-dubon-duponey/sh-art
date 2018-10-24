@@ -12,7 +12,7 @@ testMovieGrify(){
 
   # [ ! -f "tests/integration/movie-grify/movie.mp4" ] || rm "tests/integration/movie-grify/movie.mp4"
   # XXX remove conversion for libfdk_aac is not on linuxes --convert=1
-  result=$(DC_MOVIE_GRIFY_LOG_LEVEL=debug dc-movie-grify --destination=tests/integration/movie-grify --remove=1 tests/integration/movie-grify/movie.avi)
+  result=$(dc-movie-grify -s --destination=tests/integration/movie-grify --remove=1 tests/integration/movie-grify/movie.avi)
   local exit=$?
   dc-tools::assert::equal "$exit" "0"
   dc-tools::assert::equal "$result" ""
