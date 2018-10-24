@@ -22,7 +22,7 @@ testIMDBData(){
 }
 
 testIMDBImage(){
-  filename="$(portable::mktemp dc::http::request)"
+  filename="$(dc::portable::mktemp dc::http::request)"
   dc-imdb -s --image=dump "tt0000001" > "$filename"
   exit=$?
   dc-tools::assert::equal "$exit" "0"
