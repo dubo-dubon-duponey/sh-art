@@ -23,11 +23,11 @@ fi
 
 # Init sqlite
 dc-ext::sqlite::init "$HOME/tmp/dc-client-imdb/cache.db"
-dc-ext::sqlite::ensure "dchttp" "method TEXT, url TEXT, content BLOB, PRIMARY KEY(method, url)"
+dc-ext::http-cache::init
 
 # Request the main page and get the body
-dc-ext::http::request-cache "https://www.imdb.com/title/$1/" GET
-body="$(printf "%s" "$DC_HTTP_BODY" | portable::base64d | tr '\n' ' ')"
+dc-ext::http-cache::request "https://www.imdb.com/title/$1/" GET
+body="$(printf "%s" "$DC_HTTP_BODY" | dc::portable::base64d | tr '\n' ' ')"
 
 # Extract the shema.org section, then the original title and picture url
 schema=$(printf "%s" "$body" | sed -E 's/.*<script type="application\/ld[+]json">([^<]+).*/\1/')
@@ -41,7 +41,7 @@ if [ "$DC_ARGE_IMAGE" ]; then
     dc::logger::error "This movie does not come with a picture."
     exit "$ERROR_FAILED"
   fi
-  dc-ext::http::request-cache "$IMDB_PICTURE" GET
+  dc-ext::http-cache::request "$IMDB_PICTURE" GET
 
   if [ ! "$DC_ARGV_IMAGE" ] || [ "$DC_ARGV_IMAGE" == "show" ]; then
     if [ "$TERM_PROGRAM" != "iTerm.app" ]; then
@@ -51,7 +51,7 @@ if [ "$DC_ARGE_IMAGE" ]; then
     printf "\\033]1337;File=name=%s;inline=1;preserveAspectRatio=true;width=50:%s\\a" "$1" "$DC_HTTP_BODY"
     exit
   fi
-  printf "%s" "$DC_HTTP_BODY" | portable::base64d
+  printf "%s" "$DC_HTTP_BODY" | dc::portable::base64d
   exit
 fi
 
@@ -70,7 +70,7 @@ IMDB_TITLE=$(printf "%s" "$cleaned" | sed -E "s/(.*)[[:space:]]+[(][^)]*[0-9]{4}
 
 
 # Now, fetch the technical specs
-dc-ext::http::request-cache "https://www.imdb.com/title/$1/technical" GET
+dc-ext::http-cache::request "https://www.imdb.com/title/$1/technical" GET
 
 ALL_IMDB_KEYS=()
 extractTechSpecs(){
@@ -113,7 +113,7 @@ extractTechSpecs(){
 }
 
 # Extract the specs
-extractTechSpecs "$(printf "%s" "$DC_HTTP_BODY" | portable::base64d | tr -d '\n')"
+extractTechSpecs "$(printf "%s" "$DC_HTTP_BODY" | dc::portable::base64d | tr -d '\n')"
 
 # Piss everything out in nice-ish json
 heads=
