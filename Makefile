@@ -4,10 +4,10 @@ DC_MAKEFILE_DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))
 DC_PREFIX ?= $(shell pwd)
 
 # Set to true to disable fancy / colored output
-NON_INTERACTIVE ?=
+DC_NO_FANCY ?=
 
 # Fancy output if interactive
-ifndef NON_INTERACTIVE
+ifndef DC_NO_FANCY
     NC := \033[0m
     GREEN := \033[1;32m
     ORANGE := \033[1;33m
@@ -112,7 +112,7 @@ integration/%: $(DC_MAKEFILE_DIR)/bin/bootstrap/builder $(DC_PREFIX)/bin/dc-tool
 test-integration: $(patsubst $(DC_MAKEFILE_DIR)/source/cli/%/cmd.sh,integration/%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli/*/cmd.sh)) \
 	$(patsubst $(DC_MAKEFILE_DIR)/source/cli-ext/%/cmd.sh,integration/%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli-ext/*/cmd.sh))
 
-build: build-library build-binaries
+build: build-library build-tooling build-binaries
 lint: lint-code lint-signed
 test: test-unit test-integration
 

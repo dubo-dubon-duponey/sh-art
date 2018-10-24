@@ -3,16 +3,17 @@
 readonly CLI_VERSION="0.0.1"
 readonly CLI_LICENSE="MIT License"
 readonly CLI_DESC="because I never remember how to use ffmpeg"
-readonly CLI_USAGE="[-s] [--destination=folder] [--delete] filename"
 
-# Boot
-dc::commander::init
-dc::require::jq
-
-if ! command -v dc-movie-info >/dev/null || ! command -v dc-movie-grify >/dev/null; then
-  dc::logger::error "You need dc-movie-info and dc-movie-grify for this to work."
-  exit "$ERROR_MISSING_REQUIREMENTS"
-fi
+# Initialize
+dc::commander::initialize
+dc::commander::declare::flag destination ".+" "optional" "where to put the converted file - will default to the same directory if left unspecified"
+dc::commander::declare::arg 1 ".+" "" "filename" "movie file to be checked / converted"
+# Start commander
+dc::commander::boot
+# Requirements
+dc::require jq
+dc::require dc-movie-info
+dc::require dc-movie-grify
 
 dc::logger::info "Analyzing $1"
 
@@ -49,8 +50,8 @@ REQUIRED_AUDIO_SHOW=$(printf "%s" "$REQUIRED_AUDIO" | jq -r '.[] | (.id|tostring
 
 # Anything but DTS, AAC and AC3 should be removed
 MUST_REMOVE_AUDIO=$(printf "%s" "$data" | jq '[.audio[] | select((.codec == "aac"|not) and (.codec == "ac3"|not) and (.codec == "dts"|not))]')
-# MUST_REMOVE_AUDIO_COUNT=$(echo "$MUST_REMOVE_AUDIO" | jq -r '. | length')
-# MUST_REMOVE_AUDIO_SHOW=$(echo "$MUST_REMOVE_AUDIO" | jq -r '.[] | (.id|tostring) + ": " + .codec + ", " + .language')
+# MUST_REMOVE_AUDIO_COUNT=$(printf "%s" "$MUST_REMOVE_AUDIO" | jq -r '. | length')
+# MUST_REMOVE_AUDIO_SHOW=$(printf "%s" "$MUST_REMOVE_AUDIO" | jq -r '.[] | (.id|tostring) + ": " + .codec + ", " + .language')
 
 # Anything but DTS AAC and AC3 could be used as a source for conversion (because if we already have DTS AAC or AC3, we do not need to convert)
 MAY_CONVERT_AUDIO=$(printf "%s" "$data" | jq '[.audio[] | select((.codec == "aac"|not) and (.codec == "ac3"|not) and (.codec == "dts"|not))]')

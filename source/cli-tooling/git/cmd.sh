@@ -1,12 +1,16 @@
 #!/usr/bin/env bash
 
-readonly CLI_VERSION="0.0.1"
+readonly CLI_VERSION="0.1.0"
 readonly CLI_LICENSE="MIT License"
-readonly CLI_DESC="git helpers (part of the dc-tooling suite)"
-readonly CLI_USAGE="[-s] file-or-directory"
+readonly CLI_DESC="git sign-of verification helper"
 
-dc::commander::init
-dc::require::git
+# Initialize
+dc::commander::initialize
+dc::commander::declare::arg 1 ".+" "" "source" "Source file (or directory) in a git tree"
+# Start commander
+dc::commander::boot
+# Requirements
+dc::require git
 
 allcommits="$(git log --format=%H -C "$1")"
 regex="^Signed-off-by: ([^<]+) <([^<>@]+@[^<>]+)>( \\(github: ([a-zA-Z0-9][a-zA-Z0-9-]+)\\))?$"
