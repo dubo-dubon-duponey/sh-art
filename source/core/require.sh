@@ -42,7 +42,14 @@ dc::require(){
   fi
   varname=DC_DEPENDENCIES_V_$(printf "%s" "$binary" | tr '[:lower:]' '[:upper:]')
   if [ ! ${!varname+x} ]; then
-    read -r "${varname?}" < <($binary "$versionFlag" 2>/dev/null | sed -E 's/^[^0-9.]+([0-9]+[.][0-9]+).*/\1/')
+    while read -r "${varname?}"; do
+      if printf "%s" "${!varname}" | grep -qE "^[^0-9.]*([0-9]+[.][0-9]+).*"; then
+        break
+      fi
+    # XXX interestingly, some application will output the result on stdout (jq version 1.3 is such an example)
+    # This is broken behavior, that we do not try to workaround here
+    done < <($binary "$versionFlag" 2>/dev/null)
+    read -r "${varname?}" < <(printf "%s" "${!varname}" | sed -E 's/^[^0-9.]*([0-9]+[.][0-9]+).*/\1/')
   fi
   if [[ "$version" > "${!varname}" ]]; then
     dc::logger::error "You need $binary (version >= $version) for this to work (you currently have ${!varname})."
@@ -68,7 +75,12 @@ dc::optional(){
   fi
   varname=DC_DEPENDENCIES_V_$(printf "%s" "$binary" | tr '[:lower:]' '[:upper:]')
   if [ ! ${!varname+x} ]; then
-    read -r "${varname?}" < <($binary "$versionFlag" 2>/dev/null | sed -E 's/^[^0-9.]+([0-9]+[.][0-9]+).*/\1/')
+    while read -r "${varname?}"; do
+      if printf "%s" "${!varname}" | grep -qE "^[^0-9.]*([0-9]+[.][0-9]+).*"; then
+        break
+      fi
+    done < <($binary "$versionFlag" 2>/dev/null)
+    read -r "${varname?}" < <(printf "%s" "${!varname}" | sed -E 's/^[^0-9.]*([0-9]+[.][0-9]+).*/\1/')
   fi
   if [[ "$version" > "${!varname}" ]]; then
     dc::logger::warning "Optional $binary (version >= $version) is recommended, but you have it as ${!varname})."
