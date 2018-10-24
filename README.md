@@ -47,7 +47,7 @@ cat "$DC_HTTP_BODY"
 
 ## Requirements
 
-Right now this is tested on macOS, Ubuntu 14.04, 16.04, 18.04, Debian stable and testing, and Alpine (and if that was not clear, 
+Right now this is tested on macOS, Ubuntu 16.04 and 18.04, Debian stable and testing, and Alpine (and if that was not clear, 
 it is meant to be used with bash).
 
 Specific parts of the library have additional requirements (`jq`, `curl`, for example).
