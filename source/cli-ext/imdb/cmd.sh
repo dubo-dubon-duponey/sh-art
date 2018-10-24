@@ -12,7 +12,7 @@ dc::commander::declare::arg 1 "^tt[0-9]{7}$" "" "imdbID" "the id of the movie (e
 # Start commander
 dc::commander::boot
 # Requirements
-dc::require jq --version 1 5
+dc::require jq --version 1.5
 
 # Init sqlite
 dc-ext::sqlite::init "$HOME/tmp/dc-client-imdb/cache.db"

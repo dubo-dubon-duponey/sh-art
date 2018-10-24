@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 testMovieGrify(){
-  command -v ffmpeg >/dev/null || startSkipping
+  if ! _=$(dc::require ffmpeg "-version" 3.0); then
+    startSkipping
+  fi
 
   local result
 
@@ -17,5 +19,7 @@ testMovieGrify(){
 
   [ ! -f "tests/integration/movie-grify/movie.mp4" ] || rm "tests/integration/movie-grify/movie.mp4"
 
-  command -v ffmpeg >/dev/null || endSkipping
+  if ! _=$(dc::require ffmpeg "-version" 3.0); then
+    endSkipping
+  fi
 }

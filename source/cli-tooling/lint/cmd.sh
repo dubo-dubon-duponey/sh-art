@@ -9,6 +9,7 @@ dc::commander::initialize
 dc::commander::declare::arg 1 ".+" "" "source" "Source file (or directory) to lint"
 # Start commander
 dc::commander::boot
+dc::require shellcheck "--version" "0.5"
 
 if [ ! -r "$1" ]; then
   dc::logger::error "Please provide a readable file or directory to lint."

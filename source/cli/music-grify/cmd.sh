@@ -13,7 +13,7 @@ dc::commander::declare::arg 1 ".+" "" "filename" "audio file to be checked / con
 # Start commander
 dc::commander::boot
 # Requirements
-dc::require ffmpeg
+dc::require ffmpeg "-version" "3.0"
 
 # Get argument and destination flag
 filename="$1"

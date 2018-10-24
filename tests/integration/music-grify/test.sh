@@ -2,7 +2,9 @@
 
 testMusicGrify(){
 #  -s --destination=folder --codec=ALAC|FLAC|MP3|MP3-VO|MP3-V2 filename
-  command -v ffmpeg >/dev/null || startSkipping
+  if ! _=$(dc::require ffmpeg "-version" 3.0); then
+    startSkipping
+  fi
 
   local result
 
@@ -40,5 +42,7 @@ testMusicGrify(){
   dc-tools::assert::equal "$result" ""
   [ ! -f "tests/integration/music-grify/music.mp3" ] || rm "tests/integration/music-grify/music.mp3"
 
-  command -v ffmpeg >/dev/null || endSkipping
+  if ! _=$(dc::require ffmpeg "-version" 3.0); then
+    endSkipping
+  fi
 }
