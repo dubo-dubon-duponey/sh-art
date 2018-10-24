@@ -15,6 +15,7 @@ dc::prompt::question() {
 }
 
 dc::prompt::confirm(){
+  # XXX Use bel and flash
   if [ ! -t 2 ] || [ ! -t 0 ]; then
     return
   fi

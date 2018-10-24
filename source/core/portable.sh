@@ -7,11 +7,11 @@
 # binaries which implementations vary too significantly.
 ##########################################################################
 
-portable::mktemp(){
+dc::portable::mktemp(){
   mktemp -q "${TMPDIR:-/tmp}/$1.XXXXXX" 2>/dev/null || mktemp -q
 }
 
-portable::base64d(){
+dc::portable::base64d(){
   case "$(uname)" in
     Darwin)
       base64 -D

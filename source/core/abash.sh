@@ -13,7 +13,7 @@ _have_bash(){
     exit 206
   fi
 
-  readonly DC_VERSION_BASH="$bashVersion"
+  readonly DC_DEPENDENCIES_V_BASH="$bashVersion"
 }
 
 _have_bash
