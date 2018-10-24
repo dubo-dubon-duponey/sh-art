@@ -7,12 +7,15 @@ readonly CLI_USAGE="[-s] [--insecure] url [method] [payload] [...headers]"
 
 # Initialize
 dc::commander::initialize
+dc::commander::declare::arg 1 ".+" "" "url" "url..."
+dc::commander::declare::arg 2 ".+" "optional" "method" "http method"
+dc::commander::declare::arg 3 ".+" "optional" "payload" "payload to post"
+dc::commander::declare::arg 4 ".+" "optional" "[...headers]" "optional additional headers to be passed"
+# Start commander
+dc::commander::boot
 
 # Requirements
 dc::require jq
-
-# Start commander
-dc::commander::boot
 
 # XXX "$(<some_file)" to pass stdin?
 # URL METHOD PAYLOAD HEADERS

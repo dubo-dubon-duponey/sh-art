@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
 
-readonly CLI_VERSION="0.0.1"
+readonly CLI_VERSION="0.1.0"
 readonly CLI_LICENSE="MIT License"
 readonly CLI_DESC="because I never remember makehybrid"
-readonly CLI_USAGE="[-s] [--file=name] [--name=name] [--source=source-directory] create|mount|unmount"
 
 # Initialize
 dc::commander::initialize
+dc::commander::declare::flag file ".+" "optional" "the iso filename (on create, default to the source directory name otherwise)"
+dc::commander::declare::flag name ".+" "optional" "the descriptive name of the iso (fallback to filename othername"
+dc::commander::declare::flag source ".+" "optional" "on create, the directory path from which to create the iso"
+dc::commander::declare::arg 1 "^(create|mount|unmount)$" "" "action" "action to perform"
+# Start commander
+dc::commander::boot
 
 # Requirements
 dc::require::platform::mac
-
-dc::argv::arg::validate 1 "(create|mount|unmount)"
-
-# Start commander
-dc::commander::boot
 
 directory=${DC_ARGV_SOURCE:-$(pwd)}
 dc::fs::isdir "$directory"
