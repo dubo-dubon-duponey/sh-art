@@ -5,8 +5,14 @@ readonly CLI_LICENSE="MIT License"
 readonly CLI_DESC="like curl, in a nicer json-way"
 readonly CLI_USAGE="[-s] [--insecure] url [method] [payload] [...headers]"
 
-dc::commander::init
-dc::require::jq
+# Initialize
+dc::commander::initialize
+
+# Requirements
+dc::require jq
+
+# Start commander
+dc::commander::boot
 
 # XXX "$(<some_file)" to pass stdin?
 # URL METHOD PAYLOAD HEADERS

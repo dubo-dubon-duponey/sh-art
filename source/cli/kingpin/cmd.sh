@@ -5,15 +5,18 @@ readonly CLI_LICENSE="MIT License"
 readonly CLI_DESC="a ridiculously stupid bootstrapper to setup pyenv, nvm, and gvm, and their most useful accompanying versions"
 readonly CLI_USAGE="[-s] go|node|python"
 
-# Boot
-dc::commander::init
+# Initialize
+dc::commander::initialize
 
-# Depend on brew
+# Requirements
 dc::require::platform::mac
 dc::require brew
 dc::require git
 
 dc::argv::arg::validate 1 "(go|node|python)"
+
+# Start commander
+dc::commander::boot
 
 _ensure_install(){
   # Install through brew

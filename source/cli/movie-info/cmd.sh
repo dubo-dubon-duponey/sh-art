@@ -5,19 +5,15 @@ readonly CLI_LICENSE="MIT License"
 readonly CLI_DESC="spits out information about media files in a json format (duration, container, size, and for each track, codec, resolution or language)"
 readonly CLI_USAGE="[-s] filename"
 
-# Boot
+# Initialize
+dc::commander::initialize
+
+# Start commander
+dc::commander::boot
+# Requirements
 dc::require jq
-dc::commander::init
-
-if ! command -v ffprobe >/dev/null; then
-  dc::logger::error "You need ffprobe for this to work (part of ffmpeg)."
-  exit "$ERROR_MISSING_REQUIREMENTS"
-fi
-
-if ! command -v mp4info >/dev/null; then
-  dc::logger::error "You need mp4info for this to work fully (part of bento)."
-fi
-
+dc::require ffprobe
+dc::optional mp4info
 
 # Argument 1 is mandatory and must be a readable file
 dc::fs::isfile "$1"
