@@ -3,24 +3,24 @@
 readonly CLI_VERSION="0.0.1"
 readonly CLI_LICENSE="MIT License"
 readonly CLI_DESC="because I never remember ffmpeg invocation"
-readonly CLI_USAGE="[-s] [--delete/-d] [--destination=folder] [--codec=ALAC|FLAC|MP3|MP3-VO|MP3-V2] filename"
 
-# Boot
-dc::commander::init
+# Initialize
+dc::commander::initialize
+dc::commander::declare::flag delete "" "optional" "delete original file after successful conversion if specified"
+dc::commander::declare::flag destination ".+" "optional" "where to put the converted file - will default to the same directory if left unspecified"
+dc::commander::declare::flag codec "^(alac|flac|mp3|mp3-v0|mp3-v2)$" "optional" "format to convert to - will default to ALAC if unspecified"
+dc::commander::declare::arg 1 ".+" "" "filename" "audio file to be checked / converted"
+# Start commander
+dc::commander::boot
+# Requirements
+dc::require ffmpeg
 
-if ! command -v ffmpeg >/dev/null; then
-  dc::logger::error "You need ffmpeg for this to work."
-  exit "$ERROR_MISSING_REQUIREMENTS"
-fi
-
+# Get argument and destination flag
 filename="$1"
-
-# Argument 1 is mandatory and must be a readable file
-dc::fs::isfile "$filename"
-
-# Destination
-# dc::argv::flag::validate destination
 destination=${DC_ARGV_DESTINATION:-$(dirname "$filename")}
+
+# Filename is mandatory and must be a readable file
+dc::fs::isfile "$filename"
 
 # Must be writable, and create if doesn't exist
 dc::fs::isdir "$destination" writable create
@@ -30,39 +30,35 @@ filename=$(basename "$filename")
 # extension="${filename##*.}"
 filename="${filename%.*}"
 
-# Validate codec if present
-if [ "$DC_ARGE_CODEC" ]; then
-  dc::argv::flag::validate codec "^(alac|flac|mp3|mp3-v0|mp3-v2)$" "-Ei"
-fi
-
 # Alac by default
-codec=${DC_ARGV_CODEC:-ALAC}
+codec=${DC_ARGV_CODEC:-alac}
 
 # Prepare command line
 ar=( "-hide_banner" "-v" 8 "-i" "$1" "-vn" "-codec:a" )
 
 # Process the codec
-case "$(printf "%s" "$codec" | tr '[:lower:]' '[:upper:]')" in
-  MP3)
+case "$(printf "%s" "$codec" | tr '[:upper:]' '[:lower:]')" in
+  mp3)
     dc::logger::debug "Codec: MP3 320k"
     codec="libmp3lame -b:a 320k"
     finalextension=mp3
   ;;
-  MP3-V0)
+  mp3-v0)
     dc::logger::debug "Codec: MP3 V0"
     codec="libmp3lame -q:a 0"
     finalextension=mp3
   ;;
-  MP3-V2)
+  mp3-v2)
     dc::logger::debug "Codec: MP3 V2"
     codec="libmp3lame -q:a 2"
     finalextension=mp3
   ;;
-  ALAC)
+  alac)
     dc::logger::debug "Codec: ALAC"
+    codec="alac"
     finalextension=m4a
   ;;
-  FLAC)
+  flac)
     dc::logger::debug "Codec: FLAC"
     codec="flac -compression_level 8"
     finalextension=flac
