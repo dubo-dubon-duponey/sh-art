@@ -1,4 +1,4 @@
-# Dubo Core Library
+# Core Library
 
 The core library provides basic functionality, and should be fairly stable and mildly to decently tested.
 
@@ -7,11 +7,12 @@ The core library provides basic functionality, and should be fairly stable and m
 ### argv
 
 #### Description
-Including this file will parse flags (arguments prefixed by a single or double dash, with or without a value).
 
-Flags values are available as DC_ARGV_NAME (where NAME is the capitalized, underscored form of the flag).
+Including the library will always parse flags (arguments prefixed by a single or double dash, with or without a value).
 
-If a flag has been passed (with or without a value), DC_ARGE_NAME will be true.
+If a flag has been specified (with or without a value), `DC_ARGE_NAME` will be set (to `true`).
+
+Values are available as `DC_ARGV_NAME` (where `NAME` is the capitalized, underscored form of the flag).
 
 Flags must be passed before any other argument.
 
@@ -19,15 +20,16 @@ Examples:
 ```
 myscript -h
 
-# [ "$DC_ARGE_H" == "true" ]
-# [ ! "$DC_ARGV_H" ]
+[ "$DC_ARGE_H" ] && printf "%s\\n" "-h has been passed"
+[ ! "$DC_ARGV_H" ] && printf "%s\\n" "with no value"
 
-myscript --something_special=foo
+myscript --something-special=foo
 
-# [ "$DC_ARGE_SOMETHING_SPECIAL" == "true" ]
-# [ "$DC_ARGV_SOMETHING_SPECIAL" == "foo" ]
+[ "$DC_ARGE_SOMETHING_SPECIAL" ] && printf "%s\\n" "-something-special has been passed"
+[ "$DC_ARGV_SOMETHING_SPECIAL" == "foo" ] && printf "%s\\n" "with value foo"
 ```
 
+<!--
 #### Methods
 
 `dc::argv::flag::validate something-special`
@@ -50,15 +52,24 @@ myscript --something_special=foo
  * will require that argument (non-flag) number two is set, and its value matches the regexp
  * will exit with `$ERROR_ARGUMENT_INVALID` if this is not true
 
+-->
 ### colors
 
 Readable (eg: `$DC_COLOR_BLACK`) color codes to be used with `tput`.
+This is mainly of interest internally, and you should rather use the `logging` or `output` modules.
 
 ### commander
 
 High-level helper for command-line applications to initialize with decent defaults.
 
-Implementers should simply call `dc::commander::init`.
+Example implementation:
+
+```
+dc::commander::initialize
+dc::commander::declare::flag myflag "^(foo|bar)$" "optional" "a flag that does foo or bar"
+dc::commander::declare::arg 1 "[0-9]+" "" "first mandatory argument, that must be an integer"
+dc::commander::boot
+```
 
 By default, this will implement the following flags:
 ```
@@ -74,7 +85,7 @@ mycli --insecure # bypass TLS validation errors when doing http requests
 ```
 # Can be set to "debug", "info", "warning" or "error" to control the level of logging.
 MYCLI_LOG_LEVEL=debug
-# When set to a non-null value, this will also output authentication headers in the logs
+# When set to a non-null value, this below will also output authentication headers in the logs
 # instead of redacting them out.
 MYCLI_LOG_AUTH=true
 ```
@@ -88,13 +99,14 @@ The following environment variables may be defined by the embedding script:
    * `CLI_VERSION`: "0.0.1" by default
    * `CLI_LICENSE`: "MIT" by default
    * `CLI_DESC`: "A fancy piece of shcript" by default
-   * `CLI_USAGE`: "mycli [flags] argument" by default
+   * `CLI_USAGE`: customize this if you don't like the output of the default help
+   * `DC_CLI_OPTS` (array): `( "my flag" "my arg description" )` - if you do not like the default help output
 
-Additionally, the `dc::commander::init` may be called with arguments to control the name of the `MYCLI_LOG_LEVEL` and `MYCLI_LOG_AUTH` environment variables
+Additionally, the `dc::commander::initialize` may be called with arguments to control the name of the `MYCLI_LOG_LEVEL` and `MYCLI_LOG_AUTH` environment variables
 
-For more flexibility, people can write their own `dc::commander::help` or `dc::commander::version` methods to customize the output.
+For more flexibility, people can write their own `dc::commander::help` or `dc::commander::version` methods to further customize the output.
 
-Or just take some inspiration from `dc::commander::init` and write their own initialization routine...
+Or just take some inspiration from `dc::commander::initialize` and `dc::commander::boot` and write their own initialization routine...
 
 
 ### errors
@@ -128,6 +140,9 @@ ERROR_FAILED=204
 
 # Expectations failed on a file (not readable, writable, doesn't exist, can't be created)
 ERROR_FILESYSTEM=205
+
+# System requirement missing
+readonly ERROR_MISSING_REQUIREMENTS=206
 ```
 
 ### fs
@@ -195,7 +210,7 @@ The currently supported levels are:
 
  * `debug`: this level should only be used to log developer/debugging information
  * `info`: should be used only to convey meaningful workflow information that helps reading the logs
- * `warning`: denotes that there is an abnormal condition, recoverable error, or something that is worth noticing for the user
+ * `warning`: denotes that there is an abnormal condition, recoverable error, or something that is worth notifying the user about
  * `error`: denotes an error that is non-recoverable, typically followed by exiting with a non-zero status
 
 #### Methods
@@ -240,8 +255,28 @@ Simple helpers to output stuff to stdout.
 ### Methods
 
 ```
+dc::output::h1 "Title"
+dc::output::h2 "Subtitle"
+dc::output::emphasis "inline emphasized word"
+dc::output::strong "inline SUPER emphasized word"
+dc::output::bullet "bullet" "list" "of" "elements"
+dc::output::strong "quoted sentence"
+dc::output::text "inline text"
+dc::output::rule "horizontal rule"
+dc::output::break "line break"
 # Output through jq for formatted, fancy visuals.
-dc::output::json "{}"
+dc::output::json '{"foo": "bar"}'
+```
+
+### Portable
+
+Code for stuff that is questionably not portable or hard to get right
+
+#### Methods
+
+```
+dc::portable::mktemp
+dc::portable::base64d
 ```
 
 ### prompt
@@ -256,8 +291,41 @@ dc::prompt::confirm
 dc::prompt::credentials "message for username" varnameforusername "message for password" varnameforpassword
 ```
 
+### System requirements
+
+#### Methods
+
+```
+# binaryName is mandatory
+dc::require "binaryName"
+# binaryName version 1.2 is required
+dc::require "binaryName" "--versionFlag" "1.2"
+# DC_DEPENDENCIES_V_BINARYNAME will hold the version in case you need to inspect it
+
+dc::optional # <- same API as require, will spit a warning instead of exiting if a requirement is not satisfied
+
+dc::require::platform::mac # Require macos
+dc::require::platform::linux # Require linux
+dc::require::platform "$DC_PLATFORM_MAC"
+dc::require::platform "$DC_PLATFORM_LINUX"
+dc::require::platform "$YOUR_OWN_SHIT_MATCHING_UNAME"
+```
+
+### Version
+
+A handful of variable holding sh-art version and build information.
+
+```
+DC_VERSION
+DC_REVISION
+DC_BUILD_DATE
+```
+
+
 ### EXPERIMENTAL: partial implementation of the golang string API
 
 #### Methods
 
 ...
+
+
