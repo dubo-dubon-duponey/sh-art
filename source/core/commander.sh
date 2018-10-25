@@ -9,7 +9,7 @@
 ##########################################################################
 
 readonly DC_CLI_NAME=$(basename "$0")
-readonly DC_CLI_VERSION=unknown
+readonly DC_CLI_VERSION="$DC_VERSION (core script)"
 readonly DC_CLI_LICENSE="MIT license"
 readonly DC_CLI_DESC="A fancy piece of shcript"
 export DC_CLI_USAGE=""
@@ -84,7 +84,7 @@ dc::commander::declare::arg(){
   local long="$fancy"
   long=$(printf "%-20s" "$long")
   if [ "$optional" ]; then
-    long="$long (optional)"
+    long="$long  (optional)"
   else
     long="$long            "
   fi
