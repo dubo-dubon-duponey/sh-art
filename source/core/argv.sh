@@ -46,7 +46,7 @@ do
   _f="DC_PARGV_$x"
   declare "$_f"="$i"
   _f="DC_PARGE_$x"
-  declare "$_f"="$i"
+  declare "$_f"=true
 done
 
 # Makes the named argument mandatory on the command-line

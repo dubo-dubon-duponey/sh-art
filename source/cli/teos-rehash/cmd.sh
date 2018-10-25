@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 
-readonly CLI_VERSION="0.0.1"
+readonly CLI_VERSION="0.1.0"
 readonly CLI_LICENSE="MIT License"
 readonly CLI_DESC="movies filesystem organizer"
-readonly CLI_USAGE="[-s] [--insecure] source-directory"
 
 # Boot
 dc::commander::initialize

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-readonly CLI_VERSION="0.0.1"
+readonly CLI_VERSION="0.1.0"
 readonly CLI_LICENSE="MIT License"
 readonly CLI_DESC="because I never remember how to use ffmpeg"
 

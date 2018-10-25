@@ -1,22 +1,17 @@
 #!/usr/bin/env bash
 
-readonly CLI_VERSION="0.0.1"
-readonly CLI_LICENSE="MIT License"
 readonly CLI_DESC="a ridiculously stupid bootstrapper to setup pyenv, nvm, and gvm, and their most useful accompanying versions"
-readonly CLI_USAGE="[-s] go|node|python"
 
 # Initialize
 dc::commander::initialize
+dc::commander::declare::arg 1 "^(go|node|python)$" "" "target" "target environment to install"
+# Start commander
+dc::commander::boot
 
 # Requirements
 dc::require::platform::mac
 dc::require brew
 dc::require git
-
-dc::argv::arg::validate 1 "(go|node|python)"
-
-# Start commander
-dc::commander::boot
 
 _ensure_install(){
   # Install through brew
