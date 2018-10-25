@@ -2,6 +2,9 @@
 
 > just a piece of shcript
 
+[![Build Status](https://travis-ci.org/dubo-dubon-duponey/sh-art.svg?branch=master)](https://travis-ci.org/dubo-dubon-duponey/sh-art)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fdubo-dubon-duponey%2Fsh-art.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fdubo-dubon-duponey%2Fsh-art?ref=badge_shield)
+
 Developing marginally complex command line utilities using bash in a consistent manner presents challenges.
 
 This project aims at providing a generic library facilitating that, primarily driven by personal needs.
