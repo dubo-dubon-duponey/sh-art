@@ -17,3 +17,11 @@ _have_bash(){
 }
 
 _have_bash
+
+_gnu_grep(){
+  if grep --version | grep -q gnu; then
+    readonly _GNUGREP="true"
+  fi
+}
+
+_gnu_grep
