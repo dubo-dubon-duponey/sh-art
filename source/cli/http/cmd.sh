@@ -1,16 +1,13 @@
 #!/usr/bin/env bash
 
-readonly CLI_VERSION="0.0.1"
-readonly CLI_LICENSE="MIT License"
 readonly CLI_DESC="like curl, in a nicer json-way"
-readonly CLI_USAGE="[-s] [--insecure] url [method] [payload] [...headers]"
 
 # Initialize
 dc::commander::initialize
-dc::commander::declare::arg 1 ".+" "" "url" "url..."
-dc::commander::declare::arg 2 ".+" "optional" "method" "http method"
+dc::commander::declare::arg 1 ".+" "" "url" "url to query"
+dc::commander::declare::arg 2 ".+" "optional" "method" "http method (default to GET)"
 dc::commander::declare::arg 3 ".+" "optional" "payload" "payload to post"
-dc::commander::declare::arg 4 ".+" "optional" "[...headers]" "optional additional headers to be passed"
+dc::commander::declare::arg 4 ".+" "optional" "[...headers]" "additional headers to be passed"
 # Start commander
 dc::commander::boot
 
