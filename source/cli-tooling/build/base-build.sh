@@ -21,7 +21,7 @@ dc-tools::build::append(){
 dc-tools::build::header(){
   local destination="$1"
   local shortdesc="${2:-another fancy piece of shcript}"
-  local license="${3:-MIT license}"
+  local license="${3:-MIT License}"
   local owner="${4-dubo-dubon-duponey}"
   local name
   name="$(basename "$1")"
