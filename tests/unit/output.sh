@@ -5,7 +5,7 @@ dc::require jq
 
 testOutputJSONInvalid(){
   local result
-  result="$(dc::output::json "invalid")"
+  result="$(dc::output::json "invalid" 2>/dev/null)"
   local exit=$?
   dc-tools::assert::equal "$exit" "$ERROR_ARGUMENT_INVALID"
   dc-tools::assert::null "$result"

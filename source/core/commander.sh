@@ -224,8 +224,8 @@ dc::commander::initialize(){
   loglevelvar="$(printf "%s" "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_LEVEL"
   logauthvar="$(printf "%s" "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_AUTH"
 
-  [ "${1+x}" ] || loglevelvar="$1"
-  [ "${2+x}" ] || logauthvar="$2"
+  [ ! "${1}" ] || loglevelvar="$1"
+  [ ! "${2}" ] || logauthvar="$2"
 
   # If the "-s" flag is passed, mute the logger entirely
   if [ -n "${DC_ARGV_SILENT+x}" ] || [ -n "${DC_ARGV_S+x}" ]; then

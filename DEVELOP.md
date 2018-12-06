@@ -63,21 +63,33 @@ Look into the individual `--help`s for details.
 
 ## Docker integration
 
-`./dckr/do` is provided as a simple wrapper to run any command into one of the supported operating systems (with the project mounted).
+Use [dckr](https://github.com/dubo-dubon-duponey/dckr).
 
-You can simply call any of the make targets that way: `./dckr/do make lint`
+On mac, `brew install dubo-dubon-duponey/brews/dckr`
 
-By default, this will target Ubuntu 18.04.
+Then just run any of the make commands with `dckr`.
 
-To specify a different target, pass it as an environment variable: `TARGET=ults-previous ./dckr/do make lint`
+For example: `DOCKERFILE=Dockerfile dckr make test-unit`
+
+By default, this will target Ubuntu 18.04 (aka `ubuntu-lts-current`).
+
+To specify a different target, pass it as an environment variable: `TARGET=ubuntu-lts-previous dckr make test-unit`
 
 Available targets are:
 
- * ults-previous: Ubuntu 16.04
- * ults-current: Ubuntu 18.04
- * deb-current: Debian stretch
- * deb-next: Debian buster
+ * ubuntu-lts-previous: Ubuntu 16.04
+ * ubuntu-lts-current: Ubuntu 18.04
+ * debian-current: Debian stretch
+ * debian-next: Debian buster
  * alpine-current: Alpine 3.8
+
+To run tests for all targets, you can:
+
+```
+for i in ubuntu-lts-previous ubuntu-lts-current debian-current debian-next alpine-current; do
+  TARGET="$i" dckr make test
+done
+```
 
 ## Travis
 
