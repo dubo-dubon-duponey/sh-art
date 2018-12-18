@@ -28,7 +28,7 @@ dc::git::gpgVerify(){
 }
 
 dc::git::resignEverything(){
-  git -C "$1" filter-branch --commit-filter 'git commit-tree -S "$@";' -- --all
+  git -C "$1" filter-branch -f --commit-filter 'git commit-tree -S "$@";' -- --all
 }
 
 regex="^Signed-off-by: ([^<]+) <([^<>@]+@[^<>]+)>( \\(github: ([a-zA-Z0-9][a-zA-Z0-9-]+)\\))?$"
