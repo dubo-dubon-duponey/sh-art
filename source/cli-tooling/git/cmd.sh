@@ -47,8 +47,9 @@ for commit in $(dc::git::allCommits "$1"); do
     dc::logger::debug "Commit is signed-off appropriately"
   fi
   if ! dc::git::gpgVerify "$1" "$commit" 2>/dev/null; then
-    badCommits+=( "$commit" )
-    dc::logger::error "NOT gpg signed properly"
+    # XXX temporarily disabling this
+    # badCommits+=( "$commit" )
+    dc::logger::error "NOT gpg signed properly ($commit)"
   fi
 done
 
