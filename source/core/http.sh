@@ -181,9 +181,8 @@ dc::http::request(){
 
         # Not a header, then it's a status line
         isRedirect=
-        DC_HTTP_STATUS=$(printf "%s" "$line" | grep -E "^HTTP/[0-9.]+ [0-9]+")
-        if [ ! "$DC_HTTP_STATUS" ]; then
-          dc::logger::warning "Ignoring random curl output: $i"
+        if ! printf "%s" "$line" | grep -qE "^HTTP/[0-9.]+ [0-9]+"; then
+          dc::logger::warning "Ignoring random curl output (XXX FIXME multiline header): $i"
           continue
         fi
 
