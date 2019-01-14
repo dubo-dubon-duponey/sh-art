@@ -15,11 +15,11 @@ dc::require dc-imdb
 dc::require dc-movie-info
 
 # Argument 1 is mandatory and must be a readable directory
-dc::fs::isdir "$1"
+dc::fs::isdir "$DC_PARGV_1"
 
-currentdir="$1"
-directory="$(basename "$1")"
-parent="$(dirname "$1")"
+currentdir="$DC_PARGV_1"
+directory="$(basename "$DC_PARGV_1")"
+parent="$(dirname "$DC_PARGV_1")"
 
 dc::logger::info "Processing $directory"
 
@@ -211,7 +211,7 @@ runtime=$(printf "%s" "${imdbRuntime[*]}" | sed -E 's/ min//g')
 
 mkvquality=
 
-for i in "$1"/*; do
+for i in "$DC_PARGV_1"/*; do
   if [ ! -f "$i" ]; then
     dc::logger::warning "Ignoring non file: $i"
     continue

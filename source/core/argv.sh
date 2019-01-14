@@ -12,10 +12,23 @@
 ##########################################################################
 
 # Flag parsing
+isFlag=true
 for i in "$@"
 do
-  if [ "${i:0:1}" != "-" ]; then
-    break
+  # if [ "${i:0:1}" != "-" ]; then
+  if [ "${i:0:1}" != "-" ] || [ "$isFlag" == "false" ]; then
+    if [ "$isFlag" == "true" ]; then
+      x=0
+      isFlag=false
+    fi
+    x=$(( x + 1 ))
+    # Set the variable
+    _f="DC_PARGV_$x"
+    declare "$_f"="$i"
+    _f="DC_PARGE_$x"
+    declare "$_f"=true
+    continue
+    # break
   fi
   # Get everything after the leading -
   name="${i:1}"
@@ -35,19 +48,19 @@ do
   _f="DC_ARGE_$name"
   declare "$_f"=true
   # Shift the arg from the stack and move onto the next
-  shift
+  # shift
 done
 
-x=0
-for i in "$@"
-do
-  x=$(( x + 1 ))
-  # Set the variable
-  _f="DC_PARGV_$x"
-  declare "$_f"="$i"
-  _f="DC_PARGE_$x"
-  declare "$_f"=true
-done
+#x=0
+#for i in "$@"
+#do
+#  x=$(( x + 1 ))
+#  # Set the variable
+#  _f="DC_PARGV_$x"
+#  declare "$_f"="$i"
+#  _f="DC_PARGE_$x"
+#  declare "$_f"=true
+#done
 
 # Makes the named argument mandatory on the command-line
 dc::argv::flag::validate()

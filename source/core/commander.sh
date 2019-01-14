@@ -28,6 +28,29 @@ dc::commander::help(){
   dc::output::h1 "$name"
   dc::output::quote "$shortdesc"
 
+  dc::output::h2 "Usage"
+  dc::output::text "$name $shortusage"
+  dc::output::break
+  dc::output::break
+  dc::output::text "$name --help"
+  dc::output::break
+  dc::output::text "$name --version"
+  dc::output::break
+
+  # XXX annoying that -s and --insecure are first - fix it
+  if [ "$long" ]; then
+    dc::output::h2 "Arguments"
+    local v
+    while read -r v; do
+      dc::output::bullet "$v"
+    done < <(printf "%s" "$long")
+    dc::output::break
+  fi
+
+  dc::output::h2 "Logging control"
+  dc::output::bullet "$(printf "%s" "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_LEVEL=(debug|info|warning|error) will adjust logging level (default to info)"
+  dc::output::bullet "$(printf "%s" "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_AUTH=true will also log sensitive/credentials information (CAREFUL)"
+
   dc::output::h2 "Version"
   dc::output::text "$version"
   dc::output::break
@@ -35,26 +58,6 @@ dc::commander::help(){
   dc::output::h2 "License"
   dc::output::text "$license"
   dc::output::break
-
-  dc::output::h2 "Usage"
-  dc::output::text "$name --help"
-  dc::output::break
-  dc::output::text "$name --version"
-  dc::output::break
-  dc::output::break
-  dc::output::text "$name $shortusage"
-  dc::output::break
-  if [ "$long" ]; then
-    dc::output::h2 "Options"
-    local v
-    while read -r v; do
-      dc::output::bullet "$v"
-    done < <(printf "%s" "$long")
-  fi
-
-  dc::output::h2 "Logging control"
-  dc::output::bullet "$(printf "%s" "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_LEVEL=(debug|info|warning|error) will adjust logging level (default to info)"
-  dc::output::bullet "$(printf "%s" "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_AUTH=true will also log sensitive/credentials information (CAREFUL)"
   dc::output::break
 
 }

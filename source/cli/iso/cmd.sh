@@ -22,7 +22,7 @@ dc::fs::isdir "$directory"
 iname="${DC_ARGV_FILE%.iso$*:-$(basename "$directory")}"
 vname="${DC_ARGV_NAME:-$iname}"
 
-case "$1" in
+case "$DC_PARGV_1" in
   create)
     dc::logger::info "Creating ISO $iname.iso with volume name $vname from $directory"
     dc::logger::debug "hdiutil makehybrid -udf -udf-volume-name \"$vname\" -o \"$iname.iso\" \"$directory\""

@@ -19,9 +19,9 @@ dc::commander::boot
 dc::require ffmpeg "-version" "3.0"
 
 # Argument 1 is mandatory and must be a readable file
-dc::fs::isfile "$1"
+dc::fs::isfile "$DC_PARGV_1"
 
-filename=$(basename "$1")
+filename=$(basename "$DC_PARGV_1")
 # extension="${filename##*.}"
 filename="${filename%.*}"
 
@@ -30,7 +30,7 @@ if [ "$DC_ARGV_DESTINATION" ]; then
   dc::fs::isdir "$DC_ARGV_DESTINATION" writable create
   destination=$DC_ARGV_DESTINATION/$filename
 else
-  destination=$(dirname "$1")/$filename-convert
+  destination=$(dirname "$DC_PARGV_1")/$filename-convert
 fi
 
 # Validate optional arguments syntax
@@ -121,7 +121,7 @@ xxxtranscode::fullmonthy(){
 
 
 
-if ! transmogrify::do "$1" "$destination" "${DC_ARGV_CONVERT}" "${DC_ARGV_REMOVE}" "${DC_ARGV_EXTRACT}"; then
+if ! transmogrify::do "$DC_PARGV_1" "$destination" "${DC_ARGV_CONVERT}" "${DC_ARGV_REMOVE}" "${DC_ARGV_EXTRACT}"; then
   dc::logger::error "Failed to convert $filename!"
   if [ -f "$destination.mp4" ]; then
     rm "$destination.mp4"
@@ -129,11 +129,11 @@ if ! transmogrify::do "$1" "$destination" "${DC_ARGV_CONVERT}" "${DC_ARGV_REMOVE
   exit "$ERROR_FAILED"
 fi
 
-dc::logger::info "Successfully transmogrified $1"
+dc::logger::info "Successfully transmogrified $DC_PARGV_1"
 if [ "$DC_ARGE_DELETE" ] || [ "$DC_ARGE_D" ]; then
   dc::logger::info "Press enter to delete the original"
   dc::prompt::confirm
-  rm "$1"
+  rm "$DC_PARGV_1"
   dc::logger::info "Original deleted"
 else
   dc::logger::info "Original preserved"

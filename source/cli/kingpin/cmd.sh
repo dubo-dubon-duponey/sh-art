@@ -175,4 +175,4 @@ EOF
   dc::logger::info "Done with python"
 }
 
-get::"$1"
+get::"$DC_PARGV_1"

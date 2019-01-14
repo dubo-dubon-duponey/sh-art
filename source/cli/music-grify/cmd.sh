@@ -16,7 +16,7 @@ dc::commander::boot
 dc::require ffmpeg "-version" "3.0"
 
 # Get argument and destination flag
-filename="$1"
+filename="$DC_PARGV_1"
 destination=${DC_ARGV_DESTINATION:-$(dirname "$filename")}
 
 # Filename is mandatory and must be a readable file
@@ -34,7 +34,7 @@ filename="${filename%.*}"
 codec=${DC_ARGV_CODEC:-alac}
 
 # Prepare command line
-ar=( "-hide_banner" "-v" 8 "-i" "$1" "-vn" "-codec:a" )
+ar=( "-hide_banner" "-v" 8 "-i" "$DC_PARGV_1" "-vn" "-codec:a" )
 
 # Process the codec
 case "$(printf "%s" "$codec" | tr '[:upper:]' '[:lower:]')" in
@@ -92,7 +92,7 @@ else
 	dc::logger::info "Success"
   if [ "$DC_ARGE_DELETE" ] || [ "$DC_ARGE_D" ]; then
     dc::logger::info "Original file deleted"
-	  rm "$1"
+	  rm "$DC_PARGV_1"
   else
     dc::logger::info "Original file preserved"
   fi
