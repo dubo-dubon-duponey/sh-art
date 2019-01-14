@@ -10,7 +10,7 @@ The API may not be well tested, or even be stable.
 Decode a JWT token (requires `jq`).
 
 ```
-dc::jwt::read "$rawtoken"
+dc-ext::jwt::read "$rawtoken"
 
 DC_JWT_TOKEN="the original rawtoken"
 DC_JWT_HEADER="the header"
