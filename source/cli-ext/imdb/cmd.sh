@@ -18,7 +18,7 @@ dc-ext::sqlite::init "$HOME/tmp/dc-client-imdb/cache.db"
 dc-ext::http-cache::init
 
 # Request the main page and get the body
-dc-ext::http-cache::request "https://www.imdb.com/title/$1/" GET
+dc-ext::http-cache::request "https://www.imdb.com/title/$DC_PARGV_1/" GET
 body="$(printf "%s" "$DC_HTTP_BODY" | dc::portable::base64d | tr '\n' ' ')"
 
 # Extract the shema.org section, then the original title and picture url
@@ -40,7 +40,7 @@ if [ "$DC_ARGE_IMAGE" ]; then
       dc::logger::error "You need iTerm2 to display the image"
       exit "$ERROR_FAILED"
     fi
-    printf "\\033]1337;File=name=%s;inline=1;preserveAspectRatio=true;width=50:%s\\a" "$1" "$DC_HTTP_BODY"
+    printf "\\033]1337;File=name=%s;inline=1;preserveAspectRatio=true;width=50:%s\\a" "$DC_PARGV_1" "$DC_HTTP_BODY"
     exit
   fi
   printf "%s" "$DC_HTTP_BODY" | dc::portable::base64d
@@ -62,7 +62,7 @@ IMDB_TITLE=$(printf "%s" "$cleaned" | sed -E "s/(.*)[[:space:]]+[(][^)]*[0-9]{4}
 
 
 # Now, fetch the technical specs
-dc-ext::http-cache::request "https://www.imdb.com/title/$1/technical" GET
+dc-ext::http-cache::request "https://www.imdb.com/title/$DC_PARGV_1/technical" GET
 
 ALL_IMDB_KEYS=()
 extractTechSpecs(){
@@ -126,7 +126,7 @@ output=$(printf "%s" "{$heads}" | jq --arg title "$IMDB_TITLE" \
   --arg picture "$IMDB_PICTURE" \
   --argjson runtime "[\"$result\"]" \
   --arg type "$IMDB_TYPE" \
-  --arg id "$1" \
+  --arg id "$DC_PARGV_1" \
   --arg ratio "$IMDB_ASPECT_RATIO" -rc '{
   title: $title,
   original: $original,

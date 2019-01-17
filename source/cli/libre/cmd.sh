@@ -9,4 +9,5 @@ dc::commander::declare::arg 2 ".+" "optional" "arguments [...arg]" "arguments to
 # Start commander
 dc::commander::boot
 
+# XXX will break miserably with any of the --insecure or -s flags...
 "$@"

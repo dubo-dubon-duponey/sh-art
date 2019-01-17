@@ -17,7 +17,7 @@ dc::require jq
 # XXX "$(<some_file)" to pass stdin?
 # URL METHOD PAYLOAD HEADERS
 # XXX implement --method and stdin payload
-dc::http::request "$@"
+dc::http::request "$DC_PARGV_1" "$DC_PARGV_2" "$DC_PARGV_3" "$DC_PARGV_4"
 
 if [ ! "$DC_HTTP_STATUS" ]; then
   dc::logger::error "Network issue... Recommended: check your pooch whereabouts. Now, check these chewed-up network cables."
