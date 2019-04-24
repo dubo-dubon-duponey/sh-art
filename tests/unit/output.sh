@@ -23,7 +23,7 @@ testOutputJSONInvalidNoJQ(){
   local result
   local previousJQ="$_DC_DEPENDENCIES_B_JQ"
   unset _DC_DEPENDENCIES_B_JQ
-  result="$(PATH= dc::output::json "invalid")"
+  result="$(PATH="" dc::output::json "invalid")"
   local exit=$?
   _DC_DEPENDENCIES_B_JQ="$previousJQ"
   dc-tools::assert::equal "Exit code should be 0" "$exit" "0"

@@ -19,7 +19,6 @@ testArgumentProcessing(){
   dc-tools::assert::equal "flag ul_u_v" "true" "$DC_ARGE_UL_U_V"
   dc-tools::assert::equal "flag ul_u_v" "Baz baz ∞ bloom" "$DC_ARGV_UL_U_V"
 
-  local result
   local exit
 
   dc::args::flag::validate t
@@ -27,15 +26,15 @@ testArgumentProcessing(){
   dc::args::flag::validate ul_u_v "^baz" "" insensitive
   dc::args::flag::validate w "^baz" optional
 
-  result=$(dc::args::flag::validate ul_u_v "^baz" 2>/dev/null)
+  _=$(dc::args::flag::validate ul_u_v "^baz" 2>/dev/null)
   exit=$?
   dc-tools::assert::equal "Case sensitiveness failed validation" "$ERROR_ARGUMENT_INVALID" "$exit"
 
-  result=$(dc::args::flag::validate ul_u_v "^Babar" 2>/dev/null)
+  _=$(dc::args::flag::validate ul_u_v "^Babar" 2>/dev/null)
   exit=$?
   dc-tools::assert::equal "Non matching regexp failed validation" "$ERROR_ARGUMENT_INVALID" "$exit"
 
-  result=$(dc::args::flag::validate w 2>/dev/null)
+  _=$(dc::args::flag::validate w 2>/dev/null)
   exit=$?
   dc-tools::assert::equal "Non existent flag failed validation" "$ERROR_ARGUMENT_MISSING" "$exit"
 
@@ -44,15 +43,15 @@ testArgumentProcessing(){
   dc::args::arg::validate 2 "^FOO" "" insensitive
   dc::args::arg::validate 10 "foo$" optional
 
-  result=$(dc::args::arg::validate 2 "^FOO" 2>/dev/null)
+  _=$(dc::args::arg::validate 2 "^FOO" 2>/dev/null)
   exit=$?
   dc-tools::assert::equal "Case sensitiveness failed validation" "$ERROR_ARGUMENT_INVALID" "$exit"
 
-  result=$(dc::args::arg::validate 2 "^Babar" 2>/dev/null)
+  _=$(dc::args::arg::validate 2 "^Babar" 2>/dev/null)
   exit=$?
   dc-tools::assert::equal "Non matching regexp failed validation" "$ERROR_ARGUMENT_INVALID" "$exit"
 
-  result=$(dc::args::arg::validate 10 2>/dev/null)
+  _=$(dc::args::arg::validate 10 2>/dev/null)
   exit=$?
   dc-tools::assert::equal "Non existent arg failed validation" "$ERROR_ARGUMENT_MISSING" "$exit"
 
