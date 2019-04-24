@@ -15,7 +15,7 @@ dc::require git
 
 _ensure_install(){
   # Install through brew
-  [ ! "$(brew list "$1" 2>/dev/null)" ] && brew install "$1"
+  [ "$(brew list "$1" 2>/dev/null)" ] || brew install "$1"
 }
 
 _profile_link(){

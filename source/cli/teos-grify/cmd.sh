@@ -6,7 +6,7 @@ readonly CLI_DESC="because I never remember how to use ffmpeg"
 
 # Initialize
 dc::commander::initialize
-dc::commander::declare::flag destination ".+" "optional" "where to put the converted file - will default to the same directory if left unspecified"
+dc::commander::declare::flag destination ".+" optional "where to put the converted file - will default to the same directory if left unspecified"
 dc::commander::declare::arg 1 ".+" "" "filename" "movie file to be checked / converted"
 # Start commander
 dc::commander::boot

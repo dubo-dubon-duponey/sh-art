@@ -6,9 +6,9 @@ readonly CLI_DESC="because I never remember ffmpeg invocations"
 
 # Initialize
 dc::commander::initialize
-dc::commander::declare::flag delete "" "optional" "delete original file after successful conversion if specified"
-dc::commander::declare::flag destination ".+" "optional" "where to put the converted file - will default to the same directory if left unspecified"
-dc::commander::declare::flag codec "^(alac|flac|mp3|mp3-v0|mp3-v2)$" "optional" "format to convert to - will default to ALAC if unspecified"
+dc::commander::declare::flag delete "" optional "delete original file after successful conversion if specified"
+dc::commander::declare::flag destination ".+" optional "where to put the converted file - will default to the same directory if left unspecified"
+dc::commander::declare::flag codec "^(alac|flac|mp3|mp3-v0|mp3-v2)$" optional "format to convert to - will default to ALAC if unspecified"
 dc::commander::declare::arg 1 ".+" "" "filename" "audio file to be checked / converted"
 # Start commander
 dc::commander::boot
