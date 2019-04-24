@@ -42,3 +42,16 @@ dc::prompt::credentials() {
   # Just to avoid garbling the output
   >&2 printf "\\n"
 }
+
+dc::prompt::password() {
+  # TODO implement osxkeychain integration
+  # No terminal stdin or stdout, can't ask for credentials
+  if [ ! -t 2 ] || [ ! -t 0 ]; then
+    return
+  fi
+
+  # Ask for password
+  read -r -s -p "$1" "$2"
+  # Just to avoid garbling the output
+  >&2 printf "\\n"
+}
