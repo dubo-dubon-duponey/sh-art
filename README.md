@@ -10,7 +10,7 @@ Developing marginally complex command line utilities using bash in a consistent 
 This project aims at providing a generic library facilitating that, primarily driven by personal needs.
 
 Specifically, it takes care of argument parsing and validation, logging, http, string manipulation
-and other commodities.
+and other commodities in a consistent, elegant fashion.
 
 ## TL;DR
 
@@ -18,30 +18,37 @@ On mac: `brew install sh_art`
 
 You can then use one of the example binaries to get a taste (named `dc-*`).
 
-Or start your own:
+Or start your own `foobar` script:
 
 ```
 #!/usr/bin/env bash
 
 . "$(brew --prefix)/lib/dc-sh-art"
 
+# Information about your `foobar` script
 readonly CLI_VERSION="0.0.1"
 readonly CLI_LICENSE="MIT License"
 readonly CLI_DESC="super top dupper awesome"
 
+# Declare flags and arguments
 dc::commander::initialize
-dc::commander::declare::flag myflag "^(foo|bar)$" "optional" "a flag that does foo or bar"
-dc::commander::declare::arg 1 "[0-9]+" "" "somearg" first mandatory argument, that must be an integer"
+dc::commander::declare::flag myflag "^(foo|bar)$" optional "a flag that does foo or bar"
+dc::commander::declare::arg 1 "[0-9]+" "" "somearg" "first mandatory argument, that must be an integer"
 dc::commander::boot
+
+# State that you need the `find` binary
 dc::require find
 
+# Test if the optional flag `myflag` was set
 if [ "$DC_ARGE_MYFLAG" ]; then
   dc::logger::info "Hey! You used --myflag, and the value was $DC_ARGV_MYFLAG. Did you try --help and --version as well?"
 fi
 
+# HEAD something over http
 dc::logger::debug "Now, let's query something"
 dc::http::request "https://www.google.com" HEAD
 
+# Output the result
 dc::logger::warning "We got something!"
 cat "$DC_HTTP_BODY"
 
@@ -55,7 +62,7 @@ it is meant to be used with bash).
 
 Specific parts of the library have additional requirements (`jq`, `curl`, for example).
 
-Some of the binaries may also declare additional requirements like `git`, `file`, `sqlite`, `shellcheck`, `make` or `ffmpeg`.
+Specific binaries may also require additional binaries like `git`, `file`, `sqlite`, `shellcheck`, `make` or `ffmpeg`.
 
 ## Design principles
 
