@@ -31,7 +31,7 @@ dc-ext::jwt::read(){
   #  sig=$(printf "%s" ${decoded[2]} | dc::portable::base64d)
   #fi
 
-  if [ ! "$_DC_HTTP_REDACT" ]; then
+  if [ ! "$_DC_PRIVATE_HTTP_REDACT" ]; then
     dc::logger::debug "[dc-jwt] decoded header: $(printf "%s" "$DC_JWT_HEADER" | jq '.')"
     dc::logger::debug "[dc-jwt] decoded payload: $(printf "%s" "$DC_JWT_PAYLOAD" | jq '.')"
     # TODO implement signature verification? not super useful...
