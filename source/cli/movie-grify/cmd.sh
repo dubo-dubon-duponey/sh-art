@@ -26,25 +26,13 @@ filename=$(basename "$DC_PARGV_1")
 # extension="${filename##*.}"
 filename="${filename%.*}"
 
-# Optional destination must be a writable directory, and create it is it does not exist
+# Optional destination must be a writable directory - create it if not there
 if [ "$DC_ARGV_DESTINATION" ]; then
   dc::fs::isdir "$DC_ARGV_DESTINATION" writable create
-  destination=$DC_ARGV_DESTINATION/$filename
+  destination="$DC_ARGV_DESTINATION/$filename"
 else
-  destination=$(dirname "$DC_PARGV_1")/$filename-convert
+  destination="$(dirname "$DC_PARGV_1")/$filename-convert"
 fi
-
-# Validate optional arguments syntax
-if [ "$DC_ARGV_CONVERT" ]; then
-  dc::argv::flag::validate convert "^[0-9]$"
-fi
-if [ "$DC_ARGV_REMOVE" ]; then
-  dc::argv::flag::validate remove "^[0-9]+( [0-9]+)*$"
-fi
-if [ "$DC_ARGV_EXTRACT" ]; then
-  dc::argv::flag::validate extract "^[0-9]+:[^ ]+( [0-9]+:[^ ]+)*$"
-fi
-
 
 
 # Add -movflags faststart for web optimized shit
