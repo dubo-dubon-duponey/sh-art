@@ -12,7 +12,7 @@ dc::fs::isfile(){
     touch "$1"
   fi
   if [ ! -f "$1" ] || [ ! -r "$1" ] || { [ "$writable" ] && [ ! -w "$1" ]; }  ; then
-    dc::logger::error "You need to specify a valid file that you have access to (you provided: $1)"
+    dc::logger::error "$1 is not a valid file or you do not have the appropriate permissions"
     exit "$ERROR_FILESYSTEM"
   fi
 }
@@ -24,7 +24,7 @@ dc::fs::isdir(){
     mkdir -p "$1"
   fi
   if [ ! -d "$1" ] || [ ! -r "$1" ] || { [ "$writable" ] && [ ! -w "$1" ]; }  ; then
-    dc::logger::error "You need to specify a valid directory that you have access to (you provided: $1)"
+    dc::logger::error "$1 is not a valid directory or you do not have the appropriate permissions"
     exit "$ERROR_FILESYSTEM"
   fi
 
