@@ -6,7 +6,7 @@ readonly CLI_DESC="imdb json client, with caching"
 # Init
 dc::commander::initialize
 # Flags
-dc::commander::declare::flag image "^(show|dump)$" "optional" "retrieve the cover image and print it to stdout ('dump') or display it (iterm2 only, 'show')"
+dc::commander::declare::flag image "^(show|dump)$" optional "retrieve the cover image and print it to stdout ('dump') or display it (iterm2 only, 'show')"
 dc::commander::declare::arg 1 "^tt[0-9]{7}$" "" "imdbID" "the id of the movie (eg: tt0000001)"
 # Start commander
 dc::commander::boot
@@ -52,14 +52,12 @@ fi
 
 # Process the body to get the title, year and type
 cleaned=$(printf "%s" "${body}" | sed -E "s/.*<meta property='og:title' ([^>]+).*/\\1/" | sed -E 's/.*content=\"([^\"]+)\".*/\1/')
-IMDB_YEAR=$(printf "%s" "$cleaned" | sed -E "s/.*[(]([^)]*[0-9]{4}[–0-9]*)[)]/\\1/")
-IMDB_TYPE=${IMDB_YEAR% *}
+IMDB_YEAR=$(printf "%s" "$cleaned" | sed -E "s/^.*[(]([^)]*[0-9]{4}[–0-9]*)[)].*/\\1/")
 IMDB_YEAR=${IMDB_YEAR##* }
-if [ "$IMDB_TYPE" == "$IMDB_YEAR" ]; then
-  IMDB_TYPE="movie"
-fi
-IMDB_TITLE=$(printf "%s" "$cleaned" | sed -E "s/(.*)[[:space:]]+[(][^)]*[0-9]{4}[–0-9]*[)]/\\1/" | sed -E 's/&quot;/"/g')
+IMDB_TITLE=$(printf "%s" "$cleaned" | sed -E "s/(.*)[[:space:]]+[(][^)]*[0-9]{4}[–0-9]*[)].*/\\1/" | sed -E 's/&quot;/"/g')
 
+cleaned=$(printf "%s" "${body}" | sed -E "s/.*<meta property='og:type' ([^>]+).*/\\1/" | sed -E 's/.*content=\"([^\"]+)\".*/\1/')
+IMDB_TYPE=$(printf "%s" "$cleaned")
 
 # Now, fetch the technical specs
 dc-ext::http-cache::request "https://www.imdb.com/title/$DC_PARGV_1/technical" GET
