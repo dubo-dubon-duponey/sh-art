@@ -2,9 +2,8 @@
 ##########################################################################
 # Errors
 # ------
-# To be used as exit codes
-# Used by core methods
-# Should be used by implementers as well
+# Used as exit codes, by core methods
+# May be used by implementers as well
 # Custom errors defined by libraries should use the 100-199 range
 # Custom errors defined by applications should use the 1-99 range
 ##########################################################################

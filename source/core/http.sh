@@ -17,16 +17,16 @@
 #####################################
 
 dc::configure::http::leak(){
-  dc::logger::warning "[dc-http] YOU ASKED FOR FULL-BLOWN HTTP DEBUGGING: THIS WILL LEAK YOUR AUTHENTICATION TOKENS TO STDERR."
+  dc::logger::warning "[dc-http] YOU ASKED FOR FULL-BLOWN HTTP DEBUGGING: THIS WILL LEAK SENSITIVE INFORMATION TO STDERR."
   dc::logger::warning "[dc-http] Unless you are debugging actively and you really know what you are doing, you MUST STOP NOW."
-  _DC_HTTP_REDACT=
+  _DC_PRIVATE_HTTP_REDACT=
 }
 
 dc::configure::http::insecure(){
   dc::logger::warning "[dc-http] YOU ARE USING THE INSECURE FLAG."
   dc::logger::warning "[dc-http] This basically means your communication with the server is as secure as if there was NO TLS AT ALL."
   dc::logger::warning "[dc-http] Unless you really, really, REALLY know what you are doing, you MUST RECONSIDER NOW."
-  _DC_HTTP_INSECURE=true
+  _DC_PRIVATE_HTTP_INSECURE=true
 }
 
 #####################################
@@ -52,15 +52,15 @@ dc::http::dump::headers() {
     value=DC_HTTP_HEADER_$i
 
     # Expunge
-    [ "$_DC_HTTP_REDACT" ] && [[ "${_DC_HTTP_PROTECTED_HEADERS[*]}" == *"$i"* ]] && value=REDACTED
+    [ "$_DC_PRIVATE_HTTP_REDACT" ] && [[ "${_DC_PRIVATE_HTTP_PROTECTED_HEADERS[*]}" == *"$i"* ]] && value=REDACTED
     dc::logger::warning "[dc-http] $i: ${!value}"
   done
 }
 
 dc::http::dump::body() {
   dc::optional jq
-  if ! dc::logger::warning "$(jq . $DC_HTTP_BODY 2>/dev/null)"; then
-    dc::logger::warning "$(cat $DC_HTTP_BODY)"
+  if ! dc::logger::warning "$(jq . "$DC_HTTP_BODY" 2>/dev/null)"; then
+    dc::logger::warning "$(cat "$DC_HTTP_BODY")"
   fi
 }
 
@@ -134,12 +134,12 @@ dc::http::request(){
     curlOpts[${#curlOpts[@]}]="$i"
   done
 
-  if [ "$_DC_HTTP_INSECURE" ]; then
+  if [ "$_DC_PRIVATE_HTTP_INSECURE" ]; then
     curlOpts[${#curlOpts[@]}]="--insecure"
     curlOpts[${#curlOpts[@]}]="--proxy-insecure"
   fi
 
-  _dc::http::logcommand
+  _dc_internal::http::logcommand
 
   # Do it!
   local key
@@ -174,7 +174,7 @@ dc::http::request(){
           fi
 
           # Expunge what we log
-          [ "$_DC_HTTP_REDACT" ] && [[ "${_DC_HTTP_PROTECTED_HEADERS[*]}" == *"$key"* ]] && value=REDACTED
+          [ "$_DC_PRIVATE_HTTP_REDACT" ] && [[ "${_DC_PRIVATE_HTTP_PROTECTED_HEADERS[*]}" == *"$key"* ]] && value=REDACTED
           dc::logger::debug "[dc-http] $key | $value"
           continue
         fi
@@ -212,12 +212,12 @@ dc::http::request(){
 # Private
 #####################################
 
-_DC_HTTP_REDACT=true
-_DC_HTTP_INSECURE=
+_DC_PRIVATE_HTTP_REDACT=true
+_DC_PRIVATE_HTTP_INSECURE=
 # Given the nature of the matching we do, any header that contains these words will match, including proxy-authorization and set-cookie
-_DC_HTTP_PROTECTED_HEADERS=( authorization cookie user-agent )
+_DC_PRIVATE_HTTP_PROTECTED_HEADERS=( authorization cookie user-agent )
 
-_dc::http::logcommand() {
+_dc_internal::http::logcommand() {
   local output="curl"
   local i
   for i in "${curlOpts[@]}"; do
@@ -228,8 +228,9 @@ _dc::http::logcommand() {
     fi
 
     # If we redact, filter out sensitive headers
-    if [ "$_DC_HTTP_REDACT" ]; then
-      case "${_DC_HTTP_PROTECTED_HEADERS[*]}" in
+    if [ "$_DC_PRIVATE_HTTP_REDACT" ]; then
+      # XXX this is overly aggressive, and will match any header that is a substring of one of the protected headers
+      case "${_DC_PRIVATE_HTTP_PROTECTED_HEADERS[*]}" in
         *$(printf "%s" ${i%%:*} | tr '[:upper:]' '[:lower:]')*)
           output="$output \"${i%%:*}: REDACTED\""
           continue
@@ -241,7 +242,7 @@ _dc::http::logcommand() {
     output="$output \"$i\" "
   done
 
-  dc::logger::info "[dc-http] ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★"
+  # dc::logger::info "[dc-http] ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★"
   dc::logger::info "[dc-http] $output"
-  dc::logger::info "[dc-http] ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★"
+  # dc::logger::info "[dc-http] ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★"
 }

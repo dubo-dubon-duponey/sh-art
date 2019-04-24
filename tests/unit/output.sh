@@ -21,11 +21,11 @@ testOutputJSONValid(){
 
 testOutputJSONInvalidNoJQ(){
   local result
-  _DC_OUTPUT_JSON_JQ=fakejq
+  local previousJQ="$_DC_DEPENDENCIES_B_JQ"
   unset _DC_DEPENDENCIES_B_JQ
-  result="$(dc::output::json "invalid")"
+  result="$(PATH="" dc::output::json "invalid")"
   local exit=$?
-  export _DC_OUTPUT_JSON_JQ=jq
+  _DC_DEPENDENCIES_B_JQ="$previousJQ"
   dc-tools::assert::equal "Exit code should be 0" "$exit" "0"
   dc-tools::assert::equal "$result" 'invalid'
 }

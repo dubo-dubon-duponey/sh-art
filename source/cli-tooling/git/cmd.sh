@@ -33,20 +33,20 @@ dc::git::resignEverything(){
 
 regex="^Signed-off-by: ([^<]+) <([^<>@]+@[^<>]+)>( \\(github: ([a-zA-Z0-9][a-zA-Z0-9-]+)\\))?$"
 
-for commit in $(dc::git::allCommits "$1"); do
+for commit in $(dc::git::allCommits "$DC_PARGV_1"); do
   dc::logger::debug "Analyzing $commit"
-  if [ ! "$(dc::git::commitContent "$1" "$commit")" ]; then
+  if [ ! "$(dc::git::commitContent "$DC_PARGV_1" "$commit")" ]; then
     # no content (ie, Merge commit, etc)
     dc::logger::warning "Ignoring empty merge commit $commit"
     continue
   fi
-  if ! dc::git::commitMessage "$1" "$commit" | grep -qE "$regex"; then
+  if ! dc::git::commitMessage "$DC_PARGV_1" "$commit" | grep -qE "$regex"; then
     badCommits+=( "$commit" )
     dc::logger::error "NOT signed-off appropriately"
   else
     dc::logger::debug "Commit is signed-off appropriately"
   fi
-  if ! dc::git::gpgVerify "$1" "$commit" 2>/dev/null; then
+  if ! dc::git::gpgVerify "$DC_PARGV_1" "$commit" 2>/dev/null; then
     # XXX temporarily disabling this
     # badCommits+=( "$commit" )
     dc::logger::error "NOT gpg signed properly ($commit)"

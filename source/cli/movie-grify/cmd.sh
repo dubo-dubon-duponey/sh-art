@@ -1,49 +1,38 @@
 #!/usr/bin/env bash
 
-# https://trac.ffmpeg.org/wiki/Encode/AAC
+# ffmpeg useful documentation: https://trac.ffmpeg.org/wiki/Encode/AAC
+
 readonly CLI_VERSION="0.1.0"
 readonly CLI_LICENSE="MIT License"
 readonly CLI_DESC="because I never remember how to use ffmpeg"
 
 # Initialize
 dc::commander::initialize
-dc::commander::declare::flag destination ".+" "optional" "where to put the converted file - will default to the same directory if left unspecified"
-dc::commander::declare::flag delete "" "optional" "delete original file after successful conversion if specified"
-dc::commander::declare::flag convert "^[0-9]$" "optional" "track identifier to convert to AAC (typically, an audio track)"
-dc::commander::declare::flag remove "^[0-9]+( [0-9]+)*$" "optional" "one or many (space separated) track identifiers to remove"
-dc::commander::declare::flag extract "^[0-9]+:[^ ]+( [0-9]+:[^ ]+)*$" "optional" "one or many (space separated) streams to extract on the side, with their final format (eg: 4:en.sub)"
+dc::commander::declare::flag destination ".+" optional "where to put the converted file - will default to the same directory if left unspecified"
+dc::commander::declare::flag delete "" optional "delete original file after successful conversion if specified"
+dc::commander::declare::flag convert "^[0-9]$" optional "track identifier to convert to AAC (typically, an audio track)"
+dc::commander::declare::flag remove "^[0-9]+( [0-9]+)*$" optional "one or many (space separated) track identifiers to remove"
+dc::commander::declare::flag extract "^[0-9]+:[^ ]+( [0-9]+:[^ ]+)*$" optional "one or many (space separated) streams to extract on the side, with their final format (eg: 4:en.sub)"
 dc::commander::declare::arg 1 ".+" "" "filename" "media file to process"
-# Start commander
 dc::commander::boot
+
 # Requirements
 dc::require ffmpeg "-version" "3.0"
 
 # Argument 1 is mandatory and must be a readable file
-dc::fs::isfile "$1"
+dc::fs::isfile "$DC_PARGV_1"
 
-filename=$(basename "$1")
+filename=$(basename "$DC_PARGV_1")
 # extension="${filename##*.}"
 filename="${filename%.*}"
 
-# Optional destination must be a writable directory, and create it is it does not exist
+# Optional destination must be a writable directory - create it if not there
 if [ "$DC_ARGV_DESTINATION" ]; then
   dc::fs::isdir "$DC_ARGV_DESTINATION" writable create
-  destination=$DC_ARGV_DESTINATION/$filename
+  destination="$DC_ARGV_DESTINATION/$filename"
 else
-  destination=$(dirname "$1")/$filename-convert
+  destination="$(dirname "$DC_PARGV_1")/$filename-convert"
 fi
-
-# Validate optional arguments syntax
-if [ "$DC_ARGV_CONVERT" ]; then
-  dc::argv::flag::validate convert "^[0-9]$"
-fi
-if [ "$DC_ARGV_REMOVE" ]; then
-  dc::argv::flag::validate remove "^[0-9]+( [0-9]+)*$"
-fi
-if [ "$DC_ARGV_EXTRACT" ]; then
-  dc::argv::flag::validate extract "^[0-9]+:[^ ]+( [0-9]+:[^ ]+)*$"
-fi
-
 
 
 # Add -movflags faststart for web optimized shit
@@ -121,7 +110,7 @@ xxxtranscode::fullmonthy(){
 
 
 
-if ! transmogrify::do "$1" "$destination" "${DC_ARGV_CONVERT}" "${DC_ARGV_REMOVE}" "${DC_ARGV_EXTRACT}"; then
+if ! transmogrify::do "$DC_PARGV_1" "$destination" "${DC_ARGV_CONVERT}" "${DC_ARGV_REMOVE}" "${DC_ARGV_EXTRACT}"; then
   dc::logger::error "Failed to convert $filename!"
   if [ -f "$destination.mp4" ]; then
     rm "$destination.mp4"
@@ -129,11 +118,11 @@ if ! transmogrify::do "$1" "$destination" "${DC_ARGV_CONVERT}" "${DC_ARGV_REMOVE
   exit "$ERROR_FAILED"
 fi
 
-dc::logger::info "Successfully transmogrified $1"
+dc::logger::info "Successfully transmogrified $DC_PARGV_1"
 if [ "$DC_ARGE_DELETE" ] || [ "$DC_ARGE_D" ]; then
   dc::logger::info "Press enter to delete the original"
   dc::prompt::confirm
-  rm "$1"
+  rm "$DC_PARGV_1"
   dc::logger::info "Original deleted"
 else
   dc::logger::info "Original preserved"

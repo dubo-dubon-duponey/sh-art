@@ -2,8 +2,7 @@
 ##########################################################################
 # Colors
 # ------
-# To be used with TPUT
-# See logger and other output methods
+# Used with TPUT - see logger and other output methods
 ##########################################################################
 
 readonly DC_COLOR_BLACK=0

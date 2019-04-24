@@ -28,11 +28,15 @@ dc::require(){
   local binary="$1"
   local versionFlag="$2"
   local version="$3"
+  local provider="$4"
   local varname
   varname=_DC_DEPENDENCIES_B_$(printf "%s" "$binary" | tr '[:lower:]' '[:upper:]')
   if [ ! ${!varname+x} ]; then
     if ! command -v "$binary" >/dev/null; then
       dc::logger::error "You need $binary for this to work."
+      if [ "$provider" ]; then
+        dc::logger::error "$provider"
+      fi
       exit "$ERROR_MISSING_REQUIREMENTS"
     fi
     read -r "${varname?}" < <(printf "true")

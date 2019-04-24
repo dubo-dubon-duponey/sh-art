@@ -6,7 +6,7 @@ readonly CLI_DESC="imdb json client, with caching"
 # Init
 dc::commander::initialize
 # Flags
-dc::commander::declare::flag image "^(show|dump)$" "optional" "retrieve the cover image and print it to stdout ('dump') or display it (iterm2 only, 'show')"
+dc::commander::declare::flag image "^(show|dump)$" optional "retrieve the cover image and print it to stdout ('dump') or display it (iterm2 only, 'show')"
 dc::commander::declare::arg 1 "^tt[0-9]{7}$" "" "imdbID" "the id of the movie (eg: tt0000001)"
 # Start commander
 dc::commander::boot
@@ -18,7 +18,7 @@ dc-ext::sqlite::init "$HOME/tmp/dc-client-imdb/cache.db"
 dc-ext::http-cache::init
 
 # Request the main page and get the body
-dc-ext::http-cache::request "https://www.imdb.com/title/$1/" GET
+dc-ext::http-cache::request "https://www.imdb.com/title/$DC_PARGV_1/" GET
 body="$(printf "%s" "$DC_HTTP_BODY" | dc::portable::base64d | tr '\n' ' ')"
 
 # Extract the shema.org section, then the original title and picture url
@@ -40,7 +40,7 @@ if [ "$DC_ARGE_IMAGE" ]; then
       dc::logger::error "You need iTerm2 to display the image"
       exit "$ERROR_FAILED"
     fi
-    printf "\\033]1337;File=name=%s;inline=1;preserveAspectRatio=true;width=50:%s\\a" "$1" "$DC_HTTP_BODY"
+    printf "\\033]1337;File=name=%s;inline=1;preserveAspectRatio=true;width=50:%s\\a" "$DC_PARGV_1" "$DC_HTTP_BODY"
     exit
   fi
   printf "%s" "$DC_HTTP_BODY" | dc::portable::base64d
@@ -52,17 +52,15 @@ fi
 
 # Process the body to get the title, year and type
 cleaned=$(printf "%s" "${body}" | sed -E "s/.*<meta property='og:title' ([^>]+).*/\\1/" | sed -E 's/.*content=\"([^\"]+)\".*/\1/')
-IMDB_YEAR=$(printf "%s" "$cleaned" | sed -E "s/.*[(]([^)]*[0-9]{4}[–0-9]*)[)]/\\1/")
-IMDB_TYPE=${IMDB_YEAR% *}
+IMDB_YEAR=$(printf "%s" "$cleaned" | sed -E "s/^.*[(]([^)]*[0-9]{4}[–0-9]*)[)].*/\\1/")
 IMDB_YEAR=${IMDB_YEAR##* }
-if [ "$IMDB_TYPE" == "$IMDB_YEAR" ]; then
-  IMDB_TYPE="movie"
-fi
-IMDB_TITLE=$(printf "%s" "$cleaned" | sed -E "s/(.*)[[:space:]]+[(][^)]*[0-9]{4}[–0-9]*[)]/\\1/" | sed -E 's/&quot;/"/g')
+IMDB_TITLE=$(printf "%s" "$cleaned" | sed -E "s/(.*)[[:space:]]+[(][^)]*[0-9]{4}[–0-9]*[)].*/\\1/" | sed -E 's/&quot;/"/g')
 
+cleaned=$(printf "%s" "${body}" | sed -E "s/.*<meta property='og:type' ([^>]+).*/\\1/" | sed -E 's/.*content=\"([^\"]+)\".*/\1/')
+IMDB_TYPE=$(printf "%s" "$cleaned")
 
 # Now, fetch the technical specs
-dc-ext::http-cache::request "https://www.imdb.com/title/$1/technical" GET
+dc-ext::http-cache::request "https://www.imdb.com/title/$DC_PARGV_1/technical" GET
 
 ALL_IMDB_KEYS=()
 extractTechSpecs(){
@@ -126,7 +124,7 @@ output=$(printf "%s" "{$heads}" | jq --arg title "$IMDB_TITLE" \
   --arg picture "$IMDB_PICTURE" \
   --argjson runtime "[\"$result\"]" \
   --arg type "$IMDB_TYPE" \
-  --arg id "$1" \
+  --arg id "$DC_PARGV_1" \
   --arg ratio "$IMDB_ASPECT_RATIO" -rc '{
   title: $title,
   original: $original,

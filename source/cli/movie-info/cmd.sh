@@ -15,9 +15,9 @@ dc::require ffprobe
 dc::optional mp4info
 
 # Argument 1 is mandatory and must be a readable file
-dc::fs::isfile "$1"
+dc::fs::isfile "$DC_PARGV_1"
 
-filename="$1"
+filename="$DC_PARGV_1"
 dc::logger::info "[movie-info] $filename"
 
 

@@ -6,7 +6,7 @@ readonly CLI_DESC="because I never remember how to use ffmpeg"
 
 # Initialize
 dc::commander::initialize
-dc::commander::declare::flag destination ".+" "optional" "where to put the converted file - will default to the same directory if left unspecified"
+dc::commander::declare::flag destination ".+" optional "where to put the converted file - will default to the same directory if left unspecified"
 dc::commander::declare::arg 1 ".+" "" "filename" "movie file to be checked / converted"
 # Start commander
 dc::commander::boot
@@ -15,9 +15,9 @@ dc::require jq
 dc::require dc-movie-info
 dc::require dc-movie-grify
 
-dc::logger::info "Analyzing $1"
+dc::logger::info "Analyzing $DC_PARGV_1"
 
-if ! data="$(dc-movie-info -s "$1")"; then
+if ! data="$(dc-movie-info -s "$DC_PARGV_1")"; then
   dc::logger::error " > Media info analysis failed. Exiting."
   exit "$ERROR_FAILED"
 fi
@@ -157,7 +157,7 @@ ALERT_SUBS=$(printf "%s" "$ALL_SUBTITLES" | jq -r -c '[.[] | select(.codec == "d
 # EXTRACT=( $(echo $ALL_SUBTITLES | jq -r -c '.[] | (.id | tostring)') )
 
 if [ "$ALERT_SUBS" -ge 1 ]; then
-  dc::logger::error " > This file contains unprocessable subtitles that will get dropped. You should extract out of band with mkvextract tracks \"$1\" X:\"$1\""
+  dc::logger::error " > This file contains unprocessable subtitles that will get dropped. You should extract out of band with mkvextract tracks \"$DC_PARGV_1\" X:\"$DC_PARGV_1\""
   dc::logger::warning " > Press enter to continue (warning again: this sub WILL BE REMOVED)"
   dc::prompt::confirm
 fi
@@ -195,15 +195,15 @@ if [ "${ALSO_REMOVE[*]}" ]; then
   # XXX dirty hack to still extract them
   # XXX
   #for i in ${ALSO_REMOVE[@]}; do
-  #  echo mkvextract tracks "$1" $i:"$1.srt"
-  #  echo $(mkvextract tracks "$1" $i:"$1.srt")
+  #  echo mkvextract tracks "$DC_PARGV_1" $i:"$DC_PARGV_1.srt"
+  #  echo $(mkvextract tracks "$DC_PARGV_1" $i:"$DC_PARGV_1.srt")
   #done
 fi
 
 CONVERT=$MUST_CONVERT_AUDIO
 
 if [ "$CONTAIN" ] || [ "$OPTIMIZE" ] || [ "$CONVERT" ] || [ "$REMOVE" ] || [ "${EXTRACT[*]}" ]; then
-  dc-movie-grify --destination="$DC_ARGV_DESTINATION" --convert="$CONVERT" --remove="$REMOVE" --extract="${EXTRACT[*]}" "$1"
+  dc-movie-grify --destination="$DC_ARGV_DESTINATION" --convert="$CONVERT" --remove="$REMOVE" --extract="${EXTRACT[*]}" "$DC_PARGV_1"
   dc::logger::info " > Done"
   # dc::prompt::confirm
 else

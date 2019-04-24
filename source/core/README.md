@@ -32,22 +32,22 @@ myscript --something-special=foo
 <!--
 #### Methods
 
-`dc::argv::flag::validate something-special`
+`dc::args::flag::validate something-special`
 
  * will require that `--something-special` is passed on the command-line, with or without a value
  * will exit with `$ERROR_ARGUMENT_MISSING` if this is not true
 
-`dc::argv::arg::validate 2`
+`dc::args::arg::validate 2`
 
  * will require that argument (non-flag) number two is set
  * will exit with `$ERROR_ARGUMENT_MISSING` if this is not true
 
-`dc::argv::flag::validate something-special REGEXP`
+`dc::args::flag::validate something-special REGEXP`
 
  * will require that `--something-special` is passed on the command-line, and its value matches the regexp
  * will exit with `$ERROR_ARGUMENT_INVALID` if this is not true
 
-`dc::argv::arg::validate 2 REGEXP`
+`dc::args::arg::validate 2 REGEXP`
 
  * will require that argument (non-flag) number two is set, and its value matches the regexp
  * will exit with `$ERROR_ARGUMENT_INVALID` if this is not true
@@ -66,7 +66,7 @@ Example implementation:
 
 ```
 dc::commander::initialize
-dc::commander::declare::flag myflag "^(foo|bar)$" "optional" "a flag that does foo or bar"
+dc::commander::declare::flag myflag "^(foo|bar)$" optional "a flag that does foo or bar"
 dc::commander::declare::arg 1 "[0-9]+" "" "first mandatory argument, that must be an integer"
 dc::commander::boot
 ```
