@@ -5,7 +5,7 @@
 
 testHTTPDNSResolutionFailure(){
   # DNS resolution failure
-  result=$(dc-http -s https://WHATEVERTHISISITWILLFAIL  "HEAD")
+  result=$(dc-http -s -m=HEAD https://WHATEVERTHISISITWILLFAIL)
   exit=$?
   dc-tools::assert::equal "http dns failure exit code" "$exit" "$ERROR_NETWORK"
   dc-tools::assert::equal "$result" ""
@@ -13,7 +13,7 @@ testHTTPDNSResolutionFailure(){
 
 testHTTPNoServer(){
   # No response at that address
-  result=$(dc-http -s https://locahost:12345 "HEAD")
+  result=$(dc-http -s -m=HEAD https://locahost:12345)
   exit=$?
   dc-tools::assert::equal "$exit" "$ERROR_NETWORK"
   dc-tools::assert::equal "$result" ""
@@ -21,7 +21,7 @@ testHTTPNoServer(){
 
 testHTTPUnexpectedTLS(){
   # HTTP on HTTPS
-  result=$(dc-http -s https://www.google.com:80 "HEAD")
+  result=$(dc-http -s -m=HEAD https://www.google.com:80)
   exit=$?
   dc-tools::assert::equal "$exit" "$ERROR_NETWORK"
   dc-tools::assert::equal "$result" ""
@@ -29,7 +29,7 @@ testHTTPUnexpectedTLS(){
 
 testHTTPUnexpectedNoTLS(){
   # HTTPS on HTTP
-  result=$(dc-http -s http://www.google.com:443 "HEAD")
+  result=$(dc-http -s -m=HEAD http://www.google.com:443)
   exit=$?
   dc-tools::assert::equal "$exit" "$ERROR_NETWORK"
   dc-tools::assert::equal "$result" ""
@@ -37,7 +37,7 @@ testHTTPUnexpectedNoTLS(){
 
 testHTTPRedirect(){
   # Redirect
-  result=$(dc-http -s https://google.com "HEAD")
+  result=$(dc-http -s -m=HEAD https://google.com)
   exit=$?
   status="$(printf "%s" "$result" | jq -r -c .status)"
   redirected="$(printf "%s" "$result" | jq -r -c .redirected)"
@@ -53,7 +53,7 @@ testHTTPRedirect(){
 
 testHTTPValidHEAD(){
   # Valid HEAD request
-  result=$(dc-http -s https://www.google.com "HEAD")
+  result=$(dc-http -s -m=HEAD https://www.google.com)
   exit=$?
   status="$(printf "%s" "$result" | jq -r -c .status)"
   redirected="$(printf "%s" "$result" | jq -r -c .redirected)"
@@ -67,7 +67,7 @@ testHTTPValidHEAD(){
 
 testHTTPValidGET(){
   # Valid GET request
-  result=$(dc-http -s https://registry-1.docker.io/v2 "GET")
+  result=$(dc-http -s -m=GET https://registry-1.docker.io/v2)
   exit=$?
   status="$(printf "%s" "$result" | jq -r -c .status)"
   redirected="$(printf "%s" "$result" | jq -r -c .redirected)"
