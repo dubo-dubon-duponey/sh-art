@@ -81,3 +81,7 @@ Specific binaries may also require additional binaries like `git`, `file`, `sqli
 
  * it's a portementeau: "sh" (short for "shell") + "art" (short for "I like it"), which somewhat makes sense - what did you think it meant?
  * if it was powershell instead of bash, it would probably have been named `phart`, which doesn't really sound right
+
+## License
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fdubo-dubon-duponey%2Fsh-art.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fdubo-dubon-duponey%2Fsh-art?ref=badge_large)
