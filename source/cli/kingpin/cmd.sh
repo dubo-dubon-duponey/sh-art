@@ -76,7 +76,8 @@ _setit(){
   nvm install "$1"
   nvm use "$1"
   npm install -g yarn
-  yarn global add gulp slush ember-cli create-react-app
+  # XXX slush cli as well?
+  yarn global add gulp-cli slush ember-cli create-react-app
 }
 
 get::node(){
