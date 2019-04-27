@@ -23,6 +23,7 @@ testOutputJSONInvalidNoJQ(){
   local result
   local previousJQ="$_DC_DEPENDENCIES_B_JQ"
   unset _DC_DEPENDENCIES_B_JQ
+  # XXX this will also fuck tput and date
   result="$(PATH="" dc::output::json "invalid")"
   local exit=$?
   _DC_DEPENDENCIES_B_JQ="$previousJQ"
