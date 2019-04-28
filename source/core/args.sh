@@ -80,6 +80,9 @@ dc::args::flag::validate()
   fi
 
   if [ "$regexp" ]; then
+    if [ "$regexp" == "^$" ] && [ ! "${!var}" ]; then
+      return
+    fi
     if ! printf "%s" "${!var}" | grep -q "$extended" "$regexp"; then
       dc::logger::error "Flag \"$(printf "%s" "$1" | tr "_" "-" | tr '[:upper:]' '[:lower:]')\" is invalid. Provided value \"${!var}\" does not match \"$regexp\"."
       exit "$ERROR_ARGUMENT_INVALID"
@@ -106,6 +109,9 @@ dc::args::arg::validate()
   fi
 
   if [ "$regexp" ]; then
+    if [ "$regexp" == "^$" ] && [ ! "${!var}" ]; then
+      return
+    fi
     if ! printf "%s" "${!var}" | grep -q "$extended" "$regexp"; then
       dc::logger::error "Argument \"$1\" is invalid. Provided value \"${!var}\" does not match \"$regexp\"."
       exit "$ERROR_ARGUMENT_INVALID"

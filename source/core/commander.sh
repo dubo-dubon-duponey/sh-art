@@ -129,7 +129,7 @@ dc::commander::declare::flag(){
     display="$display/-$alias"
     long="$long, -$alias"
   fi
-  if [ "$validator" ]; then
+  if [ "$validator" ] && [ "$validator" != "^$" ]; then
     display="$display=$validator"
     long="$long=value"
   fi
