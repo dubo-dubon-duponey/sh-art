@@ -4,7 +4,7 @@ readonly CLI_DESC="a ridiculously stupid bootstrapper to setup pyenv, nvm, and g
 
 # Initialize
 dc::commander::initialize
-dc::commander::declare::arg 1 "^(go|node|python)$" "" "target" "target environment to install"
+dc::commander::declare::arg 1 "^(go|node|python)$" "target" "target environment to install"
 # Start commander
 dc::commander::boot
 

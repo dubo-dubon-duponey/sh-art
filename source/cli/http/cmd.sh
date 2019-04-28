@@ -4,12 +4,12 @@ readonly CLI_DESC="just curl, in a nicer, json-way"
 
 # Initialize
 dc::commander::initialize
-dc::commander::declare::flag "method" "^[a-zA-Z]+$" optional "http method (default to GET)" "m"
-dc::commander::declare::flag "file" ".+" optional "file to use as payload" "f"
-dc::commander::declare::arg 1 ".+" "" "url" "url to query"
-# dc::commander::declare::arg 2 "" optional "method" "http method (default to GET)"
-# dc::commander::declare::arg 2 "" optional "payload" "file payload to post"
-dc::commander::declare::arg 2 "" optional "[...headers]" "additional headers to be passed"
+dc::commander::declare::flag "method" "^[a-zA-Z]+$" "http method (default to GET)" optional "m"
+dc::commander::declare::flag "file" ".+" "file to use as payload" optional "f"
+dc::commander::declare::arg 1 ".+" "url" "url to query"
+# dc::commander::declare::arg 2 "" "method" "http method (default to GET)" optional
+# dc::commander::declare::arg 2 "" "payload" "file payload to post" optional
+dc::commander::declare::arg 2 "^$" "[...headers]" "additional headers to be passed" optional
 dc::commander::boot
 
 # Requirements

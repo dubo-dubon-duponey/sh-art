@@ -32,8 +32,8 @@ readonly CLI_DESC="super top dupper awesome"
 
 # Declare flags and arguments
 dc::commander::initialize
-dc::commander::declare::flag myflag "^(foo|bar)$" optional "a flag that does foo or bar"
-dc::commander::declare::arg 1 "[0-9]+" "" "somearg" "first mandatory argument, that must be an integer"
+dc::commander::declare::flag myflag "^(foo|bar)$" "a flag that does foo or bar" optional
+dc::commander::declare::arg 1 "[0-9]+" "somearg" "first mandatory argument, that must be an integer"
 dc::commander::boot
 
 # State that you need the `find` binary

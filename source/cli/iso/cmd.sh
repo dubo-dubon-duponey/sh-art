@@ -4,10 +4,10 @@ readonly CLI_DESC="creates or mount/unmount iso files from a folder (because I n
 
 # Initialize
 dc::commander::initialize
-dc::commander::declare::flag file ".+" optional "the iso filename (on create, default to the source directory name otherwise)"
-dc::commander::declare::flag name ".+" optional "the descriptive name of the iso (fallback to filename othername"
-dc::commander::declare::flag source ".+" optional "on create, the directory path from which to create the iso"
-dc::commander::declare::arg 1 "^(create|mount|unmount)$" "" "action" "action to perform"
+dc::commander::declare::flag file ".+" "the iso filename (on create, default to the source directory name otherwise)" optional
+dc::commander::declare::flag name ".+" "the descriptive name of the iso (fallback to filename othername" optional
+dc::commander::declare::flag source ".+" "on create, the directory path from which to create the iso" optional
+dc::commander::declare::arg 1 "^(create|mount|unmount)$" "action" "action to perform"
 # Start commander
 dc::commander::boot
 

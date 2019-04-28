@@ -61,7 +61,7 @@ dc::commander::help(){
     local v
     while read -r v; do
       if [ "${v:0:1}" == ">" ]; then
-        printf "    %s\n" "$v"
+        printf "    %s\\n" "$v"
       elif [ "$v" ]; then
         dc::output::bullet "$v"
       else
@@ -88,20 +88,21 @@ dc::commander::version(){
 dc::commander::declare::arg(){
   local number="$1"
   local validator="$2"
-  local optional="$3"
-  local fancy="$4"
-  local description="$5"
-
-  if [ "${DC_CLI_USAGE}" ]; then
-    fancy=" $fancy"
-  fi
+  local fancy="$3"
+  local description="$4"
+  local optional="$5"
 
   local long="$fancy"
   long=$(printf "%-20s" "$long")
   if [ "$optional" ]; then
-    long="$long  (optional)"
+    fancy="[$fancy]"
+    long="$long (optional)"
   else
-    long="$long            "
+    long="$long           "
+  fi
+
+  if [ "${DC_CLI_USAGE}" ]; then
+    fancy=" $fancy"
   fi
 
   DC_CLI_USAGE="${DC_CLI_USAGE}$fancy"
@@ -119,8 +120,8 @@ dc::commander::declare::arg(){
 dc::commander::declare::flag(){
   local name="$1"
   local validator="$2"
-  local optional="$3"
-  local description="$4"
+  local description="$3"
+  local optional="$4"
   local alias="$5"
 
   local display="--$name"
@@ -187,8 +188,8 @@ dc::commander::declare::flag(){
 # The same goes for the *CLI_NAME*_LOG_AUTH environment variable
 
 dc::commander::initialize(){
-  dc::commander::declare::flag "silent" "" optional "silence all logging (overrides log level)" "s"
-  dc::commander::declare::flag "insecure" "" optional "disable TLS verification for network operations"
+  dc::commander::declare::flag "silent" "^$" "no logging (overrides log level) - equivalent to: ${CLI_NAME:-${DC_CLI_NAME}} 2>/dev/null" optional "s"
+  dc::commander::declare::flag "insecure" "^$" "disable TLS verification for network operations" optional
 
   local loglevelvar
   local logauthvar

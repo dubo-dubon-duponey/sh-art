@@ -6,7 +6,7 @@ readonly CLI_DESC="spits out information about media files in a json format (dur
 
 # Initialize
 dc::commander::initialize
-dc::commander::declare::arg 1 ".+" "" "filename" "media file to be analyzed"
+dc::commander::declare::arg 1 ".+" "filename" "media file to be analyzed"
 # Start commander
 dc::commander::boot
 # Requirements

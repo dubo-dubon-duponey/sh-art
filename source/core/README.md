@@ -66,8 +66,8 @@ Example implementation:
 
 ```
 dc::commander::initialize
-dc::commander::declare::flag myflag "^(foo|bar)$" optional "a flag that does foo or bar"
-dc::commander::declare::arg 1 "[0-9]+" "" "first mandatory argument, that must be an integer"
+dc::commander::declare::flag myflag "^(foo|bar)$" "a flag that does foo or bar" optional
+dc::commander::declare::arg 1 "[0-9]+" "first mandatory argument, that must be an integer"
 dc::commander::boot
 ```
 

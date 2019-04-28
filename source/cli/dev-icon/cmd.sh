@@ -4,8 +4,8 @@ readonly CLI_DESC="makes macos and windows icons out of a png file"
 
 # Initialize
 dc::commander::initialize
-dc::commander::declare::flag preserve "" optional "do not delete intermediary files" p
-dc::commander::declare::arg 1 ".+" "" "image" "the path to the png image to use"
+dc::commander::declare::flag preserve "^$" "do not delete intermediary files" optional p
+dc::commander::declare::arg 1 ".+" "image" "the path to the png image to use"
 dc::commander::boot
 
 # Requirements

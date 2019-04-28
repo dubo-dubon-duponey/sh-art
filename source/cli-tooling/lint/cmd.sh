@@ -4,7 +4,7 @@ readonly CLI_DESC="script linter based on shellcheck"
 
 # Initialize
 dc::commander::initialize
-dc::commander::declare::arg 1 ".+" "" "source" "Source file (or directory) to lint"
+dc::commander::declare::arg 1 ".+" "source" "Source file (or directory) to lint"
 # Start commander
 dc::commander::boot
 dc::require shellcheck "--version" "0.5"
