@@ -19,11 +19,11 @@ export DC_CLI_OPTS=()
 # Override this method in your script to define your own help
 dc::commander::help(){
   local name="$1"
-  local version="$2"
-  local license="$3"
-  local shortdesc="$4"
-  local shortusage="$5"
-  local long="$6"
+  local license="$2"
+  local shortdesc="$3"
+  local shortusage="$4"
+  local long="$5"
+  local examples="$6"
 
   dc::output::h1 "$name"
   dc::output::quote "$shortdesc"
@@ -51,9 +51,25 @@ dc::commander::help(){
   dc::output::bullet "$(printf "%s" "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_LEVEL=(debug|info|warning|error) will adjust logging level (default to info)"
   dc::output::bullet "$(printf "%s" "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_AUTH=true will also log sensitive/credentials information (CAREFUL)"
 
-  dc::output::h2 "Version"
-  dc::output::text "$version"
-  dc::output::break
+# This is visible through the --version flag anyway...
+#  dc::output::h2 "Version"
+#  dc::output::text "$version"
+#  dc::output::break
+
+  if [ "$examples" ]; then
+    dc::output::h2 "Examples"
+    local v
+    while read -r v; do
+      if [ "${v:0:1}" == ">" ]; then
+        printf "    %s\n" "$v"
+      elif [ "$v" ]; then
+        dc::output::bullet "$v"
+      else
+        dc::output::break
+      fi
+    done < <(printf "%s" "$examples")
+    dc::output::break
+  fi
 
   dc::output::h2 "License"
   dc::output::text "$license"
@@ -218,11 +234,11 @@ dc::commander::boot(){
 
     dc::commander::help \
       "${CLI_NAME:-${DC_CLI_NAME}}" \
-      "${CLI_VERSION:-${DC_CLI_VERSION}}" \
       "${CLI_LICENSE:-${DC_CLI_LICENSE}}" \
       "${CLI_DESC:-${DC_CLI_DESC}}" \
       "${CLI_USAGE:-${DC_CLI_USAGE}}" \
-      "${CLI_OPTS:-$opts}"
+      "${CLI_OPTS:-$opts}" \
+      "${CLI_EXAMPLES}"
     exit
   fi
 
