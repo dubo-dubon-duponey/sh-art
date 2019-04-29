@@ -1,6 +1,21 @@
 #!/usr/bin/env bash
 
 readonly CLI_DESC="just curl, in a nicer, json-way"
+readonly CLI_EXAMPLES="Simple get request, get the Date reponse header
+> dc-http -s localhost:5000 | jq -r .headers.DATE
+
+Echo the body of the response of a complex PUT request
+> echo 'something' | dc-http -s --method=PUT --file=/dev/stdin http://localhost:5000 'User-Agent: pouic-pouic/alpha-omega' | jq -rc .body | base64 -D
+
+To submit a file:
+> dc-http -s --method=PUT --file=some_file_somewhere http://server
+
+To submit something you already have around you can either:
+> printf '%s' 'some payload' | dc-http -s --method=PUT --file=/dev/stdin http://server
+
+Or:
+> dc-http -s --method=PUT --file=/dev/stdin http://server < <(printf '%s' 'some payload')
+"
 
 # Initialize
 dc::commander::initialize
@@ -15,9 +30,7 @@ dc::commander::boot
 # Requirements
 dc::require jq
 
-# XXX "$(<some_file)" to pass stdin?
 # URL METHOD PAYLOAD HEADERS
-# XXX implement --method and stdin payload
 opts=( "$DC_PARGV_1" "${DC_ARGV_METHOD:-$DC_ARGV_M}" "${DC_ARGV_FILE:-$DC_ARGV_F}" )
 x=2
 e="DC_PARGE_$x"
