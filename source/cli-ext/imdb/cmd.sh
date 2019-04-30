@@ -6,8 +6,8 @@ readonly CLI_DESC="imdb json client, with caching"
 # Init
 dc::commander::initialize
 # Flags
-dc::commander::declare::flag image "^(show|dump)$" optional "retrieve the cover image and print it to stdout ('dump') or display it (iterm2 only, 'show')"
-dc::commander::declare::arg 1 "^tt[0-9]{7}$" "" "imdbID" "the id of the movie (eg: tt0000001)"
+dc::commander::declare::flag image "^(show|dump)$" "retrieve the cover image and print it to stdout ('dump') or display it (iterm2 only, 'show')" optional
+dc::commander::declare::arg 1 "^tt[0-9]{7}$" "imdbID" "the id of the movie (eg: tt0000001)"
 # Start commander
 dc::commander::boot
 # Requirements

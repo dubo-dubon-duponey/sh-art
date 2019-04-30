@@ -19,11 +19,11 @@ export DC_CLI_OPTS=()
 # Override this method in your script to define your own help
 dc::commander::help(){
   local name="$1"
-  local version="$2"
-  local license="$3"
-  local shortdesc="$4"
-  local shortusage="$5"
-  local long="$6"
+  local license="$2"
+  local shortdesc="$3"
+  local shortusage="$4"
+  local long="$5"
+  local examples="$6"
 
   dc::output::h1 "$name"
   dc::output::quote "$shortdesc"
@@ -51,9 +51,25 @@ dc::commander::help(){
   dc::output::bullet "$(printf "%s" "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_LEVEL=(debug|info|warning|error) will adjust logging level (default to info)"
   dc::output::bullet "$(printf "%s" "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_AUTH=true will also log sensitive/credentials information (CAREFUL)"
 
-  dc::output::h2 "Version"
-  dc::output::text "$version"
-  dc::output::break
+# This is visible through the --version flag anyway...
+#  dc::output::h2 "Version"
+#  dc::output::text "$version"
+#  dc::output::break
+
+  if [ "$examples" ]; then
+    dc::output::h2 "Examples"
+    local v
+    while read -r v; do
+      if [ "${v:0:1}" == ">" ]; then
+        printf "    %s\\n" "$v"
+      elif [ "$v" ]; then
+        dc::output::bullet "$v"
+      else
+        dc::output::break
+      fi
+    done < <(printf "%s" "$examples")
+    dc::output::break
+  fi
 
   dc::output::h2 "License"
   dc::output::text "$license"
@@ -72,20 +88,21 @@ dc::commander::version(){
 dc::commander::declare::arg(){
   local number="$1"
   local validator="$2"
-  local optional="$3"
-  local fancy="$4"
-  local description="$5"
-
-  if [ "${DC_CLI_USAGE}" ]; then
-    fancy=" $fancy"
-  fi
+  local fancy="$3"
+  local description="$4"
+  local optional="$5"
 
   local long="$fancy"
   long=$(printf "%-20s" "$long")
   if [ "$optional" ]; then
-    long="$long  (optional)"
+    fancy="[$fancy]"
+    long="$long (optional)"
   else
-    long="$long            "
+    long="$long           "
+  fi
+
+  if [ "${DC_CLI_USAGE}" ]; then
+    fancy=" $fancy"
   fi
 
   DC_CLI_USAGE="${DC_CLI_USAGE}$fancy"
@@ -103,8 +120,8 @@ dc::commander::declare::arg(){
 dc::commander::declare::flag(){
   local name="$1"
   local validator="$2"
-  local optional="$3"
-  local description="$4"
+  local description="$3"
+  local optional="$4"
   local alias="$5"
 
   local display="--$name"
@@ -113,7 +130,7 @@ dc::commander::declare::flag(){
     display="$display/-$alias"
     long="$long, -$alias"
   fi
-  if [ "$validator" ]; then
+  if [ "$validator" ] && [ "$validator" != "^$" ]; then
     display="$display=$validator"
     long="$long=value"
   fi
@@ -171,8 +188,8 @@ dc::commander::declare::flag(){
 # The same goes for the *CLI_NAME*_LOG_AUTH environment variable
 
 dc::commander::initialize(){
-  dc::commander::declare::flag "silent" "" optional "silence all logging (overrides log level)" "s"
-  dc::commander::declare::flag "insecure" "" optional "disable TLS verification for network operations"
+  dc::commander::declare::flag "silent" "^$" "no logging (overrides log level) - equivalent to: ${CLI_NAME:-${DC_CLI_NAME}} 2>/dev/null" optional "s"
+  dc::commander::declare::flag "insecure" "^$" "disable TLS verification for network operations" optional
 
   local loglevelvar
   local logauthvar
@@ -218,11 +235,11 @@ dc::commander::boot(){
 
     dc::commander::help \
       "${CLI_NAME:-${DC_CLI_NAME}}" \
-      "${CLI_VERSION:-${DC_CLI_VERSION}}" \
       "${CLI_LICENSE:-${DC_CLI_LICENSE}}" \
       "${CLI_DESC:-${DC_CLI_DESC}}" \
       "${CLI_USAGE:-${DC_CLI_USAGE}}" \
-      "${CLI_OPTS:-$opts}"
+      "${CLI_OPTS:-$opts}" \
+      "${CLI_EXAMPLES}"
     exit
   fi
 

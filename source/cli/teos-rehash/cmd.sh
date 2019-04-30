@@ -6,7 +6,7 @@ readonly CLI_DESC="movies filesystem organizer"
 
 # Boot
 dc::commander::initialize
-dc::commander::declare::arg 1 ".+" "" "directory" "the directory to analyze. The name must contain an imdb identifier (eg: tt0000001)"
+dc::commander::declare::arg 1 ".+" "directory" "the directory to analyze. The name must contain an imdb identifier (eg: tt0000001)"
 # Start commander
 dc::commander::boot
 

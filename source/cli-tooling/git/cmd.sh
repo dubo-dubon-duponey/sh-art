@@ -4,7 +4,7 @@ readonly CLI_DESC="git sign-of & gpg verification helper"
 
 # Initialize
 dc::commander::initialize
-dc::commander::declare::arg 1 ".+" "" "source" "Source file (or directory) in a git tree"
+dc::commander::declare::arg 1 ".+" "source" "Source file (or directory) in a git tree"
 # Start commander
 dc::commander::boot
 # Requirements
