@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-_here=$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)
+readonly _here=$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)
 
 # shellcheck source=/dev/null
 . "$_here/source/cli-tooling/build/base-build.sh"
