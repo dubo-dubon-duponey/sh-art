@@ -32,8 +32,6 @@ dc-ext::sqlite::insert(){
   local table="$1"
   local fields="$2"
   local values="$3"
-  shift
-  shift
   printf "%s" "INSERT INTO $table ($fields) VALUES ($values);" | sqlite3 "$_DC_EXT_SQLITE_DB"
 }
 
