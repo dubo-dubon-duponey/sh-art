@@ -17,7 +17,7 @@ dc::require ffmpeg "-version" "3.0"
 
 # Get argument and destination flag
 filename="$DC_PARGV_1"
-destination=${DC_ARGV_DESTINATION:-$(dirname "$filename")}
+destination="${DC_ARGV_DESTINATION:-$(dirname "$filename")}"
 
 # Filename is mandatory and must be a readable file
 dc::fs::isfile "$filename"
@@ -26,12 +26,12 @@ dc::fs::isfile "$filename"
 dc::fs::isdir "$destination" writable create
 
 # Process filename
-filename=$(basename "$filename")
+filename="$(basename "$filename")"
 # extension="${filename##*.}"
 filename="${filename%.*}"
 
 # Alac by default
-codec=${DC_ARGV_CODEC:-alac}
+codec=${DC_ARGV_CODEC:-flac}
 
 # Prepare command line
 ar=( "-hide_banner" "-v" 8 "-i" "$DC_PARGV_1" "-vn" "-codec:a" )
