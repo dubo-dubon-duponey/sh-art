@@ -22,3 +22,6 @@ readonly ERROR_FAILED=204
 readonly ERROR_FILESYSTEM=205
 # System requirements
 readonly ERROR_MISSING_REQUIREMENTS=206
+
+# Crypto errors
+readonly ERROR_SHASUM_FAILED=210
