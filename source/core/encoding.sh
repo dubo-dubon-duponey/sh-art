@@ -2,6 +2,8 @@
 
 # Convert all files to utf8
 encoding::toutf8(){
+  dc::require uchardet
+
   local file="$1"
   local result
   local source
