@@ -17,6 +17,8 @@ dc::crypto::shasum::compute(){
   dc::require shasum
   local file="$1"
   local type="${2:-256}"
+  local raw="$3"
+  [ "$raw" ] && raw="" || raw="sha${type}:"
   digest=$(shasum -a "$type" "$file" 2>/dev/null)
-  printf "%s" "sha256:${digest%% *}"
+  printf "%s" "$raw${digest%% *}"
 }
