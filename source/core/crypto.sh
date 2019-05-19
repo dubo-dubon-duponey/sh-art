@@ -16,6 +16,7 @@ dc::crypto::shasum::verify(){
 dc::crypto::shasum::compute(){
   dc::require shasum
   local file="$1"
-  digest=$(shasum -a 256 "$file" 2>/dev/null)
+  local type="${2:-256}"
+  digest=$(shasum -a "$type" "$file" 2>/dev/null)
   printf "%s" "sha256:${digest%% *}"
 }
