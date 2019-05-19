@@ -105,6 +105,9 @@ Currently test on macOS, Ubuntu 14.04 and 16.04.
  * explore using curl -w to build an HTTP perf/security testing tool
  * make a call on passing by reference or not for the string API: http://fvue.nl/wiki/Bash:_Passing_variables_by_reference
 
+ * use FUNCNAME to mangle local variables name so to avoid collisions
+ * finish queue manager
+
 <!--
 ```
 https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
