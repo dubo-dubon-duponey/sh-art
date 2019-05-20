@@ -17,5 +17,5 @@ encoding::toutf8(){
     exit "$ERROR_FAILED"
   fi
   dc::logger::debug "Successfully converted encoding for $file (initially $source)"
-  printf "%s\n" "$result"
+  printf "%s\\n" "$result"
 }
