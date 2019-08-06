@@ -61,7 +61,7 @@ Look into the individual `--help`s for details.
 3. call `make lint` to enforce syntax and commit checks
 4. create integration tests under `tests/integration/mycli` and run `make test`
 
-## Docker integration
+## Docker testing & integration
 
 Use [dckr](https://github.com/dubo-dubon-duponey/dckr).
 
@@ -69,7 +69,7 @@ On mac, `brew install dubo-dubon-duponey/brews/dckr`
 
 Then just run any of the make commands with `dckr`.
 
-For example: `DOCKERFILE=Dockerfile dckr make test-unit`
+For example: `DOCKERFILE=./dckr.Dockerfile dckr make test-unit`
 
 By default, this will target Ubuntu 18.04 (aka `ubuntu-lts-current`).
 

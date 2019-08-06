@@ -7,10 +7,10 @@
 
 Developing marginally complex command line utilities using bash in a consistent manner presents challenges.
 
-This project aims at providing a generic library facilitating that, primarily driven by personal needs.
+This project aims at providing a generic library facilitating that task, driven by personal needs.
 
 Specifically, it takes care of argument parsing and validation, logging, http, string manipulation
-and other commodities in a consistent, elegant fashion.
+and other commodities in a consistent fashion.
 
 ## TL;DR
 
@@ -20,7 +20,7 @@ You can then use one of the example binaries to get a taste (named `dc-*`).
 
 Or start your own `foobar` script:
 
-```
+```bash
 #!/usr/bin/env bash
 
 . "$(brew --prefix)/lib/dc-sh-art"
@@ -62,7 +62,7 @@ it is meant to be used with bash).
 
 Specific parts of the library have additional requirements (`jq`, `curl`, for example).
 
-Specific binaries may also require additional binaries like `git`, `file`, `sqlite`, `shellcheck`, `make` or `ffmpeg`.
+Specific binaries may also require additional binaries like `git`, `file`, `sqlite`, `shellcheck`, `hadolint`, `make` or `ffmpeg`.
 
 ## Design principles
 
@@ -77,9 +77,9 @@ Specific binaries may also require additional binaries like `git`, `file`, `sqli
  * or [extensions library details](source/extensions/README.md)
  * or [developing sh-art](DEVELOP.md)
  
-## Why... the... name?
+## Why the name?
 
- * it's a portementeau: "sh" (short for "shell") + "art" (short for "I like it"), which somewhat makes sense - what did you think it meant?
+ * it's a portementeau: "sh" (short for "shell") + "art" (short for "I like it"), which somewhat makes sense
  * if it was powershell instead of bash, it would probably have been named `phart`, which doesn't really sound right
 
 ## License

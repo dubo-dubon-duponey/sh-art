@@ -189,7 +189,7 @@ dc::commander::declare::flag(){
 
 dc::commander::initialize(){
   dc::commander::declare::flag "silent" "^$" "no logging (overrides log level) - equivalent to: ${CLI_NAME:-${DC_CLI_NAME}} 2>/dev/null" optional "s"
-  dc::commander::declare::flag "insecure" "^$" "disable TLS verification for network operations" optional
+  dc::commander::declare::flag "insecure" "^$" "disable TLS verification for network operations (CAREFUL)" optional
 
   local loglevelvar
   local logauthvar

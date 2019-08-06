@@ -9,20 +9,24 @@ The API may not be well tested, or even be stable.
 
 Decode a JWT token (requires `jq`).
 
-```
+```bash
 dc-ext::jwt::read "$rawtoken"
 
-DC_JWT_TOKEN="the original rawtoken"
-DC_JWT_HEADER="the header"
-DC_JWT_PAYLOAD="the payload"
-DC_JWT_ACCESS="the access grant"
+# "the original rawtoken"
+printf "%s\n" "$DC_JWT_TOKEN"
+# header
+printf "%s\n" "$DC_JWT_HEADER"
+# payload
+printf "%s\n" "$DC_JWT_PAYLOAD"
+# access grant
+printf "%s\n" "$DC_JWT_ACCESS"
 ```
 
 ### cache
 
 Naive, simple, caching http client (requires `curl` and `sqlite`).
 
-```
+```bash
 dc-ext::sqlite::init "yourdbsomewhere.db"
 dc-ext::http-cache::init
 dc-ext::http-cache::request "$url" "$method"
@@ -32,7 +36,7 @@ dc-ext::http-cache::request "$url" "$method"
 
 A generic SQLITE client (requires... `sqlite3`).
 
-```
+```bash
 # Initialize
 dc-ext::sqlite::init "yourdb.db"
 # Ensure the table exist. Create it with description if it does not.
