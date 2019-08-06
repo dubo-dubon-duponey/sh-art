@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+true
+# shellcheck disable=SC2034
 readonly CLI_DESC="a ridiculously stupid bootstrapper to setup pyenv, nvm, and gvm, and their most useful accompanying versions"
 
 # Initialize

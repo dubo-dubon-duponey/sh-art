@@ -16,6 +16,7 @@ _dc_internal::have::bash(){
     exit 206
   fi
 
+  # shellcheck disable=SC2034
   readonly DC_DEPENDENCIES_V_BASH="$bashVersion"
 }
 
@@ -30,6 +31,7 @@ _dc_internal::have::grep(){
     exit 206
   fi
   if printf "%s" "$grepVersion" | grep -q gnu; then
+    # shellcheck disable=SC2034
     readonly _DC_PRIVATE_GNUGREP=true
   fi
 }

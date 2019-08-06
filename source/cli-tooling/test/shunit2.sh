@@ -92,6 +92,7 @@ for __shunit_const in ${__shunit_constants}; do
   if \[ -z "${ZSH_VERSION:-}" ]; then
     readonly "${__shunit_const}"
   else
+    # shellcheck disable=SC2039
     case ${ZSH_VERSION} in
       [123].*) readonly "${__shunit_const}" ;;
       *) readonly -g "${__shunit_const}"  # Declare readonly constants globally.

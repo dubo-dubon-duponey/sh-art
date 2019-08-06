@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 ## Builder
+
+true
+# shellcheck disable=SC2034
 readonly CLI_DESC="a lightweight script builder"
 
 dc::commander::initialize

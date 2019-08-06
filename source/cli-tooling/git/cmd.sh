@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+true
+# shellcheck disable=SC2034
 readonly CLI_DESC="git sign-of & gpg verification helper"
 
 # Initialize

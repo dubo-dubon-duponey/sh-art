@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+true
+# shellcheck disable=SC2034
 readonly CLI_DESC="creates or mount/unmount iso files from a folder (because I never remember makehybrid syntax)"
 
 # Initialize
