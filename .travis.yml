@@ -1,36 +1,31 @@
 language: bash
 
 env:
-  - SHUNIT_COLOR='always'
-
-script:
-  - make build
-  - make lint
-  - make test-unit
-  - make test-integration
+  - SHUNIT_COLOR=always TEST_PLATFORMS='alpine-current'
+# alpine-next debian-old debian-current debian-next ubuntu-lts-old ubuntu-lts-current ubuntu-current ubuntu-next'
 
 addons:
   homebrew:
+    update: true
     packages:
     - jq
     - shellcheck
-    - bento4
-    - ffmpeg
-  apt:
-    packages:
-    - jq
-    - shellcheck
+    - hadolint
 
 matrix:
   include:
     - os: osx
-    # For some reason, ffmpeg doesn't work well on all Ubuntu but bionic
-    - os: linux
-      dist: trusty
-      # Older version of shellcheck does not support -a
       script:
       - make build
+      - make lint
       - make test-unit
       - make test-integration
     - os: linux
-      dist: xenial
+      dist: bionic
+      install:
+      - curl -sL -o "$HOME"/dckr-1.1.0.tar.gz https://github.com/dubo-dubon-duponey/dckr/archive/v1.1.0.tar.gz
+      - tar -C "$HOME" -xzf "$HOME"/dckr-1.1.0.tar.gz
+      script:
+      - for i in $TEST_PLATFORMS; do if ! DOCKERFILE=./dckr.Dockerfile TARGET="$i" "$HOME"/dckr-1.1.0/dckr ls -lA .; then exit 1; fi; done
+      - for i in $TEST_PLATFORMS; do if ! DOCKERFILE=./dckr.Dockerfile TARGET="$i" "$HOME"/dckr-1.1.0/dckr ls -lA /; then exit 1; fi; done
+      - for i in $TEST_PLATFORMS; do if ! DOCKERFILE=./dckr.Dockerfile TARGET="$i" "$HOME"/dckr-1.1.0/dckr make test; then exit 1; fi; done
