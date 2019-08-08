@@ -50,25 +50,32 @@ dc::http::request "https://www.google.com" HEAD
 
 # Output the result
 dc::logger::warning "We got something!"
-cat "$DC_HTTP_BODY"
+dc::http::dump::body
 
-# ... Now go do something useful below (like, looking at other cli for inspiration, or reading the docs)
+# ... Now go do something useful (like, looking at other cli for inspiration, or reading the docs)
 ```
 
 ## Requirements
 
-Right now this is tested on macOS, Ubuntu 16.04 and 18.04, Debian stable and testing, and Alpine (and if that was not clear, 
-it is meant to be used with bash).
+Right now this is tested on:
+ * macOS 10.14
+ * Ubuntu 16.04, 18.04, 19.04, 19.10
+ * Debian stretch, buster, and testing
+ * Alpine 3.10 and edge
 
-Specific parts of the library have additional requirements (`jq`, `curl`, for example).
+If that wasn't clear, this is meant to be used with bash.
 
-Specific binaries may also require additional binaries like `git`, `file`, `sqlite`, `shellcheck`, `hadolint`, `make` or `ffmpeg`.
+Parts of the core library (`dc:http`) requires `jq` and `curl`, or `shasum`.
+
+Library extensions require `sqlite`.
+
+Specific binaries (the `dc-tooling-*`) may also require additional binaries like `git`, `shellcheck`, `hadolint`, and `make`.
 
 ## Design principles
 
  * emphasize use of json for cli output ([you should really learn `jq`](https://stedolan.github.io/jq/manual/))
  * don't pollute stdout, use stderr for all logging
- * aim for correctness (eg: shellcheck), but not true POSIX-ness (too boring)
+ * aim for correctness (eg: `shellcheck`), but not true POSIX-ness (too boring)
 
 ## Moar
 
