@@ -1,7 +1,7 @@
 language: bash
 
 env:
-  - SHUNIT_COLOR=always DCKR_VERSION=1.2.0
+  - SHUNIT_COLOR=always DCKR_VERSION=1.2.0 CACHE_DIR=$HOME/cache
 
 addons:
   homebrew:
@@ -10,6 +10,10 @@ addons:
     - jq
     - shellcheck
     - hadolint
+
+cache:
+  directories:
+    - $HOME/cache
 
 matrix:
   include:
