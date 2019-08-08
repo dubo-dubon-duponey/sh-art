@@ -25,4 +25,4 @@ matrix:
       - curl -sL -o "$HOME"/dckr.tar.gz https://github.com/dubo-dubon-duponey/dckr/archive/v${DCKR_VERSION}.tar.gz
       - tar -C "$HOME" -xzf "$HOME"/dckr.tar.gz
       script:
-      - make test-dckr
+      - PATH="$PATH:$HOME/dckr-$DCKR_VERSION" make test-all
