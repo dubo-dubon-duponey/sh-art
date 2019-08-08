@@ -1,7 +1,7 @@
 language: bash
 
 env:
-  - DC_PREFIX=/tmp SHUNIT_COLOR=always DCKR_VERSION=1.2.0 TEST_PLATFORMS='alpine-current alpine-next debian-old debian-current debian-next ubuntu-lts-old ubuntu-lts-current ubuntu-current ubuntu-next'
+  - SHUNIT_COLOR=always DCKR_VERSION=1.2.0
 
 addons:
   homebrew:
@@ -25,4 +25,4 @@ matrix:
       - curl -sL -o "$HOME"/dckr.tar.gz https://github.com/dubo-dubon-duponey/dckr/archive/v${DCKR_VERSION}.tar.gz
       - tar -C "$HOME" -xzf "$HOME"/dckr.tar.gz
       script:
-      - for i in $TEST_PLATFORMS; do if ! DOCKERFILE=./dckr.Dockerfile TARGET="$i" "$HOME"/dckr-${DCKR_VERSION}/dckr make test; then exit 1; fi; done
+      - make test-dckr

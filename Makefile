@@ -23,7 +23,7 @@ define title
 endef
 
 # List of dckr platforms to test
-DCKR_PLATFORMS ?= "ubuntu-lts-old ubuntu-lts-current ubuntu-current ubuntu-next alpine-current alpine-next debian-old debian-current debian-next"
+DCKR_PLATFORMS ?= ubuntu-lts-old ubuntu-lts-current ubuntu-current ubuntu-next alpine-current alpine-next debian-old debian-current debian-next
 
 #######################################################
 # Targets
@@ -115,10 +115,11 @@ integration/%: build-tooling $(DC_PREFIX)/bin/dc-%
 test-integration: $(patsubst $(DC_MAKEFILE_DIR)/source/cli/%/cmd.sh,integration/%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli/*/cmd.sh)) \
 	$(patsubst $(DC_MAKEFILE_DIR)/source/cli-ext/%/cmd.sh,integration/%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli-ext/*/cmd.sh))
 
-test-dckr: $(wildcard $(DC_MAKEFILE_DIR)/tests/unit/*.sh) \
-	$(wildcard $(DC_MAKEFILE_DIR)/source/cli/*/cmd.sh) \
-	$(wildcard $(DC_MAKEFILE_DIR)/source/cli-ext/*/cmd.sh)
-	$(shell for i in $(DCKR_PLATFORMS); do if ! DOCKERFILE=./dckr.Dockerfile TARGET="$i" dckr make test; then exit 1; fi; done)
+dckr/%:
+	$(call title, $@)
+	DOCKERFILE=./dckr.Dockerfile TARGET="$(patsubst dckr/%,%,$@)" dckr make test
+
+test-all: $(patsubst %,dckr/%,$(DCKR_PLATFORMS))
 
 build: build-tooling build-library build-binaries
 lint: lint-code lint-signed
