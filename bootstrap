@@ -5,7 +5,8 @@ readonly _here=$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && p
 # shellcheck source=/dev/null
 . "$_here/source/cli-tooling/build/base-build.sh"
 
-destination="$_here/bin/bootstrap"
+destination="${1:-$_here}/bin/bootstrap"
+
 if [ ! -d "$destination" ]; then
   mkdir -p "$destination"
 fi

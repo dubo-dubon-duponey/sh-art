@@ -22,6 +22,9 @@ define title
 	@echo "$(GREEN)------------------------------------------------------------------------------------------------------------------------$(ORANGE)"
 endef
 
+# List of dckr platforms to test
+DCKR_PLATFORMS ?= "ubuntu-lts-old ubuntu-lts-current ubuntu-current ubuntu-next alpine-current alpine-next debian-old debian-current debian-next"
+
 #######################################################
 # Targets
 #######################################################
@@ -35,14 +38,14 @@ all: build lint test
 #######################################################
 
 # This builds the bootstrapping builder, and never refreshed unless clean is called
-$(DC_MAKEFILE_DIR)/bin/bootstrap/builder: $(DC_MAKEFILE_DIR)/bootstrap
+$(DC_PREFIX)/bin/bootstrap/builder: $(DC_MAKEFILE_DIR)/bootstrap
 	$(call title, $@)
-	$(DC_MAKEFILE_DIR)/bootstrap
+	$(DC_MAKEFILE_DIR)/bootstrap $(DC_PREFIX)
 
 # Then build the cli tools, using the bootstrapper
 $(DC_PREFIX)/bin/dc-tooling-%: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE_DIR)/source/cli-tooling/%
 	$(call title, $@)
-	$(DC_MAKEFILE_DIR)/bin/bootstrap/builder --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="MIT License" --author="dubo-dubon-duponey" --description="another fancy (tooling) piece of shcript" --with-git-info $^
+	$(DC_PREFIX)/bin/bootstrap/builder --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="MIT License" --author="dubo-dubon-duponey" --description="another fancy (tooling) piece of shcript" --with-git-info $^
 
 #######################################################
 # Base building tasks
@@ -73,23 +76,23 @@ $(DC_PREFIX)/bin/dc-%: $(DC_PREFIX)/lib/dc-sh-art $(DC_PREFIX)/lib/dc-sh-art-ext
 #######################################################
 
 # High-level task for embedders to build just the tooling
-build-tooling: $(DC_MAKEFILE_DIR)/bin/bootstrap/builder $(patsubst $(DC_MAKEFILE_DIR)/source/cli-tooling/%/cmd.sh,$(DC_PREFIX)/bin/dc-tooling-%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli-tooling/*/cmd.sh))
+build-tooling: $(DC_PREFIX)/bin/bootstrap/builder $(patsubst $(DC_MAKEFILE_DIR)/source/cli-tooling/%/cmd.sh,$(DC_PREFIX)/bin/dc-tooling-%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli-tooling/*/cmd.sh))
 
 # High-level task to build the library, and extensions
-build-library: $(DC_MAKEFILE_DIR)/bin/bootstrap/builder $(DC_PREFIX)/bin/dc-tooling-build $(DC_PREFIX)/lib/dc-sh-art $(DC_PREFIX)/lib/dc-sh-art-extensions
+build-library: build-tooling $(DC_PREFIX)/lib/dc-sh-art $(DC_PREFIX)/lib/dc-sh-art-extensions
 
 # High-level task to build all non tooling CLIs
 build-binaries: build-library $(patsubst $(DC_MAKEFILE_DIR)/source/cli-ext/%/cmd.sh,$(DC_PREFIX)/bin/dc-%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli-ext/*/cmd.sh)) \
 				$(patsubst $(DC_MAKEFILE_DIR)/source/cli/%/cmd.sh,$(DC_PREFIX)/bin/dc-%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli/*/cmd.sh))
 
 # Git sanity
-lint-signed: $(DC_MAKEFILE_DIR)/bin/bootstrap/builder $(DC_PREFIX)/bin/dc-tooling-git
+lint-signed: build-tooling
 	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-git $(DC_MAKEFILE_DIR)
 
 # Linter
 #	XXX broken for now $(DC_PREFIX)/bin/dc-tooling-lint $(DC_PREFIX)/bin
-lint-code: $(DC_MAKEFILE_DIR)/bin/bootstrap/builder $(DC_PREFIX)/bin/dc-tooling-lint build-library build-binaries
+lint-code: build-tooling build-library build-binaries
 	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-lint $(DC_MAKEFILE_DIR)/bootstrap
 	$(DC_PREFIX)/bin/dc-tooling-lint $(DC_MAKEFILE_DIR)/source
@@ -98,21 +101,26 @@ lint-code: $(DC_MAKEFILE_DIR)/bin/bootstrap/builder $(DC_PREFIX)/bin/dc-tooling-
 	$(DC_PREFIX)/bin/dc-tooling-lint ~/.profile
 
 # Unit tests
-unit/%: $(DC_MAKEFILE_DIR)/bin/bootstrap/builder $(DC_PREFIX)/bin/dc-tooling-test
+unit/%: build-tooling
 	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-test $(DC_MAKEFILE_DIR)/tests/$@
 
-test-unit: $(patsubst $(DC_MAKEFILE_DIR)/tests/unit/%,unit/%,$(wildcard $(DC_MAKEFILE_DIR)/tests/unit/*.sh)) \
+test-unit: $(patsubst $(DC_MAKEFILE_DIR)/tests/unit/%,unit/%,$(wildcard $(DC_MAKEFILE_DIR)/tests/unit/*.sh))
 
 # Integration tests
-integration/%: $(DC_MAKEFILE_DIR)/bin/bootstrap/builder $(DC_PREFIX)/bin/dc-tooling-test $(DC_PREFIX)/bin/dc-%
+integration/%: build-tooling $(DC_PREFIX)/bin/dc-%
 	$(call title, $@)
 	PATH=$(DC_PREFIX)/bin:${PATH} $(DC_PREFIX)/bin/dc-tooling-test $(DC_MAKEFILE_DIR)/tests/$@/*.sh
 
 test-integration: $(patsubst $(DC_MAKEFILE_DIR)/source/cli/%/cmd.sh,integration/%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli/*/cmd.sh)) \
 	$(patsubst $(DC_MAKEFILE_DIR)/source/cli-ext/%/cmd.sh,integration/%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli-ext/*/cmd.sh))
 
-build: build-library build-tooling build-binaries
+test-dckr: $(wildcard $(DC_MAKEFILE_DIR)/tests/unit/*.sh) \
+	$(wildcard $(DC_MAKEFILE_DIR)/source/cli/*/cmd.sh) \
+	$(wildcard $(DC_MAKEFILE_DIR)/source/cli-ext/*/cmd.sh)
+	$(shell for i in $(DCKR_PLATFORMS); do if ! DOCKERFILE=./dckr.Dockerfile TARGET="$i" dckr make test; then exit 1; fi; done)
+
+build: build-tooling build-library build-binaries
 lint: lint-code lint-signed
 test: test-unit test-integration
 

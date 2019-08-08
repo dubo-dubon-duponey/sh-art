@@ -1,8 +1,7 @@
 language: bash
 
 env:
-  - SHUNIT_COLOR=always TEST_PLATFORMS='alpine-current'
-# alpine-next debian-old debian-current debian-next ubuntu-lts-old ubuntu-lts-current ubuntu-current ubuntu-next'
+  - DC_PREFIX=/tmp SHUNIT_COLOR=always DCKR_VERSION=1.2.0 TEST_PLATFORMS='alpine-current alpine-next debian-old debian-current debian-next ubuntu-lts-old ubuntu-lts-current ubuntu-current ubuntu-next'
 
 addons:
   homebrew:
@@ -23,9 +22,7 @@ matrix:
     - os: linux
       dist: bionic
       install:
-      - curl -sL -o "$HOME"/dckr-1.1.0.tar.gz https://github.com/dubo-dubon-duponey/dckr/archive/v1.1.0.tar.gz
-      - tar -C "$HOME" -xzf "$HOME"/dckr-1.1.0.tar.gz
+      - curl -sL -o "$HOME"/dckr.tar.gz https://github.com/dubo-dubon-duponey/dckr/archive/v${DCKR_VERSION}.tar.gz
+      - tar -C "$HOME" -xzf "$HOME"/dckr.tar.gz
       script:
-      - for i in $TEST_PLATFORMS; do if ! DOCKERFILE=./dckr.Dockerfile TARGET="$i" "$HOME"/dckr-1.1.0/dckr ls -lA .; then exit 1; fi; done
-      - for i in $TEST_PLATFORMS; do if ! DOCKERFILE=./dckr.Dockerfile TARGET="$i" "$HOME"/dckr-1.1.0/dckr ls -lA /; then exit 1; fi; done
-      - for i in $TEST_PLATFORMS; do if ! DOCKERFILE=./dckr.Dockerfile TARGET="$i" "$HOME"/dckr-1.1.0/dckr make test; then exit 1; fi; done
+      - for i in $TEST_PLATFORMS; do if ! DOCKERFILE=./dckr.Dockerfile TARGET="$i" "$HOME"/dckr-${DCKR_VERSION}/dckr make test; then exit 1; fi; done
