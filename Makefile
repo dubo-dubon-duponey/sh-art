@@ -1,3 +1,6 @@
+# Ouch - necessary for globbing to work
+SHELL=/bin/bash -O extglob -c
+
 DC_MAKEFILE_DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 
 # Output directory
@@ -91,13 +94,13 @@ lint-signed: build-tooling
 	$(DC_PREFIX)/bin/dc-tooling-git $(DC_MAKEFILE_DIR)
 
 # Linter
-#	XXX broken for now $(DC_PREFIX)/bin/dc-tooling-lint $(DC_PREFIX)/bin
 lint-code: build-tooling build-library build-binaries
 	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-lint $(DC_MAKEFILE_DIR)/bootstrap
 	$(DC_PREFIX)/bin/dc-tooling-lint $(DC_MAKEFILE_DIR)/source
 	$(DC_PREFIX)/bin/dc-tooling-lint $(DC_MAKEFILE_DIR)/tests
 	$(DC_PREFIX)/bin/dc-tooling-lint $(DC_PREFIX)/lib
+	$(DC_PREFIX)/bin/dc-tooling-lint $(DC_PREFIX)/bin/!(dc-tooling-test)
 	$(DC_PREFIX)/bin/dc-tooling-lint ~/.profile
 
 # Unit tests

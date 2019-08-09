@@ -17,7 +17,6 @@ USER dckr
 ##################################################################
 FROM com.dbdbdp.dckr:ubuntu-lts-old as ubuntu-lts-old
 RUN apt-get install -y --no-install-recommends make git shellcheck ca-certificates
-# is too old, shellcheck is too old as well
 RUN apt-get install -y --no-install-recommends curl jq sqlite
 ENV DC_PREFIX=/tmp
 USER dckr

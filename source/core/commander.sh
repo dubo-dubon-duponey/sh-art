@@ -187,6 +187,7 @@ dc::commander::declare::flag(){
 # If you want a different environment variable to be used, pass its name as the first argument
 # The same goes for the *CLI_NAME*_LOG_AUTH environment variable
 
+# shellcheck disable=SC2120
 dc::commander::initialize(){
   dc::commander::declare::flag "silent" "^$" "no logging (overrides log level) - equivalent to: ${CLI_NAME:-${DC_CLI_NAME}} 2>/dev/null" optional "s"
   dc::commander::declare::flag "insecure" "^$" "disable TLS verification for network operations (CAREFUL)" optional

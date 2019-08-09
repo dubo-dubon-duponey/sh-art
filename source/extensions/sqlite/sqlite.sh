@@ -28,6 +28,7 @@ dc-ext::sqlite::select(){
   printf "%s" "select $2 from $table where $3;" | sqlite3 "$_DC_EXT_SQLITE_DB"
 }
 
+# XXX fix this shit so that values are magically escaped (hint: fucking " needs to be turned into "" - yeah, bite me)
 dc-ext::sqlite::insert(){
   local table="$1"
   local fields="$2"
