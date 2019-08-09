@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+true
+# shellcheck disable=SC2034
 readonly CLI_DESC="makes macos and windows icons out of a png file"
 
 # Initialize

@@ -1,6 +1,6 @@
 # Core Library
 
-The core library provides basic functionality, and should be fairly stable and mildly to decently tested.
+The core library provides basic functionality, and should be fairly stable and decently tested.
 
 ## API
 
@@ -17,17 +17,28 @@ Values are available as `DC_ARGV_NAME` (where `NAME` is the capitalized, undersc
 Flags must be passed before any other argument.
 
 Examples:
-```
-myscript -h
 
+`myscript -h`
+```bash
 [ "$DC_ARGE_H" ] && printf "%s\\n" "-h has been passed"
 [ ! "$DC_ARGV_H" ] && printf "%s\\n" "with no value"
-
-myscript --something-special=foo
-
+```
+`myscript --something-special=foo`
+```bash
 [ "$DC_ARGE_SOMETHING_SPECIAL" ] && printf "%s\\n" "-something-special has been passed"
 [ "$DC_ARGV_SOMETHING_SPECIAL" == "foo" ] && printf "%s\\n" "with value foo"
 ```
+
+### colors
+
+Color codes to be used with `tput` (eg: `$DC_COLOR_BLACK`).
+This is mainly of interest internally, and you should rather use the `logging` or `output` modules.
+
+### commander
+
+High-level helper for command-line applications to initialize with decent defaults and arguments constraints.
+
+Example implementation:
 
 <!--
 #### Methods
@@ -53,26 +64,17 @@ myscript --something-special=foo
  * will exit with `$ERROR_ARGUMENT_INVALID` if this is not true
 
 -->
-### colors
 
-Readable (eg: `$DC_COLOR_BLACK`) color codes to be used with `tput`.
-This is mainly of interest internally, and you should rather use the `logging` or `output` modules.
 
-### commander
-
-High-level helper for command-line applications to initialize with decent defaults.
-
-Example implementation:
-
-```
+```bash
 dc::commander::initialize
-dc::commander::declare::flag myflag "^(foo|bar)$" "a flag that does foo or bar" optional
-dc::commander::declare::arg 1 "[0-9]+" "first mandatory argument, that must be an integer"
+dc::commander::declare::flag myflag "^(foo|bar)$" "an optional flag that does foo or bar" optional
+dc::commander::declare::arg 1 "^[0-9]+$" "some_arg" "first mandatory argument, that must be an integer"
 dc::commander::boot
 ```
 
-By default, this will implement the following flags:
-```
+By default, the following are always implemented:
+```bash
 mycli -h # show help
 mycli --help # show help
 mycli --version # show version
@@ -80,9 +82,9 @@ mycli -s # mute all logging
 mycli --insecure # bypass TLS validation errors when doing http requests
 ```
 
-... and honor the following environment variables (where `MYCLI` is the name of the embedding script):
+... and the following environment variables are always processed (where `MYCLI` is the name of the embedding script):
 
-```
+```bash
 # Can be set to "debug", "info", "warning" or "error" to control the level of logging.
 MYCLI_LOG_LEVEL=debug
 # When set to a non-null value, this below will also output authentication headers in the logs
@@ -93,13 +95,14 @@ MYCLI_LOG_AUTH=true
 
 #### Customization hooks:
 
-The following environment variables may be defined by the embedding script:
+The following environment variables may be set by the embedding script:
 
    * `CLI_NAME`: if not specified, will default to the name of the embedding script
    * `CLI_VERSION`: "0.0.1" by default
    * `CLI_LICENSE`: "MIT" by default
    * `CLI_DESC`: "A fancy piece of shcript" by default
    * `CLI_USAGE`: customize this if you don't like the output of the default help
+   * `CLI_EXAMPLES`: allow to pass detailed examples as a paragraph of text
    * `DC_CLI_OPTS` (array): `( "my flag" "my arg description" )` - if you do not like the default help output
 
 Additionally, the `dc::commander::initialize` may be called with arguments to control the name of the `MYCLI_LOG_LEVEL` and `MYCLI_LOG_AUTH` environment variables
@@ -113,15 +116,16 @@ Or just take some inspiration from `dc::commander::initialize` and `dc::commande
 
 Errors to be used as exit codes.
 
-These are used by core methods, and can be used by implementers as well if they fit.
+Used by core methods, and may be used by implementers as well if they fit.
 
-They use the 200-299 range.
+Internal errors use the 200-299 range.
 
 Custom errors defined by additional libraries should use the 100-199 range.
 
 Custom errors defined by applications should use the 1-99 range.
 
-```
+Internal errors:
+```bash
 # Network level error
 ERROR_NETWORK=200
 
@@ -151,7 +155,7 @@ Simple filesystem helpers
 
 #### Methods
 
-```
+```bash
 dc::fs::isfile [isWritable] [createIfMissing]
 dc::fs::isdir [isWritable] [createIfMissing]
 ```
@@ -162,7 +166,7 @@ A wrapper around curl.
 
 #### Methods
 
-```
+```bash
 # This will bypass the redacting mechanism, effectively logging credentials
 # and other sensitive informations to stderr
 # Typically wired-up with the MYCLI_LOG_AUTH environment variable.
@@ -181,7 +185,7 @@ dc::http::dump::body
 # URI encode "something"
 dc::http::uriencode "something"
 
-# Perform an http request (method is HEAD if not specified)
+# Perform an http request (method defaults to HEAD if left unspecified)
 dc::http::request URL [METHOD] [PAYLOAD] [request header] ... [request header]
 
 # "dc::http::request" will set the following variables:
@@ -194,9 +198,9 @@ dc::http::request URL [METHOD] [PAYLOAD] [request header] ... [request header]
 
 ### logger
 
-Provides logging facility.
+Provides logging.
 
-All logs are written to stderr, which can then be redirected to fit your mileage.
+All logs are written to stderr (which can then be easily redirected).
 
 Any output is timestamped, and uses painfully bright colors matching the severity if the output is a term.
 
@@ -215,7 +219,7 @@ The currently supported levels are:
 
 #### Methods
 
-```
+```bash
 # Set the log level to debug (all messages are logged)
 dc::configure::logger::setlevel::debug
 
@@ -254,7 +258,7 @@ Simple helpers to output stuff to stdout.
 
 ### Methods
 
-```
+```bash
 dc::output::h1 "Title"
 dc::output::h2 "Subtitle"
 dc::output::emphasis "inline emphasized word"
@@ -270,11 +274,11 @@ dc::output::json '{"foo": "bar"}'
 
 ### Portable
 
-Code for stuff that is questionably not portable or hard to get right
+Code for stuff that is not portable or hard to get right
 
 #### Methods
 
-```
+```bash
 dc::portable::mktemp
 dc::portable::base64d
 ```
@@ -282,7 +286,7 @@ dc::portable::base64d
 ### prompt
 
 #### Methods
-```
+```bash
 # Asks a question to the user and store the answer in $variablename
 dc::prompt::question "message" variablename
 # ... give the opportunity to the user to CTRL^C or press enter to continue
@@ -295,14 +299,14 @@ dc::prompt::credentials "message for username" varnameforusername "message for p
 
 #### Methods
 
-```
+```bash
 # binaryName is mandatory
 dc::require "binaryName"
 # binaryName version 1.2 is required
 dc::require "binaryName" "--versionFlag" "1.2"
 # DC_DEPENDENCIES_V_BINARYNAME will hold the version in case you need to inspect it
 
-dc::optional # <- same API as require, will spit a warning instead of exiting if a requirement is not satisfied
+dc::optional "binaryName" # <- same API as require, will spit a warning instead of exiting if a requirement is not satisfied
 
 dc::require::platform::mac # Require macos
 dc::require::platform::linux # Require linux
@@ -315,17 +319,15 @@ dc::require::platform "$YOUR_OWN_SHIT_MATCHING_UNAME"
 
 A handful of variable holding sh-art version and build information.
 
-```
+```bash
 DC_VERSION
 DC_REVISION
 DC_BUILD_DATE
 ```
 
 
-### EXPERIMENTAL: partial implementation of the golang string API
+### EXPERIMENTAL: incomplete implementation of the golang string API
 
 #### Methods
 
-...
-
-
+TODO

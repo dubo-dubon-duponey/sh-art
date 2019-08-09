@@ -30,7 +30,7 @@ dc::require(){
   local version="$3"
   local provider="$4"
   local varname
-  varname=_DC_DEPENDENCIES_B_$(printf "%s" "$binary" | tr '[:lower:]' '[:upper:]')
+  varname=_DC_DEPENDENCIES_B_$(printf "%s" "$binary" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
   if [ ! ${!varname+x} ]; then
     if ! command -v "$binary" >/dev/null; then
       dc::logger::error "You need $binary for this to work."
@@ -44,7 +44,7 @@ dc::require(){
   if [ ! "$versionFlag" ]; then
     return
   fi
-  varname=DC_DEPENDENCIES_V_$(printf "%s" "$binary" | tr '[:lower:]' '[:upper:]')
+  varname=DC_DEPENDENCIES_V_$(printf "%s" "$binary" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
   if [ ! ${!varname+x} ]; then
     while read -r "${varname?}"; do
       if printf "%s" "${!varname}" | grep -qE "^[^0-9.]*([0-9]+[.][0-9]+).*"; then

@@ -6,12 +6,10 @@ This is a collection of assorted scripts, leveraging the dc library, meant prima
 
 ## The what
 
+ * `dc-dev-icon`: generates mac and windows icon files from images
  * `dc-http`: a simple, json-fancy wrapper around curl
- * `dc-imdb`: retrieve information for a movie from imdb and output json or images
- * `dc-libre`: allows direct access to any methods in the library
  * `dc-iso`: manipulate ISOs files on macOS (create, mount, unmount)
- * `dc-movie-grify`: manipulate video files (extract, delete or convert streams)
- * `dc-movie-info`: retrieve and json output information about media files
- * `dc-music-grify`: transcode audio files to and from mp3, alac, flac
+ * `dc-kingpin`: a ridiculously stupid bootstrapper to setup pyenv, nvm, and gvm, and their most useful accompanying versions
+ * `dc-libre`: allows direct access to any methods in the library
 
  

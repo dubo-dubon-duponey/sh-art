@@ -1,36 +1,32 @@
 language: bash
 
 env:
-  - SHUNIT_COLOR='always'
-
-script:
-  - make build
-  - make lint
-  - make test-unit
-  - make test-integration
+  - SHUNIT_COLOR=always DCKR_VERSION=1.2.0 CACHE_DIR=$HOME/cache
 
 addons:
   homebrew:
+    update: true
     packages:
     - jq
     - shellcheck
-    - bento4
-    - ffmpeg
-  apt:
-    packages:
-    - jq
-    - shellcheck
+    - hadolint
+
+cache:
+  directories:
+    - $HOME/cache
 
 matrix:
   include:
     - os: osx
-    # For some reason, ffmpeg doesn't work well on all Ubuntu but bionic
-    - os: linux
-      dist: trusty
-      # Older version of shellcheck does not support -a
       script:
       - make build
+      - make lint
       - make test-unit
       - make test-integration
     - os: linux
-      dist: xenial
+      dist: bionic
+      install:
+      - curl -sL -o "$HOME"/dckr.tar.gz https://github.com/dubo-dubon-duponey/dckr/archive/v${DCKR_VERSION}.tar.gz
+      - tar -C "$HOME" -xzf "$HOME"/dckr.tar.gz
+      script:
+      - PATH="$PATH:$HOME/dckr-$DCKR_VERSION" make test-all

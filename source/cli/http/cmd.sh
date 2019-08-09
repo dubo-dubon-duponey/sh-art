@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
+true
+# shellcheck disable=SC2034
 readonly CLI_DESC="just curl, in a nicer, json-way"
+# shellcheck disable=SC2034
 readonly CLI_EXAMPLES="Simple get request, get the Date reponse header
 > dc-http -s localhost:5000 | jq -r .headers.DATE
 
