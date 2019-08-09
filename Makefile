@@ -28,10 +28,10 @@ DCKR_PLATFORMS ?= ubuntu-lts-old ubuntu-lts-current ubuntu-current ubuntu-next a
 #######################################################
 # Targets
 #######################################################
-all: build lint test
+all: build lint test test-all
 
 # Make happy
-.PHONY: build-tooling build-library build-binaries lint-signed lint-code test-unit test-integration build lint test clean
+.PHONY: build-tooling build-library build-binaries lint-signed lint-code test-unit test-integration test-all build lint test clean
 
 #######################################################
 # Base private tasks
