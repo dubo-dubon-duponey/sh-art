@@ -66,6 +66,7 @@ dc::string::join(){
 }
 
 # ***************** OK
+# shellcheck disable=SC2120
 dc::string::toLower(){
   if [ ! "${1}" ]; then
     tr '[:upper:]' '[:lower:]' < /dev/stdin
@@ -75,6 +76,7 @@ dc::string::toLower(){
 }
 
 # ***************** OK
+# shellcheck disable=SC2120
 dc::string::toUpper(){
   if [ ! "${1}" ]; then
     tr '[:lower:]' '[:upper:]' < /dev/stdin
@@ -84,6 +86,7 @@ dc::string::toUpper(){
 }
 
 # ***************** OK
+# shellcheck disable=SC2120
 dc::string::trimSpace(){
   if [ ! "${1}" ]; then
     sed -E "s/^[[:space:]\\n]*//" < /dev/stdin | sed -E "s/[[:space:]\\n]*\$//"
