@@ -39,7 +39,7 @@ dc::require(){
       fi
       exit "$ERROR_MISSING_REQUIREMENTS"
     fi
-    read -r "${varname?}" < <(printf "true")
+    read -r "${varname?}" < <(printf "true\n")
   fi
   if [ ! "$versionFlag" ]; then
     return
@@ -72,7 +72,7 @@ dc::optional(){
       dc::logger::warning "Optional binary $binary is recommended for this."
       return
     fi
-    read -r "${varname?}" < <(printf "true")
+    read -r "${varname?}" < <(printf "true\n")
   fi
   if [ ! "$versionFlag" ]; then
     return
