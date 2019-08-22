@@ -74,7 +74,9 @@ dc::args::flag::validate()
   varexist="DC_ARGE_$(printf "%s" "$1" | tr "-" "_" | tr '[:lower:]' '[:upper:]')"
 
   if [ ! "${!varexist}" ]; then
-    [ ! "$optional" ] || return
+    if [ "$optional" ]; then
+      return
+    fi
     dc::logger::error "Required flag \"$(printf "%s" "$1" | tr "_" "-" | tr '[:upper:]' '[:lower:]')\" is missing."
     exit "$ERROR_ARGUMENT_MISSING"
   fi
@@ -103,7 +105,9 @@ dc::args::arg::validate()
   [ ! "$caseInsensitive" ] || extended="${extended}i"
 
   if [ ! "${!varexist}" ]; then
-    [ ! "$optional" ] || return
+    if [ "$optional" ]; then
+      return
+    fi
     dc::logger::error "Required argument \"$1\" is missing."
     exit "$ERROR_ARGUMENT_MISSING"
   fi
