@@ -7,11 +7,12 @@
 
 dc::prompt::question() {
   local message="$1"
+  local varname="$2"
   if [ ! -t 2 ] || [ ! -t 0 ]; then
     return
   fi
 
-  read -r -p "$message" "$2"
+  read -r -p "$message" "$varname"
 }
 
 dc::prompt::confirm(){
@@ -44,14 +45,18 @@ dc::prompt::credentials() {
 }
 
 dc::prompt::password() {
-  # TODO implement osxkeychain integration
+  local message="$1"
+  local varname="$2"
   # No terminal stdin or stdout, can't ask for credentials
   if [ ! -t 2 ] || [ ! -t 0 ]; then
     return
   fi
 
   # Ask for password
-  read -r -s -p "$1" "$2"
+  read -r -s -p "$message" "$varname"
   # Just to avoid garbling the output
   >&2 printf "\\n"
 }
+
+# Keychain notes:
+# Integation is not worth it and would be clunky
