@@ -3,11 +3,12 @@
 dc-tools::build::append(){
   local source="$1"
   local destination="$2"
+  local i
 
   OIFS=$IFS
   IFS=$'\n'
   local start
-  while read -r i
+  while read -r i || [ "$i" ]
   do
     # Ignore file headers
     if [ "$start" ] || ! printf "%s" "$i" | grep -q -E "^[ ]*#"; then

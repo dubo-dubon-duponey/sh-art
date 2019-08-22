@@ -41,7 +41,7 @@ dc::commander::help(){
   if [ "$long" ]; then
     dc::output::h2 "Arguments"
     local v
-    while read -r v; do
+    while IFS= read -r v || [ "$v" ]; do
       dc::output::bullet "$v"
     done < <(printf "%s" "$long")
     dc::output::break
@@ -59,7 +59,7 @@ dc::commander::help(){
   if [ "$examples" ]; then
     dc::output::h2 "Examples"
     local v
-    while read -r v; do
+    while IFS= read -r v || [ "$v" ]; do
       if [ "${v:0:1}" == ">" ]; then
         printf "    %s\\n" "$v"
       elif [ "$v" ]; then
