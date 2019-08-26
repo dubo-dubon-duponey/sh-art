@@ -4,7 +4,7 @@ testMkISO(){
   [ "$(uname)" == Darwin ] || startSkipping
 
   local iso
-  iso="$(dc::portable::mktemp mkisotest) ∞ fancy"
+  iso="$(dc::fs::mktemp mkisotest) ∞ fancy"
   local vname="fancy ∞ name"
 
   dc-iso -s --name="$vname" --file="$iso" --source="$(pwd)" create

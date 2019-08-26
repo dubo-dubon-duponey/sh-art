@@ -21,7 +21,7 @@ dc::commander::boot
 destination="${DC_ARGV_DESTINATION:-./bin}"
 
 # By all means, destination must be a writable directory - create if needed
-dc::fs::isdir "$destination" writable create
+dc::fs::isdir "$destination" writable create || exit
 
 # Set the final destination
 destination="$destination/$DC_ARGV_NAME"

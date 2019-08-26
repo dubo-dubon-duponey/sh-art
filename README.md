@@ -37,7 +37,7 @@ dc::commander::declare::arg 1 "[0-9]+" "somearg" "first mandatory argument, that
 dc::commander::boot
 
 # State that you need the `find` binary
-dc::require find
+dc::require find || exit
 
 # Test if the optional flag `myflag` was set
 if [ "$DC_ARGE_MYFLAG" ]; then

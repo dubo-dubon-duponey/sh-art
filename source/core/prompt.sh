@@ -1,60 +1,68 @@
 #!/usr/bin/env bash
-##########################################################################
-# Prompting
-# ------
-# https://unix.stackexchange.com/questions/222974/ask-for-a-password-in-posix-compliant-shell/222977
-##########################################################################
+
+dc::prompt::input(){
+  local varname="$1"
+  local message="$2"
+  local silent="$3"
+  local timeout="$4"
+  local args=("-r")
+
+  # Arg validation
+  # https://pubs.opengroup.org/onlinepubs/000095399/basedefs/xbd_chap08.html
+  # Not really compliant with https://en.wikipedia.org/wiki/Portable_character_set minus "=" and NUL, but then good enough
+  dc::argument::check varname "^[a-zA-Z_]{1,}[a-zA-Z0-9_]{0,}$" || return
+  dc::argument::check timeout "^([0-9]+)?$" || return
+
+  # Arg processing
+  [ ! "$silent" ]   || args+=("-s")
+  [ ! "$timeout" ]  || args+=("-t" "$timeout")
+
+  # Prompt and read
+  [ ! -t 2 ] || >&2 printf "%s" "$message"
+  # shellcheck disable=SC2162
+  if ! read "${args[@]}" "${varname?}"; then
+    dc::error::detail::set "$timeout"
+    return "$ERROR_ARGUMENT_TIMEOUT"
+  fi
+
+  [ ! "$silent" ] || [ ! -t 2 ] || >&2 printf "\\n"
+}
 
 dc::prompt::question() {
   local message="$1"
-  if [ ! -t 2 ] || [ ! -t 0 ]; then
-    return
-  fi
-
-  read -r -p "$message" "$2"
-}
-
-dc::prompt::confirm(){
-  # XXX Use bel and flash
-  if [ ! -t 2 ] || [ ! -t 0 ]; then
-    return
-  fi
-
-  read -r
-}
-
-dc::prompt::credentials() {
-  # TODO implement osxkeychain integration
-  # No terminal stdin or stdout, can't ask for credentials
-  if [ ! -t 2 ] || [ ! -t 0 ]; then
-    return
-  fi
-
-  # No username? Then ask for one.
-  read -r -p "$1" "$2"
-  # No answer? Stay anonymous
-  if [ ! "${!2}" ]; then
-    return
-  fi
-
-  # Otherwise, ask for password
-  read -r -s -p "$3" "$4"
-  # Just to avoid garbling the output
-  >&2 printf "\\n"
+  local varname="$2"
+  dc::prompt::input "$varname" "$message"
 }
 
 dc::prompt::password() {
   local message="$1"
-  # No terminal stdin or stdout, can't ask for credentials
-  if [ ! -t 2 ] || [ ! -t 0 ]; then
-    return
-  fi
-
-  # Ask for password
-  read -r -s -p "$message" "$2"
-  # Just to avoid garbling the output
-  >&2 printf "\\n"
+  local varname="$2"
+  dc::prompt::input "$varname" "$message" silent
 }
 
-# Keychain notes:
-# Integation is not worth it and would be clunky
+dc::prompt::credentials() {
+  local message="$1"
+  local varname="$2"
+  local pmessage="$1"
+  local pvarname="$2"
+
+  dc::prompt::question "$message" "$varname"
+
+  # No answer? Stay anonymous
+  [ ! "${!varname}" ] && return
+
+  # Otherwise, ask for password
+  dc::prompt::password "$pmessage" "$pvarname"
+}
+
+dc::prompt::confirm(){
+  local message="$1"
+  local _
+
+  # Flash it baby, to stderr though, so not to pollute stdout
+  >&2 tput bel
+  >&2 tput flash
+
+  # Don't care about the return value
+  dc::prompt::input _ "$message"
+}

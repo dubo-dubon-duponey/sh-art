@@ -14,10 +14,10 @@ dc::commander::declare::arg 1 "^(create|mount|unmount)$" "action" "action to per
 dc::commander::boot
 
 # Requirements
-dc::require::platform::mac
+dc::require::platform::mac || exit
 
 directory=${DC_ARGV_SOURCE:-$(pwd)}
-dc::fs::isdir "$directory"
+dc::fs::isdir "$directory" || exit
 
 iname="${DC_ARGV_FILE%.iso$*:-$(basename "$directory")}"
 vname="${DC_ARGV_NAME:-$iname}"

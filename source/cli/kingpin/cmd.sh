@@ -11,9 +11,9 @@ dc::commander::declare::arg 1 "^(go|node|python)$" "target" "target environment 
 dc::commander::boot
 
 # Requirements
-dc::require::platform::mac
-dc::require brew
-dc::require git
+dc::require::platform::mac || exit
+dc::require brew || exit
+dc::require git || exit
 
 _ensure_install(){
   # Install through brew
@@ -22,7 +22,7 @@ _ensure_install(){
 
 _profile_link(){
   local posh="$1"
-  if ! grep -q "$posh" "$HOME/.profile"; then
+  if ! dc::internal::grep -q "$posh" "$HOME/.profile"; then
     printf "%s\\n" "# shellcheck source=$HOME/$posh" >> "$HOME/.profile"
     printf "%s\\n" ". \"\$HOME/$posh\"" >> "$HOME/.profile"
   fi

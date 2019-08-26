@@ -11,7 +11,7 @@ dc-tools::sc::filecheck(){
     return
   fi
   # Shellcheck
-  if ! head -n1 "$1" | grep -q -E -w "sh|bash|ksh"; then
+  if ! head -n1 "$1" | dc::internal::grep -q -w "sh|bash|ksh"; then
     dc::logger::warning "[linter] shellcheck ignoring $1 (no recognized shebang)"
     return
   fi

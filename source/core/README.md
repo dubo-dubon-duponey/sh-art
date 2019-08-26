@@ -156,8 +156,8 @@ Simple filesystem helpers
 #### Methods
 
 ```bash
-dc::fs::isfile [isWritable] [createIfMissing]
-dc::fs::isdir [isWritable] [createIfMissing]
+dc::fs::isfile [isWritable] [createIfMissing] || exit
+dc::fs::isdir [isWritable] [createIfMissing] || exit
 ```
 
 ### http
@@ -279,8 +279,8 @@ Code for stuff that is not portable or hard to get right
 #### Methods
 
 ```bash
-dc::portable::mktemp
-dc::portable::base64d
+dc::fs::mktemp
+dc::wrapped::base64d
 ```
 
 ### prompt
@@ -301,18 +301,18 @@ dc::prompt::credentials "message for username" varnameforusername "message for p
 
 ```bash
 # binaryName is mandatory
-dc::require "binaryName"
+dc::require "binaryName" || exit
 # binaryName version 1.2 is required
-dc::require "binaryName" "--versionFlag" "1.2"
+dc::require "binaryName" "--versionFlag" "1.2" || exit
 # DC_DEPENDENCIES_V_BINARYNAME will hold the version in case you need to inspect it
 
-dc::optional "binaryName" # <- same API as require, will spit a warning instead of exiting if a requirement is not satisfied
+dc::require "binaryName" || dc::logger::warning "This program run best with binaryName, you should install it"
 
-dc::require::platform::mac # Require macos
-dc::require::platform::linux # Require linux
-dc::require::platform "$DC_PLATFORM_MAC"
-dc::require::platform "$DC_PLATFORM_LINUX"
-dc::require::platform "$YOUR_OWN_SHIT_MATCHING_UNAME"
+dc::require::platform::mac || exit # Require macos
+dc::require::platform::linux || exit  # Require linux
+dc::require::platform "$DC_PLATFORM_MAC" || exit 
+dc::require::platform "$DC_PLATFORM_LINUX" || exit 
+dc::require::platform "$YOUR_OWN_SHIT_MATCHING_UNAME" || exit 
 ```
 
 ### Version

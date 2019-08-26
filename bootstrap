@@ -7,15 +7,17 @@ readonly _here=$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && p
 
 destination="${1:-$_here}/bin/bootstrap"
 
-if [ ! -d "$destination" ]; then
-  mkdir -p "$destination"
-fi
+[ -d "$destination" ] || mkdir -p "$destination"
 
 destination="$destination/builder"
 
 dc-tools::build::header "$destination" "bootstrap builder" "MIT License" "dubo-dubon-duponey"
 
 for k in "$_here/source/core/"*.sh; do
+  dc-tools::build::append "$k" "$destination"
+done
+
+for k in "$_here/source/headers/"*.sh; do
   dc-tools::build::append "$k" "$destination"
 done
 

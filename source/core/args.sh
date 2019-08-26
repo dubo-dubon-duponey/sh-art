@@ -64,12 +64,12 @@ dc::args::flag::validate()
   local var
   local varexist
   local regexp="$2"
-  local extended="-E"
   local optional="$3"
   local caseInsensitive="$4"
 
-  [ ! "$_DC_PRIVATE_GNUGREP" ] || extended="-P"
-  [ ! "$caseInsensitive" ] || extended="${extended}i"
+  local args=(-q)
+  [ ! "$caseInsensitive" ] || args+=(-i)
+
   var="DC_ARGV_$(printf "%s" "$1" | tr "-" "_" | tr '[:lower:]' '[:upper:]')"
   varexist="DC_ARGE_$(printf "%s" "$1" | tr "-" "_" | tr '[:lower:]' '[:upper:]')"
 
@@ -85,7 +85,7 @@ dc::args::flag::validate()
     if [ "$regexp" == "^$" ] && [ ! "${!var}" ]; then
       return
     fi
-    if ! printf "%s" "${!var}" | grep -q "$extended" "$regexp"; then
+    if ! printf "%s" "${!var}" | dc::internal::grep "${args[@]}" "$regexp"; then
       dc::logger::error "Flag \"$(printf "%s" "$1" | tr "_" "-" | tr '[:upper:]' '[:lower:]')\" is invalid. Provided value \"${!var}\" does not match \"$regexp\"."
       exit "$ERROR_ARGUMENT_INVALID"
     fi
@@ -97,12 +97,11 @@ dc::args::arg::validate()
   local var="DC_PARGV_$1"
   local varexist="DC_PARGE_$1"
   local regexp="$2"
-  local extended="-E"
   local optional="$3"
   local caseInsensitive="$4"
 
-  [ ! "$_DC_PRIVATE_GNUGREP" ] || extended="-P"
-  [ ! "$caseInsensitive" ] || extended="${extended}i"
+  local args=(-q)
+  [ ! "$caseInsensitive" ] || args+=(-i)
 
   if [ ! "${!varexist}" ]; then
     if [ "$optional" ]; then
@@ -116,7 +115,7 @@ dc::args::arg::validate()
     if [ "$regexp" == "^$" ] && [ ! "${!var}" ]; then
       return
     fi
-    if ! printf "%s" "${!var}" | grep -q "$extended" "$regexp"; then
+    if ! printf "%s" "${!var}" | dc::internal::grep "${args[@]}" "$regexp"; then
       dc::logger::error "Argument \"$1\" is invalid. Provided value \"${!var}\" does not match \"$regexp\"."
       exit "$ERROR_ARGUMENT_INVALID"
     fi

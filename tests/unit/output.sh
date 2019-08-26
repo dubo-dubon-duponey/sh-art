@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Make jq a requirement for these tests
-dc::require jq
+dc::require jq || exit
 
 testOutputJSONInvalid(){
   local result

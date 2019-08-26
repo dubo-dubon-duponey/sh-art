@@ -11,14 +11,14 @@ dc::commander::declare::arg 1 ".+" "image" "the path to the png image to use"
 dc::commander::boot
 
 # Requirements
-dc::require::platform::mac
-dc::require sips
-dc::require iconutil
-dc::require convert "" "" "You should: brew install imagemagick"
-dc::require icotool "" "" "You should: brew install icoutils"
+dc::require::platform::mac || exit
+dc::require sips || exit
+dc::require iconutil || exit
+dc::require convert "" "" "brew install imagemagick" || exit
+dc::require icotool "" "" "brew install icoutils" || exit
 
 original="$DC_PARGV_1"
-dc::fs::isfile "$original"
+dc::fs::isfile "$original" || exit
 
 if [ "$(file -b --mime "$original")" != "image/png; charset=binary" ]; then
   dc::logger::error "File $original is not a png image. Reported mime-type: $(file -b --mime "$original")"

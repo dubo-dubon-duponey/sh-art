@@ -18,6 +18,7 @@ dc::string::splitN(){
   local _dcss_subject=${!1}
   local sep="${!2}"
   local _dcss_count
+
   _dcss_count="$(printf "%s" "$3" | grep -E '^[0-9-]+$')"
   _dcss_count=${_dcss_count:--1}
 
@@ -59,8 +60,9 @@ dc::string::join(){
   local varname="$1[@]"
   local i
   local sep=
+
   for i in "${!varname}"; do
-    printf "%s" "$sep" "$i"
+    printf "%s%s" "$sep" "$i"
     sep="$2"
   done
 }
@@ -68,29 +70,23 @@ dc::string::join(){
 # ***************** OK
 # shellcheck disable=SC2120
 dc::string::toLower(){
-  if [ ! "${1}" ]; then
-    tr '[:upper:]' '[:lower:]' < /dev/stdin
-  else
-    printf "%s" "${!1}" | tr '[:upper:]' '[:lower:]'
-  fi
+  local fd="${1:-/dev/stdin}"
+
+  tr '[:upper:]' '[:lower:]' < "$fd"
 }
 
 # ***************** OK
 # shellcheck disable=SC2120
 dc::string::toUpper(){
-  if [ ! "${1}" ]; then
-    tr '[:lower:]' '[:upper:]' < /dev/stdin
-  else
-    printf "%s" "${!1}" | tr '[:lower:]' '[:upper:]'
-  fi
+  local fd="${1:-/dev/stdin}"
+
+  tr '[:lower:]' '[:upper:]' < "$fd"
 }
 
 # ***************** OK
 # shellcheck disable=SC2120
 dc::string::trimSpace(){
-  if [ ! "${1}" ]; then
-    sed -E "s/^[[:space:]\\n]*//" < /dev/stdin | sed -E "s/[[:space:]\\n]*\$//"
-  else
-    printf "%s" "${!1}" | sed -E "s/^[[:space:]\\n]*//" | sed -E "s/[[:space:]\\n]*\$//"
-  fi
+  local fd="${1:-/dev/stdin}"
+
+  sed -E "s/^[[:space:]\\n]*//" < "$fd" | sed -E "s/[[:space:]\\n]*\$//"
 }

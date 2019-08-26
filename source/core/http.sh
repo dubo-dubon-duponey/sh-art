@@ -58,7 +58,7 @@ dc::http::dump::headers() {
 }
 
 dc::http::dump::body() {
-  dc::optional jq
+  dc::require jq || dc::logger::warning "You should consider installing jq"
   if ! dc::logger::warning "$(jq . "$DC_HTTP_BODY" 2>/dev/null)"; then
     dc::logger::warning "$(cat "$DC_HTTP_BODY")"
   fi
@@ -87,7 +87,7 @@ dc::http::uriencode() {
 }
 
 dc::http::request(){
-  dc::require curl
+  dc::require curl || exit
   # Reset result data
   DC_HTTP_STATUS=
   DC_HTTP_REDIRECTED=
@@ -115,7 +115,7 @@ dc::http::request(){
     filename=/dev/null
     curlOpts[${#curlOpts[@]}]="-I"
   else
-    filename="$(dc::portable::mktemp dc::http::request)"
+    filename="$(dc::fs::mktemp dc::http::request)"
     curlOpts[${#curlOpts[@]}]="-X"
     curlOpts[${#curlOpts[@]}]="$method"
   fi
@@ -188,7 +188,7 @@ dc::http::request(){
 
         DC_HTTP_STATUS=${line#* }
         DC_HTTP_STATUS=${DC_HTTP_STATUS%% *}
-        [[ ${DC_HTTP_STATUS:0:1} == "3" ]] && isRedirect=true
+        [ "${DC_HTTP_STATUS:0:1}" == "3" ] && isRedirect=true
         dc::logger::info "[dc-http] status: $DC_HTTP_STATUS"
       ;;
       "}")

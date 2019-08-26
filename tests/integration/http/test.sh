@@ -71,7 +71,7 @@ testHTTPValidGET(){
   exit=$?
   status="$(printf "%s" "$result" | jq -r -c .status)"
   redirected="$(printf "%s" "$result" | jq -r -c .redirected)"
-  body="$(printf "%s" "$result" | jq -r -c .body | dc::portable::base64d)"
+  body="$(printf "%s" "$result" | jq -r -c .body | dc::wrapped::base64d)"
   headers="$(printf "%s" "$result" | jq -r -c .headers)"
   dc-tools::assert::equal "$exit" "0"
   dc-tools::assert::equal "$status" "401"

@@ -5,6 +5,8 @@
 # Used with TPUT - see logger and other output methods
 ##########################################################################
 
+true
+
 # shellcheck disable=SC2034
 readonly DC_COLOR_BLACK=0
 # shellcheck disable=SC2034
