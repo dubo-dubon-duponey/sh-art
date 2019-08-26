@@ -34,11 +34,10 @@ testGnuGrep(){
   dc-tools::assert::equal "grep non-GNU" "1" "$?"
 
   unset _DC_INTERNAL_NOT_GNUGREP
+  unset grep
 }
 
 testGrep(){
-  dc::error::lookup 144
-
   dc::internal::grep "-q" "^foo" <(printf "foo foo bar foo\n")
   dc-tools::assert::equal "grep start match" "0" "$?"
   dc::internal::grep "-q" "bar foo$" <(printf "foo foo bar foo")
@@ -48,5 +47,8 @@ testGrep(){
   dc-tools::assert::equal "grep not match" "ERROR_GREP_NO_MATCH" "$(dc::error::lookup $?)"
 
   dc::internal::grep "-bogus" "baz" <(printf "foo foo bar foo")
+  dc-tools::assert::equal "grep not match" "ERROR_BINARY_UNKNOWN_ERROR" "$(dc::error::lookup $?)"
+
+  dc::internal::grep
   dc-tools::assert::equal "grep not match" "ERROR_BINARY_UNKNOWN_ERROR" "$(dc::error::lookup $?)"
 }

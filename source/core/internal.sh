@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Used solely by dc::internal::grep - as a caching mechanism so not to query grep every time preflight
+# Used solely below - as a caching mechanism so not to query grep every time preflight
 dc::internal::isgnugrep(){
   if [ ! "${_DC_INTERNAL_NOT_GNUGREP+x}" ]; then
     _DC_INTERNAL_NOT_GNUGREP=1
@@ -10,6 +10,8 @@ dc::internal::isgnugrep(){
   return $_DC_INTERNAL_NOT_GNUGREP
 }
 
+# XXX this will freeze if there is no stdin and only one argument for example
+# Also, we do not do any effort to have fine-grained erroring here (everything wonky ends-up with BINARY_UNKNOWN_ERROR
 dc::internal::grep(){
   dc::require "grep" || return
 

@@ -51,7 +51,7 @@ dc::require(){
     declare -g "${varname?}"=true
   fi
 
-  [ "$versionFlag" ] || return 0
+  [ ! "$versionFlag" ] && return
 
   cVersion="$(dc::require::version "$binary" "$versionFlag")"
   [ "${cVersion%.*}" -gt "${version%.*}" ] \
