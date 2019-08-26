@@ -51,7 +51,7 @@ if [ ! "$DC_HTTP_STATUS" ]; then
   exit "$ERROR_NETWORK"
 fi
 
-for i in $DC_HTTP_HEADERS; do
+for i in "${DC_HTTP_HEADERS[@]}"; do
   [ "$heads" ] && heads="$heads,"
   name="DC_HTTP_HEADER_$i"
   value=$(printf "%s" "${!name}" | tr '"' "'")

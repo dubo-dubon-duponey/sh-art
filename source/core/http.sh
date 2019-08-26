@@ -1,4 +1,91 @@
 #!/usr/bin/env bash
+
+#####################################
+# Private
+#####################################
+
+_DC_INTERNAL_HTTP_REDACT=true
+# Given the nature of the matching we do, any header that contains these words will match, including proxy-authorization and set-cookie
+_DC_INTERNAL_HTTP_PROTECTED_HEADERS=( authorization cookie user-agent )
+
+DC_HTTP_STATUS=
+DC_HTTP_REDIRECTED=
+DC_HTTP_HEADERS=()
+
+dc::wrapped::curl(){
+  local err
+  local ex
+  local line
+  local key
+  local value
+  local isRedirect
+
+  # Reset everything
+  local i
+  for i in "${DC_HTTP_HEADERS[@]}"; do
+    read -r "DC_HTTP_HEADER_$i" <<< ""
+  done
+  DC_HTTP_HEADERS=()
+  DC_HTTP_STATUS=
+  DC_HTTP_REDIRECTED=
+
+  exec 3>&1
+  err="$(curl "$@" 2>&1 1>&3)"
+  ex="$?"
+  if [ "$ex" != 0 ]; then
+    exec 3>&-
+    [ "$ex" == 7 ] && return "$ERROR_CURL_CONNECTION_FAILED"
+    [ "$ex" == 6 ] && return "$ERROR_CURL_DNS_FAILED"
+    dc::error::detail::set "$err"
+    return "$ERROR_BINARY_UNKNOWN_ERROR"
+  fi
+
+  while read -r line; do
+    # > request
+    # } bytes sent
+    # { bytes received
+    # * info
+    [ "${line:0:1}" != "<" ] && continue
+
+    # Ignoring the leading character, and trim for content
+    line=$(printf "%s" "${line:1}" | sed -E "s/^[[:space:]]*//" | sed -E "s/[[:space:]]*\$//")
+
+    # Ignore empty content
+    [ "$line" ] || continue
+
+    # Is it a status line
+    if printf "%s" "$line" | dc::internal::grep -q "^HTTP/[0-9.]+ [0-9]+"; then
+      isRedirect=
+      line="${line#* }"
+      DC_HTTP_STATUS="${line%% *}"
+      [ "${DC_HTTP_STATUS:0:1}" == "3" ] && isRedirect=true
+      dc::logger::debug "[dc-http] status: $DC_HTTP_STATUS"
+      continue
+    fi
+
+    # Not a header? Move on
+    [[ "$line" == *":"* ]] || continue
+
+    # Parse header
+    key="$(printf "%s" "${line%%:*}" | tr "-" "_" | tr '[:lower:]' '[:upper:]')"
+    value="${line#*: }"
+
+    # Expunge what we log
+    [ "$_DC_INTERNAL_HTTP_REDACT" ] && [[ "${_DC_INTERNAL_HTTP_PROTECTED_HEADERS[*]}" == *"$key"* ]] && value=REDACTED
+    dc::logger::debug "[dc-http] $key | $value"
+
+    if [ "$isRedirect" ]; then
+      [ "$key" == "LOCATION" ] && export DC_HTTP_REDIRECTED="$value"
+      continue
+    fi
+    DC_HTTP_HEADERS+=("$key")
+    read -r "DC_HTTP_HEADER_$key" < <(printf "%s" "$value")
+
+  done < <(printf "%s" "$err")
+
+  exec 3>&-
+}
+
 ##########################################################################
 # HTTP client
 # ------
@@ -19,7 +106,7 @@
 dc::configure::http::leak(){
   dc::logger::warning "[dc-http] YOU ASKED FOR FULL-BLOWN HTTP DEBUGGING: THIS WILL LEAK SENSITIVE INFORMATION TO STDERR."
   dc::logger::warning "[dc-http] Unless you are debugging actively and you really know what you are doing, you MUST STOP NOW."
-  _DC_PRIVATE_HTTP_REDACT=
+  _DC_INTERNAL_HTTP_REDACT=
 }
 
 dc::configure::http::insecure(){
@@ -33,216 +120,70 @@ dc::configure::http::insecure(){
 # Public API
 #####################################
 
-DC_HTTP_STATUS=
-DC_HTTP_REDIRECTED=
-DC_HTTP_HEADERS=
-DC_HTTP_BODY=
-
 # Dumps all relevant data from the last HTTP request to the logger (warning)
 # XXX fixme: this will dump sensitive information and should be
 dc::http::dump::headers() {
   dc::logger::warning "[dc-http] status: $DC_HTTP_STATUS"
   dc::logger::warning "[dc-http] redirected to: $DC_HTTP_REDIRECTED"
-
   dc::logger::warning "[dc-http] headers:"
 
+  # shellcheck disable=SC2034
+  local redacted=REDACTED
   local value
+  local i
 
-  for i in $DC_HTTP_HEADERS; do
+  for i in "${DC_HTTP_HEADERS[@]}"; do
     value=DC_HTTP_HEADER_$i
-
-    # Expunge
-    [ "$_DC_PRIVATE_HTTP_REDACT" ] && [[ "${_DC_PRIVATE_HTTP_PROTECTED_HEADERS[*]}" == *"$i"* ]] && value=REDACTED
+    [ "$_DC_INTERNAL_HTTP_REDACT" ] && [[ "${_DC_INTERNAL_HTTP_PROTECTED_HEADERS[*]}" == *"$i"* ]] && value=redacted
     dc::logger::warning "[dc-http] $i: ${!value}"
   done
 }
 
-dc::http::dump::body() {
-  dc::require jq || dc::logger::warning "You should consider installing jq"
-  if ! dc::logger::warning "$(jq . "$DC_HTTP_BODY" 2>/dev/null)"; then
-    dc::logger::warning "$(cat "$DC_HTTP_BODY")"
-  fi
-}
-
-# A helper to encode uri fragments
-dc::http::uriencode() {
-  local s
-  s="${*//'%'/%25}"
-  s="${s//' '/%20}"
-  s="${s//'"'/%22}"
-  s="${s//'#'/%23}"
-  s="${s//'$'/%24}"
-  s="${s//'&'/%26}"
-  s="${s//'+'/%2B}"
-  s="${s//','/%2C}"
-  s="${s//'/'/%2F}"
-  s="${s//':'/%3A}"
-  s="${s//';'/%3B}"
-  s="${s//'='/%3D}"
-  s="${s//'?'/%3F}"
-  s="${s//'@'/%40}"
-  s="${s//'['/%5B}"
-  s="${s//']'/%5D}"
-  printf %s "$s"
-}
-
 dc::http::request(){
-  dc::require curl || exit
-  # Reset result data
-  DC_HTTP_STATUS=
-  DC_HTTP_REDIRECTED=
-  local i
-  for i in $DC_HTTP_HEADERS; do
-    read -r "DC_HTTP_HEADER_$i" < <(printf "")
-  done
-  DC_HTTP_HEADERS=
-  DC_HTTP_BODY=
+  dc::require "curl" || return
 
   # Grab the named parameters first
   local url="$1"
   local method="${2:-HEAD}"
   local payloadFile="$3"
+  local outputFile="${4:-/dev/stdout}"
+  shift
   shift
   shift
   shift
 
   # Build the curl request
-  local filename
   local curlOpts=( "$url" "-v" "-L" "-s" )
+  local output="curl"
 
   # Special case HEAD, damn you curl
-  if [ "$method" == "HEAD" ]; then
-    filename=/dev/null
-    curlOpts[${#curlOpts[@]}]="-I"
-  else
-    filename="$(dc::fs::mktemp dc::http::request)"
-    curlOpts[${#curlOpts[@]}]="-X"
-    curlOpts[${#curlOpts[@]}]="$method"
-  fi
-  curlOpts[${#curlOpts[@]}]="-o$filename"
+  [ "$method" == "HEAD" ]           && curlOpts+=("-I" "-o/dev/null") \
+                                    || curlOpts+=("-X" "$method" "-o$outputFile")
 
-  if [ "$payloadFile" ]; then
-    curlOpts[${#curlOpts[@]}]="--data-binary"
-    curlOpts[${#curlOpts[@]}]="@$payloadFile"
-  fi
-
-  local i
+  [ "$payloadFile" ]                && curlOpts+=("--data-binary" "@$payloadFile")
+  [ "$_DC_PRIVATE_HTTP_INSECURE" ]  && curlOpts+=("--insecure" "--proxy-insecure")
 
   # Add in all remaining parameters as additional headers
   for i in "$@"; do
-    curlOpts[${#curlOpts[@]}]="-H"
-    curlOpts[${#curlOpts[@]}]="$i"
+    curlOpts+=("-H" "$i")
   done
 
-  if [ "$_DC_PRIVATE_HTTP_INSECURE" ]; then
-    curlOpts[${#curlOpts[@]}]="--insecure"
-    curlOpts[${#curlOpts[@]}]="--proxy-insecure"
-  fi
-
-  _dc_internal::http::logcommand
-
-  # Do it!
-  local key
-  local value
-  local isRedirect
-  local line
-
-  while read -r i; do
-    # Ignoring the leading character, and trim for content
-    line=$(printf "%s" "${i:1}" | sed -E "s/^[[:space:]]*//" | sed -E "s/[[:space:]]*\$//")
-    # Ignore empty content
-    [ "$line" ] || continue
-
-    # Now, detect leading char
-    case ${i:0:1} in
-      ">")
-        # Request
-      ;;
-      "<")
-        # Response
-
-        # This is a header
-        if [[ "$line" == *":"* ]]; then
-          key=$(printf "%s" "${line%%:*}" | tr "-" "_" | tr '[:lower:]' '[:upper:]')
-          value=${line#*: }
-
-          if [ ! "$isRedirect" ]; then
-            [ ! "$DC_HTTP_HEADERS" ] && DC_HTTP_HEADERS=$key || DC_HTTP_HEADERS="$DC_HTTP_HEADERS $key"
-            read -r "DC_HTTP_HEADER_$key" < <(printf "%s" "$value")
-          elif [ "$key" == "LOCATION" ]; then
-            DC_HTTP_REDIRECTED=$value
-          fi
-
-          # Expunge what we log
-          [ "$_DC_PRIVATE_HTTP_REDACT" ] && [[ "${_DC_PRIVATE_HTTP_PROTECTED_HEADERS[*]}" == *"$key"* ]] && value=REDACTED
-          dc::logger::debug "[dc-http] $key | $value"
-          continue
-        fi
-
-        # Not a header, then it's a status line
-        isRedirect=
-        if ! printf "%s" "$line" | grep -qE "^HTTP/[0-9.]+ [0-9]+"; then
-          dc::logger::warning "Ignoring random curl output (XXX FIXME multiline header): $i"
-          continue
-        fi
-
-        DC_HTTP_STATUS=${line#* }
-        DC_HTTP_STATUS=${DC_HTTP_STATUS%% *}
-        [ "${DC_HTTP_STATUS:0:1}" == "3" ] && isRedirect=true
-        dc::logger::info "[dc-http] status: $DC_HTTP_STATUS"
-      ;;
-      "}")
-        # Bytes sent
-      ;;
-      "{")
-        # Bytes received
-      ;;
-      "*")
-        # Info
-      ;;
-    esac
-    # headers[${#headers[@]}]="$t"
-  done < <(
-    curl "${curlOpts[@]}" 2>&1
-  )
-  DC_HTTP_BODY="$filename"
-}
-
-#####################################
-# Private
-#####################################
-
-_DC_PRIVATE_HTTP_REDACT=true
-_DC_PRIVATE_HTTP_INSECURE=
-# Given the nature of the matching we do, any header that contains these words will match, including proxy-authorization and set-cookie
-_DC_PRIVATE_HTTP_PROTECTED_HEADERS=( authorization cookie user-agent )
-
-_dc_internal::http::logcommand() {
-  local output="curl"
-  local i
-  for i in "${curlOpts[@]}"; do
+  # Log the command
+  for i in "$@"; do
     # -args are logged as-is
-    if [ "${i:0:1}" == "-" ]; then
-      output="$output $i"
-      continue
-    fi
+    [ "${i:0:1}" == "-" ] && output="$output $i" && continue
 
     # If we redact, filter out sensitive headers
-    if [ "$_DC_PRIVATE_HTTP_REDACT" ]; then
-      # XXX this is overly aggressive, and will match any header that is a substring of one of the protected headers
-      case "${_DC_PRIVATE_HTTP_PROTECTED_HEADERS[*]}" in
-        *$(printf "%s" ${i%%:*} | tr '[:upper:]' '[:lower:]')*)
-          output="$output \"${i%%:*}: REDACTED\""
-          continue
-        ;;
-      esac
-    fi
+    # XXX this is overly aggressive, and will match any header that is a substring of one of the protected headers
+    [ "$_DC_INTERNAL_HTTP_REDACT" ] && [[ "${_DC_INTERNAL_HTTP_PROTECTED_HEADERS[*]}" == *$(printf "%s" "${i%%:*}" | tr '[:upper:]' '[:lower:]')* ]] \
+      && output="$output \"${i%%:*}: REDACTED\"" \
+      && continue
 
-    # Otherwise, pass them in
+    # Otherwise, pass them in as-is
     output="$output \"$i\" "
   done
 
-  # dc::logger::info "[dc-http] ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★"
-  dc::logger::info "[dc-http] $output"
-  # dc::logger::info "[dc-http] ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★"
+  dc::logger::debug "[dc-http] $output"
+
+  dc::wrapped::curl "${curlOpts[@]}"
 }
