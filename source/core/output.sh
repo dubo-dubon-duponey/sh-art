@@ -141,6 +141,6 @@ dc::internal::output::style(){
   local i
   for i in "${!vName}"; do
     # shellcheck disable=SC2086
-    [ "$TERM" ] && [ -t 1 ] && >&1 tput "$i"
+    [ "$TERM" ] && [ -t 1 ] && >&1 tput $i
   done
 }
