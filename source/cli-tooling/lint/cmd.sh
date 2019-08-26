@@ -9,8 +9,8 @@ dc::commander::initialize
 dc::commander::declare::arg 1 ".+" "source" "Source file (or directory) to lint"
 # Start commander
 dc::commander::boot
-dc::require shellcheck "--version" "0.5"
-dc::require hadolint
+dc::require shellcheck --version 0.5 || exit
+dc::require hadolint || exit
 
 if [ ! -r "$DC_PARGV_1" ]; then
   dc::logger::error "Please provide at least one readable file or directory to lint."
@@ -23,14 +23,14 @@ for i in "$@"; do
     continue
   fi
   if [ -f "$i" ]; then
-    dc-tools::sc::filecheck "$i"
+    dc-tooling::sc::filecheck "$i"
     if [ "$DC_SHELLCHECK_FAIL" ]; then
       dc::logger::error "Shellcheck failed on file $DC_PARGV_1."
       exit "$ERROR_FAILED"
     fi
     continue
   fi
-  dc-tools::sc::dircheck "$i"
+  dc-tooling::sc::dircheck "$i"
   if [ "$DC_SHELLCHECK_FAIL" ]; then
     dc::logger::error "Shellcheck failed on directory $DC_PARGV_1."
     exit "$ERROR_FAILED"

@@ -299,12 +299,12 @@ dc::prompt::credentials "message for username" varnameforusername "message for p
 
 ```bash
 # binaryName is mandatory
-dc::require "binaryName" || exit
-# binaryName version 1.2 is required
-dc::require "binaryName" "--versionFlag" "1.2" || exit
+dc::require binaryName || exit
+# binaryName version 1.2 or above is required
+dc::require binaryName --versionFlag 1.2 || exit
 # DC_DEPENDENCIES_V_BINARYNAME will hold the version in case you need to inspect it
 
-dc::require "binaryName" || dc::logger::warning "This program run best with binaryName, you should install it"
+dc::require binaryName || dc::logger::warning "This program run best with binaryName, you should install it"
 
 dc::require::platform::mac || exit # Require macos
 dc::require::platform::linux || exit  # Require linux

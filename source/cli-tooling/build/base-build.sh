@@ -1,30 +1,28 @@
 #!/usr/bin/env bash
 
-dc-tools::build::append(){
+dc-tooling::build::append(){
   local source="$1"
   local destination="$2"
   local i
 
-  OIFS=$IFS
-  IFS=$'\n'
   local start
-  while read -r i || [ "$i" ]
+  while IFS=$'\n' read -r i || [ "$i" ]
   do
     # Ignore file headers
-    if [ "$start" ] || ! printf "%s" "$i" | grep -q -E "^[ ]*#"; then
+    if [ "$start" ] || ! printf "%s" "$i" | dc::internal::grep -q "^[ ]*#"; then
       printf "%s\\n" "$i"
       start="done"
     fi
   done < "$source" >> "$destination"
-  IFS=$OIFS
 }
 
-dc-tools::build::header(){
+dc-tooling::build::header(){
   local destination="$1"
   local shortdesc="${2:-another fancy piece of shcript}"
   local license="${3:-MIT License}"
   local owner="${4-dubo-dubon-duponey}"
   local name
+
   name="$(basename "$1")"
 
   cat <<-EOF > "$destination"
@@ -37,11 +35,12 @@ dc-tools::build::header(){
 EOF
 }
 
-dc-tools::build::version(){
-  dc::require git
+dc-tooling::build::version(){
+  dc::require git || exit
 
   local destination="$1"
   local source
+
   source="$(dirname "$2")"
   # XXX --tags
   cat <<-EOF >> "$destination"

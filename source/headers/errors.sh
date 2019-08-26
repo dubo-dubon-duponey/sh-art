@@ -9,6 +9,12 @@
 # custom errors defined by apps & libraries should use the 3-125 range
 ##########################################################################
 
+# Generic error to denote that the operation has failed. More specific errors may be provided instead
+dc::error::register ERROR_FAILED
+
+# Should be used to convey that a certain operation is not supported
+dc::error::register ERROR_UNSUPPORTED
+
 # wrapped grep will return with this if there is no match
 dc::error::register ERROR_GREP_NO_MATCH
 
@@ -48,17 +54,9 @@ dc::error::register ERROR_ENCODING_UNKNOWN
 dc::error::register ERROR_CURL_CONNECTION_FAILED
 dc::error::register ERROR_CURL_DNS_FAILED
 
-
 # Thrown by dc::http::request if a network level error occurs (eg: curl exiting abnormally)
 # shellcheck disable=SC2034
 readonly ERROR_NETWORK=200
 # Thrown if a required argument is missing
 # shellcheck disable=SC2034
 readonly ERROR_ARGUMENT_MISSING=201
-# Should be used to convey that a certain operation is not supported
-# shellcheck disable=SC2034
-readonly ERROR_UNSUPPORTED=203
-# Generic error to denote that the operation has failed. More specific errors may be provided instead
-# shellcheck disable=SC2034
-readonly ERROR_FAILED=204
-

@@ -15,18 +15,20 @@ dc::string::split(){
 
 # https://golang.org/pkg/strings/#SplitN
 dc::string::splitN(){
-  local _dcss_subject=${!1}
+  local subject=${!1}
   local sep="${!2}"
-  local _dcss_count
+  local count
+  local counter=1
+  local dcss_segment
 
-  _dcss_count="$(printf "%s" "$3" | grep -E '^[0-9-]+$')"
-  _dcss_count=${_dcss_count:--1}
+  count="$(printf "%s" "$3" | grep -E '^[0-9-]+$')"
+  count=${count:--1}
 
-  if [ "$_dcss_count" == 0 ]; then
+  if [ "$count" == 0 ]; then
     # Should return nil
     return
   fi
-  if [ ! "${_dcss_subject}" ]; then
+  if [ ! "${subject}" ]; then
     # Should return an empty array
     return
   fi
@@ -34,25 +36,23 @@ dc::string::splitN(){
   # No sep, split on every single char
   if [ ! "$sep" ]; then
     local i
-    for (( i=0; i<${#_dcss_subject} && (_dcss_count == -1 || i<_dcss_count); i++)); do
-      printf "%s\\0" "${_dcss_subject:$i:1}"
+    for (( i=0; i<${#subject} && (count == -1 || i<count); i++)); do
+      printf "%s\\0" "${subject:$i:1}"
     done
     return
   fi
 
   # Otherwise
-  local count=1
-  local _dcss_segment
   while
-    _dcss_segment="${_dcss_subject%%"$sep"*}"
-    [ "${#_dcss_segment}" != "${#_dcss_subject}" ] && { [ "$_dcss_count" == -1 ] || [ "$count" -lt "$_dcss_count" ]; }
+    dcss_segment="${subject%%"$sep"*}"
+    [ "${#dcss_segment}" != "${#subject}" ] && { [ "$count" == -1 ] || [ "$counter" -lt "$count" ]; }
   do
-    printf "%s\\0" "$_dcss_segment"
-    local tt=$(( ${#_dcss_segment} + ${#sep} ))
-    _dcss_subject=${_dcss_subject:${tt}}
-    count=$(( count + 1 ))
+    printf "%s\\0" "$dcss_segment"
+    local tt=$(( ${#dcss_segment} + ${#sep} ))
+    subject=${subject:${tt}}
+    counter=$(( counter + 1 ))
   done
-  printf "%s\\0" "$_dcss_subject"
+  printf "%s\\0" "$subject"
 }
 
 # https://golang.org/pkg/strings/#Join

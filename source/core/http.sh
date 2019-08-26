@@ -140,7 +140,7 @@ dc::http::dump::headers() {
 }
 
 dc::http::request(){
-  dc::require "curl" || return
+  dc::require curl || return
 
   # Grab the named parameters first
   local url="$1"

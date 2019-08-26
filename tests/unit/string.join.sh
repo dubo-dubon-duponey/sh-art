@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+. source/lib/string.sh
+
 testStringJoin(){
   haystack=( 1 2 3 )
   expected="123"

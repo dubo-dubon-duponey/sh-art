@@ -27,28 +27,24 @@ dc::fs::isdir "$destination" writable create || exit
 destination="$destination/$DC_ARGV_NAME"
 
 # Pack in the header to the final destination
-dc-tools::build::header "$destination" "${DC_ARGV_DESCRIPTION:-another fancy piece of shcript}" "${DC_ARGV_LICENSE:-MIT License}" "${DC_ARGV_AUTHOR:-dubo-dubon-duponey}"
+dc-tooling::build::header "$destination" "${DC_ARGV_DESCRIPTION:-another fancy piece of shcript}" "${DC_ARGV_LICENSE:-MIT License}" "${DC_ARGV_AUTHOR:-dubo-dubon-duponey}"
 
 # Add git information
-if [ "$DC_ARGE_WITH_GIT_INFO" ]; then
-  dc-tools::build::version "$destination" "$DC_PARGV_1"
-fi
+[ ! "$DC_ARGE_WITH_GIT_INFO" ] || dc-tooling::build::version "$destination" "$DC_PARGV_1"
 
 # XXX somewhat cavalier
 for item in "$@"; do
-  if [ "${item:0:1}" == "-" ]; then
-    continue
-  fi
+  [ "${item:0:1}" != "-" ] || continue
   if [ ! -r "$item" ]; then
     dc::logger::error "$item cannot be read"
     exit "$ERROR_ARGUMENT_INVALID"
   fi
   if [ -f "$item" ]; then
-    dc-tools::build::append "$item" "$destination"
+    dc-tooling::build::append "$item" "$destination"
     continue
   fi
   for k in "$item/"*.sh; do
-    dc-tools::build::append "$k" "$destination"
+    dc-tooling::build::append "$k" "$destination"
   done
 done
 

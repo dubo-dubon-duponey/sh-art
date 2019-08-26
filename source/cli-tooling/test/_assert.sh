@@ -15,4 +15,3 @@ dc-tools::assert::equal(){
 dc-tools::assert::notequal(){
   assertNotEquals "$@"
 }
-

@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-. source/lib/ext-fs.sh
-
 testDir(){
   local result
 

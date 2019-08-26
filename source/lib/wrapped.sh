@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 dc::wrapped::shasum(){
-  dc::require "shasum" || return
+  dc::require shasum || return
 
   local err
 
@@ -30,7 +30,7 @@ dc::wrapped::shasum(){
 
 # Key manipulation
 dc::wrapped::openssl(){
-  dc::require "openssl" "version" "1.0" || return
+  dc::require openssl version 1.0 || return
 
   local err
 
@@ -55,7 +55,7 @@ dc::wrapped::openssl(){
 }
 
 dc::wrapped::base64d(){
-  dc::require "base64" || return
+  dc::require base64 || return
 
   case "$(uname)" in
     Darwin)
@@ -68,14 +68,14 @@ dc::wrapped::base64d(){
 }
 
 dc::wrapped::iconv(){
-  dc::require "iconv" || return
+  dc::require iconv || return
 
   iconv "$@" 2>/dev/null \
     || { dc::error::detail::set "iconv" && return "$ERROR_BINARY_UNKNOWN_ERROR"; }
 }
 
 dc::wrapped::uchardet(){
-  dc::require "uchardet" || return
+  dc::require uchardet || return
 
   uchardet "$@" 2>/dev/null \
     || { dc::error::detail::set "uchardet" && return "$ERROR_BINARY_UNKNOWN_ERROR"; }

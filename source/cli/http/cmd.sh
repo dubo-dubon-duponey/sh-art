@@ -31,7 +31,7 @@ dc::commander::declare::arg 2 "^$" "[...headers]" "additional headers to be pass
 dc::commander::boot
 
 # Requirements
-dc::require jq
+dc::require jq || exit
 
 # URL METHOD PAYLOAD HEADERS
 opts=( "$DC_PARGV_1" "${DC_ARGV_METHOD:-$DC_ARGV_M}" "${DC_ARGV_FILE:-$DC_ARGV_F}" )

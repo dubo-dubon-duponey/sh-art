@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+. source/lib/string.sh
+
 testStringUpLow(){
   source="∞Foo"
   result=$(dc::string::toUpper <(printf "%s" "$source"))
