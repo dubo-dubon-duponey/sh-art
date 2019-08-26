@@ -6,9 +6,9 @@ dc-tooling::sc::filecheck(){
   dc::logger::info "[linter] checking \"$1\""
   # Hadolint
   if [[ "$1" = *"Dockerfile"* ]]; then
-    hadolint "$1" \
-      && return \
-      || { dc::logger::error "[linter] hadolint failed on: \"$1\"" && return "$ERROR_LINT_FAIL"; }
+    hadolint "$1" && return
+    dc::logger::error "[linter] hadolint failed on: \"$1\""
+    return "$ERROR_LINT_FAIL"
   fi
   # Shellcheck
   head -n1 "$1" | dc::internal::grep -q -w "sh|bash|ksh" \

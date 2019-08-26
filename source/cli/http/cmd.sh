@@ -39,12 +39,12 @@ x=2
 e="DC_PARGE_$x"
 while [ "${!e}" ]; do
   n="DC_PARGV_$x"
-  opts[${#opts[@]}]="${!n}"
+  opts+=("${!n}")
   x=$(( x + 1 ))
   e="DC_PARGE_$x"
 done
 
-dc::http::request "${opts[@]}"
+body=$(dc::http::request "${opts[@]}")
 
 if [ ! "$DC_HTTP_STATUS" ]; then
   dc::logger::error "Network issue... Recommended: check your pooch whereabouts. Now, check these chewed-up network cables."
@@ -58,7 +58,7 @@ for i in "${DC_HTTP_HEADERS[@]}"; do
   heads="$heads\"$i\": \"$value\""
 done
 
-output=$( printf "%s" "{$heads}" | jq --arg body "$(base64 "$DC_HTTP_BODY")" --arg status "$DC_HTTP_STATUS" --arg location "${DC_HTTP_REDIRECTED}" -r '{
+output=$( printf "%s" "{$heads}" | jq --arg body "$(base64 "$body")" --arg status "$DC_HTTP_STATUS" --arg location "${DC_HTTP_REDIRECTED}" -r '{
   status: $status,
   redirected: $location,
   headers: .,

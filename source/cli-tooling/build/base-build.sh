@@ -9,7 +9,7 @@ dc-tooling::build::append(){
   while IFS=$'\n' read -r i || [ "$i" ]
   do
     # Ignore file headers
-    if [ "$start" ] || ! printf "%s" "$i" | dc::internal::grep -q "^[ ]*#"; then
+    if [ "$start" ] || ! printf "%s" "$i" | grep -q "^[ ]*#"; then
       printf "%s\\n" "$i"
       start="done"
     fi
@@ -40,12 +40,13 @@ dc-tooling::build::version(){
 
   local destination="$1"
   local source
-
   source="$(dirname "$2")"
+  local prefix="${3:-DC}"
+
   # XXX --tags
   cat <<-EOF >> "$destination"
-DC_VERSION="$(git -C "$source" describe --match 'v[0-9]*' --dirty='.m' --always)"
-DC_REVISION="$(git -C "$source" rev-parse HEAD)$(if ! git -C "$source" diff --no-ext-diff --quiet --exit-code; then printf ".m\\n"; fi)"
-DC_BUILD_DATE="$(date -R)"
+${prefix}_VERSION="$(git -C "$source" describe --match 'v[0-9]*' --dirty='.m' --always)"
+${prefix}_REVISION="$(git -C "$source" rev-parse HEAD)$(if ! git -C "$source" diff --no-ext-diff --quiet --exit-code; then printf ".m\\n"; fi)"
+${prefix}_BUILD_DATE="$(date -R)"
 EOF
 }

@@ -318,6 +318,10 @@ dc::require::platform "$YOUR_OWN_SHIT_MATCHING_UNAME" || exit
 A handful of variable holding sh-art version and build information.
 
 ```bash
+DC_LIB_VERSION
+DC_LIB_REVISION
+DC_LIB_BUILD_DATE
+
 DC_VERSION
 DC_REVISION
 DC_BUILD_DATE

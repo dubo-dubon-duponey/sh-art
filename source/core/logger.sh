@@ -79,10 +79,10 @@ dc::logger::warning(){
 
 dc::logger::error(){
   if [ "$_DC_INTERNAL_LOGGER_LEVEL" -ge "$DC_LOGGER_ERROR" ]; then
-    [ "$TERM" ] && [ -t 2 ] && >&2 "${DC_LOGGER_STYLE_ERROR[@]}"
+    [ "$TERM" ] && [ -t 2 ] && >&2 tput "${DC_LOGGER_STYLE_ERROR[@]}"
     local i
     for i in "$@"; do
-      _dc_internal::logger::stamp "[ERROR]" "$i"
+      dc::internal::logger::stamp "[ERROR]" "$i"
     done
     [ "$TERM" ] && [ -t 2 ] && >&2 tput op
   fi

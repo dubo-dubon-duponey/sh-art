@@ -9,6 +9,9 @@ DC_PREFIX ?= $(shell pwd)
 # Set to true to disable fancy / colored output
 DC_NO_FANCY ?=
 
+# List of dckr platforms to test
+DCKR_PLATFORMS ?= ubuntu-lts-old ubuntu-lts-current ubuntu-current ubuntu-next alpine-current alpine-next debian-old debian-current debian-next
+
 # Fancy output if interactive
 ifndef DC_NO_FANCY
     NC := \033[0m
@@ -30,8 +33,8 @@ define footer
 	@printf "$(GREEN)____________________________________________________________________________________________________\n$(NC)"
 endef
 
-# List of dckr platforms to test
-DCKR_PLATFORMS ?= ubuntu-lts-old ubuntu-lts-current ubuntu-current ubuntu-next alpine-current alpine-next debian-old debian-current debian-next
+DC_AUTHOR := Dubo Dubon Duponey
+DC_LICENSE := MIT License
 
 #######################################################
 # Targets
@@ -51,62 +54,71 @@ $(DC_PREFIX)/bin/bootstrap/builder: $(DC_MAKEFILE_DIR)/bootstrap
 	$(DC_MAKEFILE_DIR)/bootstrap $(DC_PREFIX)
 	$(call footer, $@)
 
-# Then build the cli tools, using the bootstrapper
-$(DC_PREFIX)/bin/dc-tooling-%: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE_DIR)/source/headers/*.sh $(DC_MAKEFILE_DIR)/source/cli-tooling/%
+# Then build the cli builder, using the bootstrapper
+$(DC_PREFIX)/bin/dc-tooling-build: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE_DIR)/source/headers/*.sh $(DC_MAKEFILE_DIR)/source/cli-tooling/build/*.sh
 	$(call title, $@)
-	$(DC_PREFIX)/bin/bootstrap/builder --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="MIT License" --author="dubo-dubon-duponey" --description="another fancy (tooling) piece of shcript" --with-git-info $^
+	$(DC_PREFIX)/bin/bootstrap/builder --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="a script builder, part of the dc-tooling set of utilities" --with-git-info $^
 	$(call footer, $@)
 
 #######################################################
 # Base building tasks
 #######################################################
 
+#$(DC_PREFIX)/bin/dc-tooling-%: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE_DIR)/source/headers/*.sh $(DC_MAKEFILE_DIR)/source/cli-tooling/%
+# All other dev tools
+$(DC_PREFIX)/bin/dc-tooling-%: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE_DIR)/source/headers/*.sh $(DC_MAKEFILE_DIR)/source/cli-tooling/%
+	$(call title, $@)
+	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="part of the dc-tooling set of utilities" --with-git-info $^
+	$(call footer, $@)
+
 # Builds the main library
 $(DC_PREFIX)/lib/dc-sh-art: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE_DIR)/source/headers/*.sh $(DC_MAKEFILE_DIR)/source/lib/*.sh
 	$(call title, $@)
-	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="MIT License" --author="dubo-dubon-duponey" --description="the library version" --with-git-info $^
+	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="the library version" --with-git-info=DC_LIB $^
 	$(call footer, $@)
 
 # Builds the extensions
 $(DC_PREFIX)/lib/dc-sh-art-extensions: $(DC_MAKEFILE_DIR)/source/extensions/**/*.sh
 	$(call title, $@)
-	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="MIT License" --author="dubo-dubon-duponey" --description="extensions" $^
+	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="extensions" $^
 	$(call footer, $@)
 
 # Builds all the CLIs that depend just on the main library
 $(DC_PREFIX)/bin/dc-%: $(DC_PREFIX)/lib/dc-sh-art $(DC_MAKEFILE_DIR)/source/cli/%
 	$(call title, $@)
-	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="MIT License" --author="dubo-dubon-duponey" --description="another fancy piece of shcript" $^
+	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="another fancy piece of shcript" --with-git-info $^
 	$(call footer, $@)
 
 # Builds all the CLIs that depend on the main library and extensions
 $(DC_PREFIX)/bin/dc-%: $(DC_PREFIX)/lib/dc-sh-art $(DC_PREFIX)/lib/dc-sh-art-extensions $(DC_MAKEFILE_DIR)/source/cli-ext/%
 	$(call title, $@)
-	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="MIT License" --author="dubo-dubon-duponey" --description="another fancy piece of shcript" $^
+	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="another fancy piece of shcript" --with-git-info $^
 	$(call footer, $@)
 
 #######################################################
 # Tasks to be called on
 #######################################################
 
+build-builder: $(DC_PREFIX)/bin/bootstrap/builder $(DC_PREFIX)/bin/dc-tooling-build
+
 # High-level task for embedders to build just the tooling
-build-tooling: $(DC_PREFIX)/bin/bootstrap/builder $(patsubst $(DC_MAKEFILE_DIR)/source/cli-tooling/%/cmd.sh,$(DC_PREFIX)/bin/dc-tooling-%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli-tooling/*/cmd.sh))
+build-tooling: build-builder $(patsubst $(DC_MAKEFILE_DIR)/source/cli-tooling/%/cmd.sh,$(DC_PREFIX)/bin/dc-tooling-%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli-tooling/*/cmd.sh))
 
 # High-level task to build the library, and extensions
-build-library: build-tooling $(DC_PREFIX)/lib/dc-sh-art $(DC_PREFIX)/lib/dc-sh-art-extensions
+build-library: build-builder $(DC_PREFIX)/lib/dc-sh-art $(DC_PREFIX)/lib/dc-sh-art-extensions
 
 # High-level task to build all non tooling CLIs
 build-binaries: build-library $(patsubst $(DC_MAKEFILE_DIR)/source/cli-ext/%/cmd.sh,$(DC_PREFIX)/bin/dc-%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli-ext/*/cmd.sh)) \
 				$(patsubst $(DC_MAKEFILE_DIR)/source/cli/%/cmd.sh,$(DC_PREFIX)/bin/dc-%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli/*/cmd.sh))
 
 # Git sanity
-lint-signed: build-tooling
+lint-signed: build-builder $(DC_PREFIX)/bin/dc-tooling-git
 	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-git $(DC_MAKEFILE_DIR)
 	$(call footer, $@)
 
 # Linter
-lint-code: build-tooling build-library build-binaries
+lint-code: build-binaries $(DC_PREFIX)/bin/dc-tooling-lint
 	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-lint $(DC_MAKEFILE_DIR)/bootstrap
 	$(DC_PREFIX)/bin/dc-tooling-lint $(DC_MAKEFILE_DIR)/source
@@ -117,7 +129,7 @@ lint-code: build-tooling build-library build-binaries
 	$(call footer, $@)
 
 # Unit tests
-unit/%: build-tooling
+unit/%: $(DC_PREFIX)/bin/dc-tooling-test
 	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-test $(DC_MAKEFILE_DIR)/tests/$@
 	$(call footer, $@)
@@ -125,7 +137,7 @@ unit/%: build-tooling
 test-unit: $(patsubst $(DC_MAKEFILE_DIR)/tests/unit/%,unit/%,$(wildcard $(DC_MAKEFILE_DIR)/tests/unit/*.sh))
 
 # Integration tests
-integration/%: build-tooling $(DC_PREFIX)/bin/dc-%
+integration/%: build-builder $(DC_PREFIX)/bin/dc-tooling-test $(DC_PREFIX)/bin/dc-%
 	$(call title, $@)
 	PATH=$(DC_PREFIX)/bin:${PATH} $(DC_PREFIX)/bin/dc-tooling-test $(DC_MAKEFILE_DIR)/tests/$@/*.sh
 	$(call footer, $@)

@@ -67,9 +67,9 @@ EOF
   # shellcheck source=/dev/null
   . "$HOME/.profile"
 
-  gvm install go1.10 --prefer-binary
-  gvm install go1.11 --prefer-binary
-  gvm use go1.11 --default
+  gvm install go1.12 --prefer-binary
+  gvm install go1.13rc1 --prefer-binary
+  gvm use go1.12 --default
 
   dc::logger::info "Done with golang"
 }

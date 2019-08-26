@@ -54,9 +54,6 @@ dc::error::register ERROR_ENCODING_UNKNOWN
 dc::error::register ERROR_CURL_CONNECTION_FAILED
 dc::error::register ERROR_CURL_DNS_FAILED
 
-# Thrown by dc::http::request if a network level error occurs (eg: curl exiting abnormally)
-# shellcheck disable=SC2034
-readonly ERROR_NETWORK=200
 # Thrown if a required argument is missing
 # shellcheck disable=SC2034
 readonly ERROR_ARGUMENT_MISSING=201

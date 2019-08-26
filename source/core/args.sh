@@ -11,7 +11,7 @@
 # Flags must be passed before any other argument.
 ##########################################################################
 
-_dc_internal::parse_args(){
+dc::internal::parse_args(){
   # Flag parsing
   local isFlag=true
   local x=0
@@ -56,7 +56,7 @@ _dc_internal::parse_args(){
 }
 
 # XXX should this be internal? called by another higher-level method?
-_dc_internal::parse_args "$@"
+dc::internal::parse_args "$@"
 
 # Makes the named argument mandatory on the command-line
 dc::args::flag::validate()
