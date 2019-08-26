@@ -126,27 +126,25 @@ Custom errors defined by applications should use the 1-99 range.
 
 Internal errors:
 ```bash
-# Network level error
-ERROR_NETWORK=200
+./bin/dc-libre ENV | grep "^ERROR" | sort
 
-# Missing required argument
-ERROR_ARGUMENT_MISSING=201
-
-# Invalid argument
-ERROR_ARGUMENT_INVALID=202
-
-# Should be used to convey that a certain operation is not supported
-ERROR_UNSUPPORTED=203
-
-# Generic error to denote that the operation has failed
-# More specific errors may be provided instead
-ERROR_FAILED=204
-
-# Expectations failed on a file (not readable, writable, doesn't exist, can't be created)
-ERROR_FILESYSTEM=205
-
-# System requirement missing
-readonly ERROR_MISSING_REQUIREMENTS=206
+ERROR_ARGUMENT_INVALID=147
+ERROR_ARGUMENT_TIMEOUT=148
+ERROR_BINARY_UNKNOWN_ERROR=145
+ERROR_CRYPTO_PEM_NO_SUCH_HEADER=156
+ERROR_CRYPTO_SHASUM_FILE_ERROR=151
+ERROR_CRYPTO_SHASUM_VERIFY_ERROR=155
+ERROR_CRYPTO_SHASUM_WRONG_ALGORITHM=150
+ERROR_CRYPTO_SSL_INVALID_KEY=152
+ERROR_CRYPTO_SSL_WRONG_ARGUMENTS=154
+ERROR_CRYPTO_SSL_WRONG_PASSWORD=153
+ERROR_CURL_CONNECTION_FAILED=159
+ERROR_CURL_DNS_FAILED=160
+ERROR_ENCODING_CONVERSION_FAIL=157
+ERROR_ENCODING_UNKNOWN=158
+ERROR_FILESYSTEM=149
+ERROR_GREP_NO_MATCH=144
+ERROR_MISSING_REQUIREMENTS=146
 ```
 
 ### fs

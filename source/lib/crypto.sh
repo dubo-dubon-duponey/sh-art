@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
 dc::crypto::shasum::compute(){
-  dc::require shasum || return
-
   local fd="${1:-/dev/stdin}"
   local type="${2:-$DC_CRYPTO_SHASUM_512256}"
   local prefixed="$3"
@@ -14,7 +12,6 @@ dc::crypto::shasum::compute(){
 }
 
 dc::crypto::shasum::verify(){
-  dc::require shasum || return
   local expected="$1"
   local fd="${2:-/dev/stdin}"
   local type="${3:-$DC_CRYPTO_SHASUM_512256}"
@@ -80,7 +77,10 @@ dc::crypto::csr::new(){
   local organization="$4"
   local organizationUnit="$5"
   local name="$6"
+  # XXX argument validation here? New type for email?
   local email="$7"
+
+  dc::argument::check email "$DC_TYPE_EMAIL"
 
   dc::wrapped::openssl req -new -sha256 -key /dev/stdin -subj "/C=$country/ST=$state/L=$city/O=$organization/OU=$organizationUnit/CN=$name/emailAddress=$email"
 }

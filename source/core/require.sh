@@ -48,8 +48,6 @@ dc::require(){
   local cVersion
 
   dc::argument::check binary "^.+$" || return
-  dc::argument::check versionFlag "^.+$" || return
-  dc::argument::check version "$DC_TYPE_FLOAT" || return
 
   varname=_DC_DEPENDENCIES_B_$(printf "%s" "$binary" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
   if [ ! ${!varname+x} ]; then
@@ -58,7 +56,8 @@ dc::require(){
     declare -g "${varname?}"=true
   fi
 
-  [ ! "$versionFlag" ] && return
+  dc::argument::check versionFlag "^.+$" || return 0
+  dc::argument::check version "$DC_TYPE_FLOAT" || return
 
   cVersion="$(dc::require::version "$binary" "$versionFlag")"
   [ "${cVersion%.*}" -gt "${version%.*}" ] \

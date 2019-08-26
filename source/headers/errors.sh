@@ -44,6 +44,11 @@ dc::error::register ERROR_CRYPTO_PEM_NO_SUCH_HEADER
 dc::error::register ERROR_ENCODING_CONVERSION_FAIL
 dc::error::register ERROR_ENCODING_UNKNOWN
 
+# HTTP
+dc::error::register ERROR_CURL_CONNECTION_FAILED
+dc::error::register ERROR_CURL_DNS_FAILED
+
+
 # Thrown by dc::http::request if a network level error occurs (eg: curl exiting abnormally)
 # shellcheck disable=SC2034
 readonly ERROR_NETWORK=200

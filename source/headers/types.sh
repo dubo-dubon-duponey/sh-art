@@ -20,3 +20,5 @@ readonly DC_TYPE_VARIABLE="^[a-zA-Z_]{1,}[a-zA-Z0-9_]{0,}$"
 readonly DC_TYPE_ALPHANUM="^[a-zA-Z0-9]$"
 # shellcheck disable=SC2034
 readonly DC_TYPE_HEX="^[a-fA-Z0-9]$"
+# shellcheck disable=SC2034
+readonly DC_TYPE_EMAIL="^[a-zA-Z0-9!#$%&'*+/=?^_\`{|}~.-]+@[a-zA-Z0-9!#$%&'*+/=?^_\`{|}~.-]+$"

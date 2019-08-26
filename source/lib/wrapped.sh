@@ -30,7 +30,7 @@ dc::wrapped::shasum(){
 
 # Key manipulation
 dc::wrapped::openssl(){
-  dc::require "openssl" "version" "1.0.0" || return
+  dc::require "openssl" "version" "1.0" || return
 
   local err
 
