@@ -30,6 +30,8 @@
 # $! to get the pid of the process that just launched
 # otherwise pid="$(ps -fu "$USER" | grep "whatever" | grep -v "grep" | awk '{print $2}')"
 
+# XXX none of this checks arguments
+
 # Mechanism to register "cleanup" methods
 _DC_INTERNAL_TRAP_CLEAN=()
 _DC_INTERNAL_TRAP_NO_TERM=

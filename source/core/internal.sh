@@ -12,9 +12,8 @@ dc::internal::isgnugrep(){
 
 # XXX this will freeze if there is no stdin and only one argument for example
 # Also, we do not do any effort to have fine-grained erroring here (everything wonky ends-up with BINARY_UNKNOWN_ERROR
+# Finally, we of course do not try to validate arguments
 dc::internal::grep(){
-  dc::require "grep" || return
-
   local extended="-E"
 
   # If gnu grep, use -P for extended

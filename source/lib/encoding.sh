@@ -2,17 +2,17 @@
 
 # Convert all files to utf8
 dc::encoding::toutf8(){
-  local file="${1:-/dev/stdin}"
+  local fd="${1:-/dev/stdin}"
   local source
 
-  source="$(dc::wrapped::uchardet "$file")"
+  source="$(dc::wrapped::uchardet "$fd")"
   if [ "$source" == "unknown" ]; then
-    dc::error::detail::set "$file"
+    dc::error::detail::set "$fd"
     return "$ERROR_ENCODING_UNKNOWN"
   fi
 
-  dc::wrapped::iconv -f "$source" -t utf-8 "$file" \
-    || { dc::logger::error "Failed converting file $file from $source to utf8" && return "$ERROR_ENCODING_CONVERSION_FAIL"; }
+  dc::wrapped::iconv -f "$source" -t utf-8 "$fd" \
+    || { dc::logger::error "Failed converting file $fd from $source to utf8" && return "$ERROR_ENCODING_CONVERSION_FAIL"; }
 }
 
 # A helper to encode uri fragments

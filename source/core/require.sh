@@ -19,6 +19,9 @@ dc::require::version(){
   local versionFlag="$2"
   local varname
 
+  dc::argument::check binary "^.+$" || return
+  dc::argument::check versionFlag "^.+$" || return
+
   varname=DC_DEPENDENCIES_V_$(printf "%s" "$binary" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
   if [ ! ${!varname+x} ]; then
     while read -r line; do
@@ -43,6 +46,10 @@ dc::require(){
   [ "$provider" ] && provider="$(printf " (provided by: %s)" "$provider")"
   local varname
   local cVersion
+
+  dc::argument::check binary "^.+$" || return
+  dc::argument::check versionFlag "^.+$" || return
+  dc::argument::check version "$DC_TYPE_FLOAT" || return
 
   varname=_DC_DEPENDENCIES_B_$(printf "%s" "$binary" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
   if [ ! ${!varname+x} ]; then

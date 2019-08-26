@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-# Make jq a requirement for these tests
-dc::require jq || exit
-
 testOutputJSONInvalid(){
+  # Make jq a requirement for these tests
+  dc::require jq || exit
+
   local result
   result="$(dc::output::json "invalid" 2>/dev/null)"
   local exit=$?
@@ -12,6 +12,9 @@ testOutputJSONInvalid(){
 }
 
 testOutputJSONValid(){
+  # Make jq a requirement for these tests
+  dc::require jq || exit
+
   local result
   result="$(dc::output::json '"valid"')"
   local exit=$?

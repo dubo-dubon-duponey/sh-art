@@ -97,6 +97,8 @@ dc::crypto::pem::headers::has(){
   local value="${2:-.*}"
   local fd="${3:-/dev/stdin}"
 
+  dc::argument::check key "$DC_TYPE_ALPHANUM"
+
   dc::internal::grep -q "^$key: $value$" "$fd" \
     || { dc::error::detail::set "$key: $value" && return "$ERROR_CRYPTO_PEM_NO_SUCH_HEADER"; }
 }
@@ -119,6 +121,8 @@ dc::crypto::pem::headers::set(){
   local fd="${3:-/dev/stdin}"
 
   local line
+
+  dc::argument::check key "$DC_TYPE_ALPHANUM"
 
   while IFS= read -r line || [ "$line" ]; do
     printf "%s\n" "$line"

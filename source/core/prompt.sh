@@ -8,10 +8,8 @@ dc::prompt::input(){
   local args=("-r")
 
   # Arg validation
-  # https://pubs.opengroup.org/onlinepubs/000095399/basedefs/xbd_chap08.html
-  # Not really compliant with https://en.wikipedia.org/wiki/Portable_character_set minus "=" and NUL, but then good enough
-  dc::argument::check varname "^[a-zA-Z_]{1,}[a-zA-Z0-9_]{0,}$" || return
-  dc::argument::check timeout "^([0-9]+)?$" || return
+  dc::argument::check varname "$DC_TYPE_VARIABLE" || return
+  dc::argument::check timeout "$DC_TYPE_UNSIGNED" || return
 
   # Arg processing
   [ ! "$silent" ]   || args+=("-s")
@@ -31,12 +29,18 @@ dc::prompt::input(){
 dc::prompt::question() {
   local message="$1"
   local varname="$2"
+
+  dc::argument::check varname "$DC_TYPE_VARIABLE" || return
+
   dc::prompt::input "$varname" "$message"
 }
 
 dc::prompt::password() {
   local message="$1"
   local varname="$2"
+
+  dc::argument::check varname "$DC_TYPE_VARIABLE" || return
+
   dc::prompt::input "$varname" "$message" silent
 }
 
@@ -45,6 +49,9 @@ dc::prompt::credentials() {
   local varname="$2"
   local pmessage="$1"
   local pvarname="$2"
+
+  dc::argument::check varname "$DC_TYPE_VARIABLE" || return
+  dc::argument::check pvarname "$DC_TYPE_VARIABLE" || return
 
   dc::prompt::question "$message" "$varname"
 

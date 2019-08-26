@@ -108,6 +108,8 @@ dc::output::text(){
 dc::output::rule(){
   local width
 
+  dc::argument::check width "$DC_TYPE_INTEGER"
+
   width=$(tput cols)
   dc::internal::output::style RULE_START
   printf " %.s" $(seq -s" " "$width")
@@ -139,6 +141,6 @@ dc::internal::output::style(){
   local i
   for i in "${!vName}"; do
     # shellcheck disable=SC2086
-    [ "$TERM" ] && [ -t 1 ] && >&1 tput $i
+    [ "$TERM" ] && [ -t 1 ] && >&1 tput "$i"
   done
 }

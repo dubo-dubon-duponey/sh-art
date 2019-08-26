@@ -9,40 +9,35 @@
 # Configuration hooks
 #####################################
 
-readonly DC_LOGGER_DEBUG=4
-readonly DC_LOGGER_INFO=3
-readonly DC_LOGGER_WARNING=2
-readonly DC_LOGGER_ERROR=1
-
 dc::configure::logger::setlevel() {
   local level="$1"
-  [[ "$level" =~ ^-?[0-9]+$ ]] && [ "$level" -ge "$DC_LOGGER_ERROR" ] && [ "$level" -le "$DC_LOGGER_DEBUG" ] || level="$DC_LOGGER_INFO"
-  _DC_PRIVATE_LOGGER_LEVEL=$level
-  if [ "$_DC_PRIVATE_LOGGER_LEVEL" == "$DC_LOGGER_DEBUG" ]; then
-    dc::logger::warning "[Logger] YOU ARE LOGGING AT THE DEBUG LEVEL. This is NOT recommended for production use, and MAY LEAK sensitive information to stderr."
+  dc::argument::check level "$DC_TYPE_INTEGER" && [ "$level" -ge "$DC_LOGGER_ERROR" ] && [ "$level" -le "$DC_LOGGER_DEBUG" ] || level="$DC_LOGGER_INFO"
+  _DC_INTERNAL_LOGGER_LEVEL="$level"
+  if [ "$_DC_INTERNAL_LOGGER_LEVEL" == "$DC_LOGGER_DEBUG" ]; then
+    dc::logger::warning "[Logger] YOU ARE LOGGING AT THE DEBUG LEVEL. This is NOT recommended for production use, and WILL LIKELY LEAK sensitive information to stderr."
   fi
 }
 
 dc::configure::logger::setlevel::debug(){
   # XXX test this: set -x
   # Too noisy, not useful
-  dc::configure::logger::setlevel $DC_LOGGER_DEBUG
+  dc::configure::logger::setlevel "$DC_LOGGER_DEBUG"
 }
 
 dc::configure::logger::setlevel::info(){
-  dc::configure::logger::setlevel $DC_LOGGER_INFO
+  dc::configure::logger::setlevel "$DC_LOGGER_INFO"
 }
 
 dc::configure::logger::setlevel::warning(){
-  dc::configure::logger::setlevel $DC_LOGGER_WARNING
+  dc::configure::logger::setlevel "$DC_LOGGER_WARNING"
 }
 
 dc::configure::logger::setlevel::error(){
-  dc::configure::logger::setlevel $DC_LOGGER_ERROR
+  dc::configure::logger::setlevel "$DC_LOGGER_ERROR"
 }
 
 dc::configure::logger::mute() {
-  _DC_PRIVATE_LOGGER_LEVEL=0
+  _DC_INTERNAL_LOGGER_LEVEL=0
 }
 
 #####################################
@@ -50,41 +45,41 @@ dc::configure::logger::mute() {
 #####################################
 
 dc::logger::debug(){
-  if [ $_DC_PRIVATE_LOGGER_LEVEL -ge $DC_LOGGER_DEBUG ]; then
-    [ "$TERM" ] && [ -t 2 ] && >&2 tput setaf "$DC_COLOR_WHITE"
+  if [ "$_DC_INTERNAL_LOGGER_LEVEL" -ge "$DC_LOGGER_DEBUG" ]; then
+    [ "$TERM" ] && [ -t 2 ] && >&2 tput "${DC_LOGGER_STYLE_DEBUG[@]}"
     local i
     for i in "$@"; do
-      _dc_internal::logger::stamp "[DEBUG]" "$i"
+      dc::internal::logger::stamp "[DEBUG]" "$i"
     done
     [ "$TERM" ] && [ -t 2 ] && >&2 tput op
   fi
 }
 
 dc::logger::info(){
-  if [ $_DC_PRIVATE_LOGGER_LEVEL -ge $DC_LOGGER_INFO ]; then
-    [ "$TERM" ] && [ -t 2 ] && >&2 tput setaf "$DC_COLOR_GREEN"
+  if [ "$_DC_INTERNAL_LOGGER_LEVEL" -ge "$DC_LOGGER_INFO" ]; then
+    [ "$TERM" ] && [ -t 2 ] && >&2 tput "${DC_LOGGER_STYLE_INFO[@]}"
     local i
     for i in "$@"; do
-      _dc_internal::logger::stamp "[INFO]" "$i"
+      dc::internal::logger::stamp "[INFO]" "$i"
     done
     [ "$TERM" ] && [ -t 2 ] && >&2 tput op
   fi
 }
 
 dc::logger::warning(){
-  if [ $_DC_PRIVATE_LOGGER_LEVEL -ge $DC_LOGGER_WARNING ]; then
-    [ "$TERM" ] && [ -t 2 ] && >&2 tput setaf "$DC_COLOR_YELLOW"
+  if [ "$_DC_INTERNAL_LOGGER_LEVEL" -ge "$DC_LOGGER_WARNING" ]; then
+    [ "$TERM" ] && [ -t 2 ] && >&2 tput "${DC_LOGGER_STYLE_WARNING[@]}"
     local i
     for i in "$@"; do
-      _dc_internal::logger::stamp "[WARNING]" "$i"
+      dc::internal::logger::stamp "[WARNING]" "$i"
     done
     [ "$TERM" ] && [ -t 2 ] && >&2 tput op
   fi
 }
 
 dc::logger::error(){
-  if [ $_DC_PRIVATE_LOGGER_LEVEL -ge $DC_LOGGER_ERROR ]; then
-    [ "$TERM" ] && [ -t 2 ] && >&2 tput setaf "$DC_COLOR_RED"
+  if [ "$_DC_INTERNAL_LOGGER_LEVEL" -ge "$DC_LOGGER_ERROR" ]; then
+    [ "$TERM" ] && [ -t 2 ] && >&2 "${DC_LOGGER_STYLE_ERROR[@]}"
     local i
     for i in "$@"; do
       _dc_internal::logger::stamp "[ERROR]" "$i"
@@ -97,10 +92,7 @@ dc::logger::error(){
 # Private helpers
 #####################################
 
-_DC_PRIVATE_LOGGER_LEVEL=$DC_LOGGER_INFO
-
 # Prefix a date to a log line and output to stderr
-_dc_internal::logger::stamp(){
+dc::internal::logger::stamp(){
   >&2 printf "[%s] %s\\n" "$(date)" "$*"
 }
-

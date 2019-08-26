@@ -5,8 +5,11 @@ _DC_INTERNAL_ERROR_DETAIL=
 
 dc::error::register(){
   local name="$1"
-  [ "$name" ] || return "$ERROR_ARGUMENT_INVALID"
+
+  dc::argument::check name "$DC_TYPE_VARIABLE"
+
   _DC_INTERNAL_ERROR_CODEPOINT=$(( _DC_INTERNAL_ERROR_CODEPOINT + 1 ))
+
   # read -r "${name?}" < <(printf "%s" "$_DC_INTERNAL_ERROR_CODEPOINT")
   declare -g "${name?}"="$_DC_INTERNAL_ERROR_CODEPOINT"
   export "${name?}"
@@ -16,6 +19,8 @@ dc::error::register(){
 dc::error::lookup(){
   local code="$1"
   local errname
+
+  dc::argument::check code "$DC_TYPE_UNSIGNED"
 
   # XXX depends on grep here
   errname="$(ENV | dc::internal::grep "^ERROR_[^=]+=$code$")"

@@ -30,6 +30,20 @@ dc::error::register ERROR_ARGUMENT_TIMEOUT
 # shellcheck disable=SC2034
 dc::error::register ERROR_FILESYSTEM
 
+################## LIBRARY
+# Crypto
+dc::error::register ERROR_CRYPTO_SHASUM_WRONG_ALGORITHM
+dc::error::register ERROR_CRYPTO_SHASUM_FILE_ERROR
+dc::error::register ERROR_CRYPTO_SSL_INVALID_KEY
+dc::error::register ERROR_CRYPTO_SSL_WRONG_PASSWORD
+dc::error::register ERROR_CRYPTO_SSL_WRONG_ARGUMENTS
+dc::error::register ERROR_CRYPTO_SHASUM_VERIFY_ERROR
+dc::error::register ERROR_CRYPTO_PEM_NO_SUCH_HEADER
+
+# Encoding
+dc::error::register ERROR_ENCODING_CONVERSION_FAIL
+dc::error::register ERROR_ENCODING_UNKNOWN
+
 # Thrown by dc::http::request if a network level error occurs (eg: curl exiting abnormally)
 # shellcheck disable=SC2034
 readonly ERROR_NETWORK=200
@@ -42,3 +56,4 @@ readonly ERROR_UNSUPPORTED=203
 # Generic error to denote that the operation has failed. More specific errors may be provided instead
 # shellcheck disable=SC2034
 readonly ERROR_FAILED=204
+

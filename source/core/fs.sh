@@ -7,6 +7,7 @@
 
 dc::fs::rm(){
   local f="$1"
+
   rm -f "$f" 2>/dev/null \
     || { dc::error::detail::set "$f" && return "$ERROR_FILESYSTEM"; }
 }
@@ -16,11 +17,13 @@ dc::fs::mktemp(){
 }
 
 dc::fs::isdir(){
-  local writable=$2
-  local createIfMissing=$3
-  [ ! "$createIfMissing" ] || mkdir -p "$1" 2>/dev/null || return "$ERROR_FILESYSTEM"
-  if [ ! -d "$1" ] || [ ! -r "$1" ] || { [ "$writable" ] && [ ! -w "$1" ]; }  ; then
-    dc::error::detail::set "$1"
+  local path="$1"
+  local writable="$2"
+  local createIfMissing="$3"
+
+  [ ! "$createIfMissing" ] || mkdir -p "$path" 2>/dev/null || return "$ERROR_FILESYSTEM"
+  if [ ! -d "$path" ] || [ ! -r "$path" ] || { [ "$writable" ] && [ ! -w "$path" ]; }  ; then
+    dc::error::detail::set "$path"
     return "$ERROR_FILESYSTEM"
   fi
 }
