@@ -59,7 +59,8 @@ dc::wrapped::curl(){
       line="${line#* }"
       DC_HTTP_STATUS="${line%% *}"
       [ "${DC_HTTP_STATUS:0:1}" == "3" ] && isRedirect=true
-      dc::logger::debug "[dc-http] status: $DC_HTTP_STATUS"
+      dc::logger::debug "[dc-http] STATUS: $DC_HTTP_STATUS"
+      dc::logger::debug "[dc-http] REDIRECTED: $isRedirect"
       continue
     fi
 
@@ -169,7 +170,7 @@ dc::http::request(){
   done
 
   # Log the command
-  for i in "$@"; do
+  for i in "${curlOpts[@]}"; do
     # -args are logged as-is
     [ "${i:0:1}" == "-" ] && output="$output $i" && continue
 

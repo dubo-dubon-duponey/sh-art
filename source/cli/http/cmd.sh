@@ -44,10 +44,14 @@ while [ "${!e}" ]; do
   e="DC_PARGE_$x"
 done
 
-body=$(dc::http::request "${opts[@]}")
+tmpfile="$(dc::fs::mktemp)"
 
+if ! dc::http::request "${opts[@]}" > "$tmpfile"; then
+  dc::logger::error "Network issue... you may want to check these chewed-up network cables."
+  exit "$ERROR_NETWORK"
+fi
 if [ ! "$DC_HTTP_STATUS" ]; then
-  dc::logger::error "Network issue... Recommended: check your pooch whereabouts. Now, check these chewed-up network cables."
+  dc::logger::error "Server issue... Response was $DC_HTTP_STATUS"
   exit "$ERROR_NETWORK"
 fi
 
@@ -58,12 +62,11 @@ for i in "${DC_HTTP_HEADERS[@]}"; do
   heads="$heads\"$i\": \"$value\""
 done
 
-output=$( printf "%s" "{$heads}" | jq --arg body "$(base64 "$body")" --arg status "$DC_HTTP_STATUS" --arg location "${DC_HTTP_REDIRECTED}" -r '{
+output=$( printf "%s" "{$heads}" | jq --arg body "$(base64 "$tmpfile")" --arg status "$DC_HTTP_STATUS" --arg location "${DC_HTTP_REDIRECTED}" -r '{
   status: $status,
   redirected: $location,
   headers: .,
   body: $body
-}
-')
+}')
 
 dc::output::json "$output"
