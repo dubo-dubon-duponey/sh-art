@@ -52,15 +52,15 @@ dc::error::handler(){
 
   dc::logger::debug "Runtime information" \
     "uname: $(uname -a)" \
-    "bash: $(which bash) $(dc::require::version bash --version)" \
-    "curl: $(which curl) $(dc::require::version curl --version)" \
-    "grep: $(which grep) $(dc::require::version grep --version)" \
-    "jq: $(which jq) $(dc::require::version jq --version)" \
-    "openssl: $(which openssl) $(dc::require::version openssl version)" \
-    "shasum: $(which shasum) $(dc::require::version shasum --version)" \
-    "sqlite3: $(which sqlite3) $(dc::require::version sqlite3 --version)" \
-    "uchardet: $(which uchardet) $(dc::require::version uchardet --version)" \
-    "gcc: $(which gcc) $(dc::require::version gcc --version)" \
+    "bash: $(command -v bash) $(dc::require::version bash --version)" \
+    "curl: $(command -v curl) $(dc::require::version curl --version)" \
+    "grep: $(command -v grep) $(dc::require::version grep --version)" \
+    "jq: $(command -v jq) $(dc::require::version jq --version)" \
+    "openssl: $(command -v openssl) $(dc::require::version openssl version)" \
+    "shasum: $(command -v shasum) $(dc::require::version shasum --version)" \
+    "sqlite3: $(command -v sqlite3) $(dc::require::version sqlite3 --version)" \
+    "uchardet: $(command -v uchardet) $(dc::require::version uchardet --version)" \
+    "gcc: $(command -v gcc) $(dc::require::version gcc --version)" \
     "PATH: $PATH" \
     "ENV: $(env)"
 }

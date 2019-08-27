@@ -39,17 +39,22 @@ dc::wrapped::openssl(){
     exec 3>&-
 
     # Known error conditions
-    printf "%s" "$err" | dc::internal::grep -q "routines:(CRYPTO_internal|PEM_read_bio):no start line" \
+    printf "%s" "$err" | dc::internal::grep -q ":no start line:" \
       && return "$ERROR_CRYPTO_SSL_INVALID_KEY"
     printf "%s" "$err" | dc::internal::grep -q "(Error reading password from BIO|routines:(PEM_do_header|CRYPTO_internal):bad decrypt)" \
       && return "$ERROR_CRYPTO_SSL_WRONG_PASSWORD"
-    printf "%s" "$err" | dc::internal::grep -q "end of string encountered while processing type of subject" \
+    printf "%s" "$err" | dc::internal::grep -q "(:string too short:|end of string encountered while processing type of subject)" \
       && return "$ERROR_CRYPTO_SSL_WRONG_ARGUMENTS"
 
     # Generic unspecified error
     dc::error::detail::set "$err"
     return "$ERROR_BINARY_UNKNOWN_ERROR"
   fi
+
+  # With openssl 1.1 you can create a CSR with no data as subject: /C=/ST=/L=/O=/OU=/CN=/emailAddress=
+  # This here is just to safe-guard against it - mostly for test consistency...
+  [ "${@: -1}" == "/C=/ST=/L=/O=/OU=/CN=/emailAddress=" ] && return "$ERROR_CRYPTO_SSL_WRONG_ARGUMENTS"
+
   exec 3>&-
   # routines:CRYPTO_internal:bad password read <- errr, not sure how I produced that, but that was the way to prevent openssl from prompting for a password
 }

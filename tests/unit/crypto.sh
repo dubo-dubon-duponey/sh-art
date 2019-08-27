@@ -190,8 +190,8 @@ testCSRnew(){
   printf "" | dc::crypto::csr::new
   dc-tools::assert::equal "${FUNCNAME[0]} exit fail" "ERROR_CRYPTO_SSL_INVALID_KEY" "$(dc::error::lookup $?)"
 
-  dc::crypto::csr::new < tests/fixtures/key-private.pem
-  dc-tools::assert::equal "${FUNCNAME[0]} exit success" "ERROR_CRYPTO_SSL_WRONG_ARGUMENTS" "$(dc::error::lookup $?)"
+  dc::crypto::csr::new < tests/fixtures/key-private.pem > /dev/null
+  dc-tools::assert::equal "${FUNCNAME[0]} exit wrong args" "ERROR_CRYPTO_SSL_WRONG_ARGUMENTS" "$(dc::error::lookup $?)"
 
   dc::crypto::csr::new US CA "San Francisco" "Org"$'\n'"Thing" "Unit" "Foo"$'\n'"Bar" "foo@bar.com" < tests/fixtures/key-private.pem > /dev/null
   dc-tools::assert::equal "${FUNCNAME[0]} exit success" "0" "$?"
