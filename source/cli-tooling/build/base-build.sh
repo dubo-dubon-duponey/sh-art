@@ -48,5 +48,6 @@ dc-tooling::build::version(){
 ${prefix}_VERSION="$(git -C "$source" describe --match 'v[0-9]*' --dirty='.m' --always)"
 ${prefix}_REVISION="$(git -C "$source" rev-parse HEAD)$(if ! git -C "$source" diff --no-ext-diff --quiet --exit-code; then printf ".m\\n"; fi)"
 ${prefix}_BUILD_DATE="$(date -R)"
+${prefix}_BUILD_PLATFORM="$(uname -a)"
 EOF
 }
