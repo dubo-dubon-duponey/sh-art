@@ -6,6 +6,9 @@ dc::crypto::shasum::compute(){
   local prefixed="$3"
   local digest
 
+  # For some versions, hashing a directory does not error out like it should
+  [ -d "$fd" ] && return "$ERROR_BINARY_UNKNOWN_ERROR"
+
   digest="$(dc::wrapped::shasum -a "$type" "$fd")" || return
   [ ! "$prefixed" ] || printf "sha%s:" "$type"
   printf "%s" "${digest%% *}"
@@ -15,6 +18,9 @@ dc::crypto::shasum::verify(){
   local expected="$1"
   local fd="${2:-/dev/stdin}"
   local type="${3:-$DC_CRYPTO_SHASUM_512256}"
+
+  # For some versions, hashing a directory does not error out like it should
+  [ -d "$fd" ] && return "$ERROR_BINARY_UNKNOWN_ERROR"
 
   # Get the type from the expectation string if it's there, or default to arg 3 if provided, fallback to 512256
   #if dc::internal::grep -q "^sha[0-9]+:" <(printf "%s" "$expected"); then
