@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 testRequire(){
+  local version
+
   dc::require bogus
   dc-tools::assert::equal "dc::require bogus" ERROR_MISSING_REQUIREMENTS "$(dc::error::lookup $?)"
 
@@ -10,12 +12,23 @@ testRequire(){
   dc::require grep --version 1.0
   dc-tools::assert::equal "dc::require grep 1.0" 0 "$?"
 
-  dc::require grep --version 2.4
+  version="$(grep --version | grep -E "[0-9]+([.][0-9]+)+" | sed -E 's/^[^0-9.]*([0-9]+[.][0-9]+).*/\1/')"
+  local major="${version%%.*}"
+  local minor="${version#*.}"
+  minor=$(( minor - 1 ))
+  dc::require grep --version "$major.$minor"
   dc-tools::assert::equal "dc::require grep 2.4" 0 "$?"
 
-  dc::require grep --version 2.5
+  version="$(grep --version | grep -E "[0-9]+([.][0-9]+)+" | sed -E 's/^[^0-9.]*([0-9]+[.][0-9]+).*/\1/')"
+  local major="${version%%.*}"
+  local minor="${version#*.}"
+  dc::require grep --version "$major.$minor"
   dc-tools::assert::equal "dc::require grep 2.5" 0 "$?"
 
-  dc::require grep --version 2.6
-  dc-tools::assert::equal "dc::require grep 2.6" ERROR_MISSING_REQUIREMENTS "$(dc::error::lookup $?)"
+  version="$(grep --version | grep -E "[0-9]+([.][0-9]+)+" | sed -E 's/^[^0-9.]*([0-9]+[.][0-9]+).*/\1/')"
+  local major="${version%%.*}"
+  local minor="${version#*.}"
+  minor=$(( minor + 1 ))
+  dc::require grep --version "$major.$minor"
+  dc-tools::assert::equal "dc::require grep $major.$minor" ERROR_MISSING_REQUIREMENTS "$(dc::error::lookup $?)"
 }
