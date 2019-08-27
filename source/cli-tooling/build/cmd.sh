@@ -30,7 +30,8 @@ destination="$destination/$DC_ARGV_NAME"
 dc-tooling::build::header "$destination" "${DC_ARGV_DESCRIPTION:-another fancy piece of shcript}" "${DC_ARGV_LICENSE:-MIT License}" "${DC_ARGV_AUTHOR:-dubo-dubon-duponey}"
 
 # Add git information
-[ ! "$DC_ARGE_WITH_GIT_INFO" ] || dc-tooling::build::version "$destination" "$DC_PARGV_1" "$DC_ARGV_WITH_GIT_INFO"
+# Always use the last argument as git information source (first arg may be a library out of the tree)
+[ ! "$DC_ARGE_WITH_GIT_INFO" ] || dc-tooling::build::version "$destination" "${@: -1}" "$DC_ARGV_WITH_GIT_INFO"
 
 # XXX somewhat cavalier
 for item in "$@"; do
