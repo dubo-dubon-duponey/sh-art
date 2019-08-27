@@ -53,7 +53,7 @@ dc::wrapped::openssl(){
 
   # With openssl 1.1 you can create a CSR with no data as subject: /C=/ST=/L=/O=/OU=/CN=/emailAddress=
   # This here is just to safe-guard against it - mostly for test consistency...
-  [ "${@: -1}" == "/C=/ST=/L=/O=/OU=/CN=/emailAddress=" ] && return "$ERROR_CRYPTO_SSL_WRONG_ARGUMENTS"
+  [ "${*: -1}" == "/C=/ST=/L=/O=/OU=/CN=/emailAddress=" ] && return "$ERROR_CRYPTO_SSL_WRONG_ARGUMENTS"
 
   exec 3>&-
   # routines:CRYPTO_internal:bad password read <- errr, not sure how I produced that, but that was the way to prevent openssl from prompting for a password

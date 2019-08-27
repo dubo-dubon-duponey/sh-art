@@ -134,7 +134,7 @@ unit/%: $(DC_PREFIX)/bin/dc-tooling-test
 	$(DC_PREFIX)/bin/dc-tooling-test $(DC_MAKEFILE_DIR)/tests/$@
 	$(call footer, $@)
 
-test-unit: $(patsubst $(DC_MAKEFILE_DIR)/tests/unit/%,unit/%,$(wildcard $(DC_MAKEFILE_DIR)/tests/unit/*.sh))
+test-unit: build-builder $(patsubst $(DC_MAKEFILE_DIR)/tests/unit/%,unit/%,$(wildcard $(DC_MAKEFILE_DIR)/tests/unit/*.sh))
 
 # Integration tests
 integration/%: build-builder $(DC_PREFIX)/bin/dc-tooling-test $(DC_PREFIX)/bin/dc-%

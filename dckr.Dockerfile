@@ -46,6 +46,7 @@ RUN apt-get install -y --no-install-recommends curl jq sqlite3
 ENV DC_PREFIX=/tmp
 USER dckr
 
+# NOTE: debian typically comes WITHOUT procps - albeit we do not need it formally
 ##################################################################
 FROM com.dbdbdp.dckr:debian-old as debian-old
 RUN apt-get update
