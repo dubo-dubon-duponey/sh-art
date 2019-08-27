@@ -22,17 +22,15 @@ for i in "$@"; do
     dc::logger::error "$i is not readable. Ignoring linting on this."
     continue
   fi
-  if [ -f "$i" ]; then
-    dc-tooling::sc::filecheck "$i"
-    if [ "$DC_SHELLCHECK_FAIL" ]; then
-      dc::logger::error "Shellcheck failed on file $DC_PARGV_1."
+  if [ -d "$i" ]; then
+    if ! dc-tooling::sc::dircheck "$i"; then
+      dc::logger::error "Shellcheck failed on directory $DC_PARGV_1."
       exit "$ERROR_FAILED"
     fi
     continue
   fi
-  dc-tooling::sc::dircheck "$i"
-  if [ "$DC_SHELLCHECK_FAIL" ]; then
-    dc::logger::error "Shellcheck failed on directory $DC_PARGV_1."
+  if ! dc-tooling::sc::filecheck "$i"; then
+    dc::logger::error "Shellcheck failed on file $DC_PARGV_1."
     exit "$ERROR_FAILED"
   fi
 done
