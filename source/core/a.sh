@@ -1,15 +1,24 @@
 #!/usr/bin/env bash
 
 haveBash(){
+  local psout
+
+  # The best approach requires procps to be installed
   if command -v ps > /dev/null; then
-    # This obviously require procps to be installed
-    if [ "$(ps -p $$ -c -o command=)" != "bash" ]; then
-      >&2 printf "[%s] %s\\n" "$(date)" "This only works with bash. You are trying to run with $(ps -p $$ -c -o command=)"
+    # bug busybox...
+    if ! psout="$(ps -p $$ -c -o command= 2>/dev/null)"; then
+      # shellcheck disable=SC2009
+      psout="$(ps -o ppid,comm | grep $$)"
+      psout="${psout##* }"
+    fi
+    if [ "$psout" != "bash" ]; then
+      >&2 printf "[%s] %s\\n" "$(date)" "This only works with bash"
       return 1
     fi
     return 0
   fi
 
+  # This is really a survival fallback, and probably not that robust
   >&2 printf "[%s] %s\\n" "$(date)" "Your system lacks ps"
   if [ ! "$BASH" ] || [ "$(command -v bash)" != "$BASH" ]; then
     >&2 printf "[%s] %s\\n" "$(date)" "This only works with bash. BASH: $BASH - command -v bash: $(command -v bash)"
