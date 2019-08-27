@@ -44,7 +44,7 @@ while [ "${!e}" ]; do
   e="DC_PARGE_$x"
 done
 
-tmpfile="$(dc::fs::mktemp)"
+tmpfile="$(dc::fs::mktemp "dc-http")"
 
 if ! dc::http::request "${opts[@]}" > "$tmpfile"; then
   dc::logger::error "Network issue... you may want to check these chewed-up network cables."
