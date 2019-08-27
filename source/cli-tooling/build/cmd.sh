@@ -12,6 +12,7 @@ dc::commander::declare::flag destination ".+" "Output directory. Default to ./bi
 dc::commander::declare::flag author ".+" "Name of the author" optional
 dc::commander::declare::flag license ".+" "Script final license. MIT if unspecified" optional
 dc::commander::declare::flag description ".+" "A short project description to be added to the license header" optional
+dc::commander::declare::flag shellcheck-disable "" "Will add shellcheck disable headers to the script" optional
 dc::commander::declare::flag with-git-info "" "Will prepend DC_VERSION, DC_REVISION and DC_BUILD_DATE variables" optional
 dc::commander::declare::arg 1 ".+" "source [...source]" "Source file (or directory) to use to generate the final script. Add as many as required. If specifying a directory, *.sh files will be used (not recursive)"
 # Start commander
@@ -31,6 +32,7 @@ dc-tooling::build::header "$destination" "${DC_ARGV_DESCRIPTION:-another fancy p
 
 # Add git information
 # Always use the last argument as git information source (first arg may be a library out of the tree)
+[ ! "$DC_ARGE_SHELLCHECK_DISABLE" ] || dc-tooling::build::disable "$destination" "$DC_ARGV_SHELLCHECK_DISABLE"
 [ ! "$DC_ARGE_WITH_GIT_INFO" ] || dc-tooling::build::version "$destination" "${@: -1}" "$DC_ARGV_WITH_GIT_INFO"
 
 # XXX somewhat cavalier

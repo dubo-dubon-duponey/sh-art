@@ -1,6 +1,3 @@
-# Ouch - necessary for globbing to work
-SHELL=/bin/bash -O extglob -c
-
 DC_MAKEFILE_DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 
 # Output directory
@@ -10,7 +7,7 @@ DC_PREFIX ?= $(shell pwd)
 DC_NO_FANCY ?=
 
 # List of dckr platforms to test
-DCKR_PLATFORMS ?= ubuntu-lts-old ubuntu-lts-current ubuntu-current ubuntu-next alpine-current alpine-next debian-old debian-current debian-next
+DCKR_PLATFORMS ?= ubuntu-lts-old ubuntu-lts-current ubuntu-current ubuntu-next debian-old debian-current debian-next alpine-current alpine-next
 
 # Fancy output if interactive
 ifndef DC_NO_FANCY
@@ -59,6 +56,13 @@ $(DC_PREFIX)/bin/dc-tooling-build: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKE
 	$(call title, $@)
 	$(DC_PREFIX)/bin/bootstrap/builder --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="a script builder, part of the dc-tooling set of utilities" --with-git-info $^
 	$(call footer, $@)
+
+# Test is special (embeds shunit2 which requires some shellcheck disabling
+$(DC_PREFIX)/bin/dc-tooling-test: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE_DIR)/source/headers/*.sh $(DC_MAKEFILE_DIR)/source/cli-tooling/test/*.sh
+	$(call title, $@)
+	$(DC_PREFIX)/bin/bootstrap/builder --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="a script tester, part of the dc-tooling set of utilities" --shellcheck-disable=SC2006,SC2003,SC2001 --with-git-info $^
+	$(call footer, $@)
+
 
 #######################################################
 # Base building tasks
@@ -124,7 +128,7 @@ lint-code: build-binaries $(DC_PREFIX)/bin/dc-tooling-lint
 	$(DC_PREFIX)/bin/dc-tooling-lint $(DC_MAKEFILE_DIR)/source
 	$(DC_PREFIX)/bin/dc-tooling-lint $(DC_MAKEFILE_DIR)/tests
 	$(DC_PREFIX)/bin/dc-tooling-lint $(DC_PREFIX)/lib
-	$(DC_PREFIX)/bin/dc-tooling-lint $(DC_PREFIX)/bin/!(dc-tooling-test)
+	$(DC_PREFIX)/bin/dc-tooling-lint $(DC_PREFIX)/bin
 	$(DC_PREFIX)/bin/dc-tooling-lint ~/.profile
 	$(call footer, $@)
 

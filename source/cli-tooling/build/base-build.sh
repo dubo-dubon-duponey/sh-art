@@ -35,6 +35,11 @@ dc-tooling::build::header(){
 EOF
 }
 
+dc-tooling::build::disable(){
+  local destination="$1"
+  printf "# shellcheck disable=%s\n" "$2" >> "$destination"
+}
+
 dc-tooling::build::version(){
   dc::require git || exit
 
