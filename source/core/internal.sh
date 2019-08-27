@@ -22,13 +22,13 @@ dc::internal::grep(){
   grep "$extended" "$@" 2>/dev/null
   case $? in
     0)
-      return
+      return 0
     ;;
     1)
       return "$ERROR_GREP_NO_MATCH"
     ;;
     *)
-      dc::error::detail::set "grep"
+      # dc::error::detail::set "grep"
       return "$ERROR_BINARY_UNKNOWN_ERROR"
     ;;
   esac
