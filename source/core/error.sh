@@ -23,7 +23,7 @@ dc::error::lookup(){
   dc::argument::check code "$DC_TYPE_UNSIGNED"
 
   # XXX depends on grep here
-  errname="$(ENV | dc::internal::grep "^ERROR_[^=]+=$code$")"
+  errname="$(env | dc::internal::grep "^ERROR_[^=]+=$code$")"
   printf "%s" "${errname%=*}"
 }
 

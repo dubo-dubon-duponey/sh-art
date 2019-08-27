@@ -126,7 +126,7 @@ Custom errors defined by applications should use the 1-99 range.
 
 Internal errors:
 ```bash
-./bin/dc-libre ENV | grep "^ERROR" | sort
+./bin/dc-libre env | grep "^ERROR" | sort
 
 ERROR_ARGUMENT_INVALID=147
 ERROR_ARGUMENT_TIMEOUT=148
@@ -277,7 +277,7 @@ Code for stuff that is not portable or hard to get right
 #### Methods
 
 ```bash
-dc::fs::mktemp
+dc::fs::mktemp "prefix"
 dc::wrapped::base64d
 ```
 

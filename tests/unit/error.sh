@@ -6,7 +6,7 @@ testError(){
   dc::error::register ERROR_SOMETHING
   dc-tools::assert::equal "register return" "0" "$?"
   dc-tools::assert::notnull "$ERROR_SOMETHING"
-  dc-tools::assert::notnull "$(ENV | grep ERROR_SOMETHING)"
+  dc-tools::assert::notnull "$(env | grep ERROR_SOMETHING)"
 
   res="$(dc::error::lookup "$ERROR_SOMETHING")"
   dc-tools::assert::equal "lookup return" "0" "$?"
