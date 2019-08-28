@@ -1,15 +1,5 @@
 #!/usr/bin/env bash
 
-# Set up the traps
-trap 'dc::trap::signal::HUP     "$LINENO" "$?" "$BASH_COMMAND"' 1
-trap 'dc::trap::signal::INT     "$LINENO" "$?" "$BASH_COMMAND"' 2
-trap 'dc::trap::signal::QUIT    "$LINENO" "$?" "$BASH_COMMAND"' 3
-trap 'dc::trap::signal::ABRT    "$LINENO" "$?" "$BASH_COMMAND"' 6
-trap 'dc::trap::signal::ALRM    "$LINENO" "$?" "$BASH_COMMAND"' 14
-trap 'dc::trap::signal::TERM    "$LINENO" "$?" "$BASH_COMMAND"' 15
-trap 'dc::trap::exit            "$LINENO" "$?" "$BASH_COMMAND"' EXIT
-trap 'dc::trap::err             "$LINENO" "$?" "$BASH_COMMAND"' ERR
-
 dc::error::handler(){
   local exit="$1"
   local detail="$2"
@@ -63,7 +53,7 @@ dc::error::handler(){
       dc::logger::error "The requested operation is not supported: $detail"
     ;;
     # Some requirements are missing
-    "$ERROR_MISSING_REQUIREMENTS")
+    "$ERROR_REQUIREMENT_MISSING")
       dc::logger::error "Sorry, you need $detail for this to work."
     ;;
     # Typical filesystem errors: file does not exist, is unreadable, or permission denied
@@ -157,4 +147,18 @@ dc::error::handler(){
     "ENV: $(env)"
 }
 
+# Set up the traps
+trap 'dc::trap::signal::HUP     "$LINENO" "$?" "$BASH_COMMAND"' 1
+trap 'dc::trap::signal::INT     "$LINENO" "$?" "$BASH_COMMAND"' 2
+trap 'dc::trap::signal::QUIT    "$LINENO" "$?" "$BASH_COMMAND"' 3
+trap 'dc::trap::signal::ABRT    "$LINENO" "$?" "$BASH_COMMAND"' 6
+trap 'dc::trap::signal::ALRM    "$LINENO" "$?" "$BASH_COMMAND"' 14
+trap 'dc::trap::signal::TERM    "$LINENO" "$?" "$BASH_COMMAND"' 15
+trap 'dc::trap::exit            "$LINENO" "$?" "$BASH_COMMAND"' EXIT
+trap 'dc::trap::err             "$LINENO" "$?" "$BASH_COMMAND"' ERR
+
+# Attach the error handler
 dc::trap::register dc::error::handler
+
+# Parse arguments
+dc::internal::parse_args "$@"

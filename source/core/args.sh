@@ -19,8 +19,7 @@ dc::internal::parse_args(){
   local name
   local value
 
-  for i in "$@"
-  do
+  for i in "$@"; do
     # First argument no starting with a dash means we are done with flags and processing arguments
     [ "${i:0:1}" == "-" ] || isFlag=false
     if [ "$isFlag" == "false" ]; then
@@ -55,12 +54,8 @@ dc::internal::parse_args(){
   done
 }
 
-# XXX should this be internal? called by another higher-level method?
-dc::internal::parse_args "$@"
-
 # Makes the named argument mandatory on the command-line
-dc::args::flag::validate()
-{
+dc::args::flag::validate(){
   local var
   local varexist
   local regexp="$2"
@@ -74,26 +69,21 @@ dc::args::flag::validate()
   varexist="DC_ARGE_$(printf "%s" "$1" | tr "-" "_" | tr '[:lower:]' '[:upper:]')"
 
   if [ ! "${!varexist}" ]; then
-    if [ "$optional" ]; then
-      return
-    fi
-    dc::logger::error "Required flag \"$(printf "%s" "$1" | tr "_" "-" | tr '[:upper:]' '[:lower:]')\" is missing."
+    [ "$optional" ] && return
+    dc::error::detail::set "$(printf "%s" "$1" | tr "_" "-" | tr '[:upper:]' '[:lower:]')"
     exit "$ERROR_ARGUMENT_MISSING"
   fi
 
   if [ "$regexp" ]; then
-    if [ "$regexp" == "^$" ] && [ ! "${!var}" ]; then
-      return
-    fi
+    [ "$regexp" == "^$" ] && [ ! "${!var}" ] && return
     if ! printf "%s" "${!var}" | dc::internal::grep "${args[@]}" "$regexp"; then
-      dc::logger::error "Flag \"$(printf "%s" "$1" | tr "_" "-" | tr '[:upper:]' '[:lower:]')\" is invalid. Provided value \"${!var}\" does not match \"$regexp\"."
+      dc::error::detail::set "$(printf "%s" "$1" | tr "_" "-" | tr '[:upper:]' '[:lower:]') (${!var} vs. $regexp)"
       exit "$ERROR_ARGUMENT_INVALID"
     fi
   fi
 }
 
-dc::args::arg::validate()
-{
+dc::args::arg::validate(){
   local var="DC_PARGV_$1"
   local varexist="DC_PARGE_$1"
   local regexp="$2"
@@ -104,19 +94,16 @@ dc::args::arg::validate()
   [ ! "$caseInsensitive" ] || args+=(-i)
 
   if [ ! "${!varexist}" ]; then
-    if [ "$optional" ]; then
-      return
-    fi
-    dc::logger::error "Required argument \"$1\" is missing."
+    [ "$optional" ] && return
+    dc::error::detail::set "$1"
     exit "$ERROR_ARGUMENT_MISSING"
   fi
 
   if [ "$regexp" ]; then
-    if [ "$regexp" == "^$" ] && [ ! "${!var}" ]; then
-      return
-    fi
+    [ "$regexp" == "^$" ] && [ ! "${!var}" ] && return
+
     if ! printf "%s" "${!var}" | dc::internal::grep "${args[@]}" "$regexp"; then
-      dc::logger::error "Argument \"$1\" is invalid. Provided value \"${!var}\" does not match \"$regexp\"."
+      dc::error::detail::set "$1 (${!var} vs. $regexp)"
       exit "$ERROR_ARGUMENT_INVALID"
     fi
   fi

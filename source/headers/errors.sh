@@ -10,7 +10,7 @@
 ##########################################################################
 
 # System requirements
-dc::error::register ERROR_MISSING_REQUIREMENTS
+dc::error::register ERROR_REQUIREMENT_MISSING
 
 # Generic error to denote that the operation has failed. More specific errors may be provided instead
 dc::error::register ERROR_FAILED
@@ -27,6 +27,9 @@ dc::error::register ERROR_BINARY_UNKNOWN_ERROR
 # Any method may return this on argument validation, specifically the ::flag and ::arg validation methods
 # shellcheck disable=SC2034
 dc::error::register ERROR_ARGUMENT_INVALID
+
+# Thrown if a required argument is missing
+dc::error::register ERROR_ARGUMENT_MISSING
 
 # Interactive prompts may timeout and return this
 # shellcheck disable=SC2034
@@ -53,7 +56,3 @@ dc::error::register ERROR_ENCODING_UNKNOWN
 # HTTP
 dc::error::register ERROR_CURL_CONNECTION_FAILED
 dc::error::register ERROR_CURL_DNS_FAILED
-
-# Thrown if a required argument is missing
-# shellcheck disable=SC2034
-readonly ERROR_ARGUMENT_MISSING=201

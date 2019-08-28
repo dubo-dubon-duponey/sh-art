@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 testArgumentProcessing(){
-  . source/core/args.sh "-t" "-u=bar ∞" "--ul" --ul-u_V="Baz baz ∞ bloom" "ignorethis" "foo" "baz=\"baz" "-fake" "--fake-it∞=really ∞"
+  . source/core/args.sh
+  dc::internal::parse_args "-t" "-u=bar ∞" "--ul" --ul-u_V="Baz baz ∞ bloom" "ignorethis" "foo" "baz=\"baz" "-fake" "--fake-it∞=really ∞"
+
   dc-tools::assert::equal "argument 2" "true" "$DC_PARGE_2"
   dc-tools::assert::equal "argument 2" "foo" "$DC_PARGV_2"
   dc-tools::assert::equal "argument 3" "true" "$DC_PARGE_3"

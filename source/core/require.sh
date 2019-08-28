@@ -6,7 +6,7 @@
 ##########################################################################
 
 dc::require::platform(){
-  [[ "$*" == *"$(uname)"* ]] || return "$ERROR_MISSING_REQUIREMENTS"
+  [[ "$*" == *"$(uname)"* ]] || return "$ERROR_REQUIREMENT_MISSING"
 }
 
 dc::require::platform::mac(){
@@ -57,7 +57,7 @@ dc::require(){
   varname=_DC_DEPENDENCIES_B_$(printf "%s" "$binary" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
   if [ ! ${!varname+x} ]; then
     command -v "$binary" >/dev/null \
-      || { dc::error::detail::set "$binary${provider}" && return "$ERROR_MISSING_REQUIREMENTS"; }
+      || { dc::error::detail::set "$binary${provider}" && return "$ERROR_REQUIREMENT_MISSING"; }
     declare -g "${varname?}"=true
   fi
 
@@ -69,6 +69,6 @@ dc::require(){
     || { [ "${cVersion%.*}" == "${version%.*}" ] && [ "${cVersion#*.}" -ge "${version#*.}" ]; } \
     || {
       dc::error::detail::set "$binary$provider version $version (now: ${!varname})"
-      return "$ERROR_MISSING_REQUIREMENTS"
+      return "$ERROR_REQUIREMENT_MISSING"
     }
 }
