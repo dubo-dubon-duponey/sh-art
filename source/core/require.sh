@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+##########################################################################
+# Requirements
+# ------
+# Platforms, binaries, versions
+##########################################################################
 
 dc::require::platform(){
   [[ "$*" == *"$(uname)"* ]] || return "$ERROR_MISSING_REQUIREMENTS"
@@ -62,5 +67,8 @@ dc::require(){
   cVersion="$(dc::require::version "$binary" "$versionFlag")"
   [ "${cVersion%.*}" -gt "${version%.*}" ] \
     || { [ "${cVersion%.*}" == "${version%.*}" ] && [ "${cVersion#*.}" -ge "${version#*.}" ]; } \
-    || { dc::error::detail::set "$binary$provider version $version (now: ${!varname})" && return "$ERROR_MISSING_REQUIREMENTS"; }
+    || {
+      dc::error::detail::set "$binary$provider version $version (now: ${!varname})"
+      return "$ERROR_MISSING_REQUIREMENTS"
+    }
 }

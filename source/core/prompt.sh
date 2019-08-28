@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+##########################################################################
+# Prompt
+# ------
+# Ask questions
+##########################################################################
 
 dc::prompt::input(){
   local varname="$1"
@@ -66,7 +71,7 @@ dc::prompt::confirm(){
   local message="$1"
   local _
 
-  # Flash it baby, to stderr though, so not to pollute stdout
+  # Flash it
   >&2 tput bel
   >&2 tput flash
 

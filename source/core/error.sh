@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+##########################################################################
+# Error management
+# ------
+# - register to declare new error codes
+# - detail:set and get to provide context for errors when they happen
+# - lookup to get a readable constant out of an error code
+##########################################################################
 
 _DC_INTERNAL_ERROR_CODEPOINT=143
 _DC_INTERNAL_ERROR_DETAIL=
@@ -10,7 +17,6 @@ dc::error::register(){
 
   _DC_INTERNAL_ERROR_CODEPOINT=$(( _DC_INTERNAL_ERROR_CODEPOINT + 1 ))
 
-  # read -r "${name?}" < <(printf "%s" "$_DC_INTERNAL_ERROR_CODEPOINT")
   declare -g "${name?}"="$_DC_INTERNAL_ERROR_CODEPOINT"
   export "${name?}"
   readonly "${name?}"
@@ -22,7 +28,6 @@ dc::error::lookup(){
 
   dc::argument::check code "$DC_TYPE_UNSIGNED"
 
-  # XXX depends on grep here
   errname="$(env | dc::internal::grep "^ERROR_[^=]+=$code$")"
   printf "%s" "${errname%=*}"
 }

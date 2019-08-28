@@ -2,14 +2,17 @@
 ##########################################################################
 # FS
 # ------
-# Filesystem verification and manipulation helpers
+# Filesystem helpers
 ##########################################################################
 
 dc::fs::rm(){
   local f="$1"
 
   rm -f "$f" 2>/dev/null \
-    || { dc::error::detail::set "$f" && return "$ERROR_FILESYSTEM"; }
+    || {
+      dc::error::detail::set "$f"
+      return "$ERROR_FILESYSTEM"
+    }
 }
 
 dc::fs::mktemp(){

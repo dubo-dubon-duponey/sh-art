@@ -9,6 +9,9 @@
 # custom errors defined by apps & libraries should use the 3-125 range
 ##########################################################################
 
+# System requirements
+dc::error::register ERROR_MISSING_REQUIREMENTS
+
 # Generic error to denote that the operation has failed. More specific errors may be provided instead
 dc::error::register ERROR_FAILED
 
@@ -20,9 +23,6 @@ dc::error::register ERROR_GREP_NO_MATCH
 
 # any wrapped binary erroring out with an unhandled exception will return this
 dc::error::register ERROR_BINARY_UNKNOWN_ERROR
-
-# System requirements
-dc::error::register ERROR_MISSING_REQUIREMENTS
 
 # Any method may return this on argument validation, specifically the ::flag and ::arg validation methods
 # shellcheck disable=SC2034

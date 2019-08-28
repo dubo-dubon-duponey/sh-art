@@ -1,11 +1,19 @@
 #!/usr/bin/env bash
-
-#!/usr/bin/env bash
 ##########################################################################
 # Fancy stdout
 # ------
-# 1
+# Print shit out
 ##########################################################################
+
+# Output fancy shit. Used by the output module.
+dc::internal::style(){
+  local vName="DC_OUTPUT_$1[@]"
+  local i
+  for i in "${!vName}"; do
+    # shellcheck disable=SC2086
+    [ "$TERM" ] && [ -t 1 ] && >&1 tput $i
+  done
+}
 
 # Centering is tricky to get right with unicode chars - both wc and printf will count octets...
 dc::output::h1(){
@@ -20,10 +28,10 @@ dc::output::h1(){
 
   printf "\\n"
   printf " %.s" $(seq -s" " $(( width / 4 )))
-  dc::internal::output::style H1_START
+  dc::internal::style H1_START
   printf " %.s" $(seq -s" " $(( width / 4 )))
   printf " %.s" $(seq -s" " $(( width / 4 )))
-  dc::internal::output::style H1_END
+  dc::internal::style H1_END
   printf " %.s" $(seq -s" " $(( width / 4 + even )))
   printf "\\n"
 
@@ -43,10 +51,10 @@ dc::output::h2(){
   printf "\\n"
   printf "  "
 
-  dc::internal::output::style H2_START
+  dc::internal::style H2_START
   printf "%s" "  $i"
   printf " %.s" $(seq -s" " $(( width / 2 - ${#i} - 4 )))
-  dc::internal::output::style H2_END
+  dc::internal::style H2_END
 
   printf "\\n"
   printf "\\n"
@@ -55,21 +63,21 @@ dc::output::h2(){
 dc::output::emphasis(){
   local i
 
-  dc::internal::output::style EMPHASIS_START
+  dc::internal::style EMPHASIS_START
   for i in "$@"; do
     printf "%s " "$i"
   done
-  dc::internal::output::style EMPHASIS_END
+  dc::internal::style EMPHASIS_END
 }
 
 dc::output::strong(){
   local i
 
-  dc::internal::output::style STRONG_START
+  dc::internal::style STRONG_START
   for i in "$@"; do
     printf "%s " "$i"
   done
-  dc::internal::output::style STRONG_END
+  dc::internal::style STRONG_END
 }
 
 dc::output::bullet(){
@@ -89,11 +97,11 @@ dc::output::bullet(){
 dc::output::quote(){
   local i
 
-  dc::internal::output::style QUOTE_START
+  dc::internal::style QUOTE_START
   for i in "$@"; do
     printf "  > %s\\n" "$i"
   done
-  dc::internal::output::style QUOTE_END
+  dc::internal::style QUOTE_END
 }
 
 dc::output::text(){
@@ -111,9 +119,9 @@ dc::output::rule(){
   dc::argument::check width "$DC_TYPE_INTEGER"
 
   width=$(tput cols)
-  dc::internal::output::style RULE_START
+  dc::internal::style RULE_START
   printf " %.s" $(seq -s" " "$width")
-  dc::internal::output::style RULE_END
+  dc::internal::style RULE_END
 }
 
 dc::output::break(){
@@ -130,17 +138,4 @@ dc::output::json() {
   # Otherwise, print through jq and return on success
   printf "%s" "$1" | jq "." 2>/dev/null \
     || { dc::error::detail::set "$1" && return "$ERROR_ARGUMENT_INVALID"; }
-}
-
-###############################
-# Private helpers
-###############################
-
-dc::internal::output::style(){
-  local vName="DC_OUTPUT_$1[@]"
-  local i
-  for i in "${!vName}"; do
-    # shellcheck disable=SC2086
-    [ "$TERM" ] && [ -t 1 ] && >&1 tput $i
-  done
 }

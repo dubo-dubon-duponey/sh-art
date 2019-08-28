@@ -1,16 +1,16 @@
 ##################################################################
 FROM com.dbdbdp.dckr:alpine-current as alpine-current
 # no shellcheck package on alpine
-RUN apk add --no-cache make git bash ncurses grep gnupg
-RUN apk add --no-cache curl jq sqlite
+RUN apk add --no-cache make git bash ncurses gnupg
+RUN apk add --no-cache grep curl jq sqlite libressl
 ENV DC_PREFIX=/tmp
 USER dckr
 
 ##################################################################
 FROM com.dbdbdp.dckr:alpine-next as alpine-next
 # no shellcheck package on alpine
-RUN apk add --no-cache make git bash ncurses grep gnupg
-RUN apk add --no-cache curl jq sqlite
+RUN apk add --no-cache make git bash ncurses gnupg
+RUN apk add --no-cache grep curl jq sqlite libressl
 ENV DC_PREFIX=/tmp
 USER dckr
 
