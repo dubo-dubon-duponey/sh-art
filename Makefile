@@ -51,41 +51,52 @@ $(DC_PREFIX)/bin/bootstrap/builder: $(DC_MAKEFILE_DIR)/bootstrap
 	$(DC_MAKEFILE_DIR)/bootstrap $(DC_PREFIX)
 	$(call footer, $@)
 
-# Then build the cli builder, using the bootstrapper
-$(DC_PREFIX)/bin/dc-tooling-build: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE_DIR)/source/headers/*.sh $(DC_MAKEFILE_DIR)/source/cli-tooling/build/*.sh
+# Builds the minimal library
+$(DC_PREFIX)/bin/bootstrap/dc-mini: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE_DIR)/source/headers/*.sh
+	$(call title, $@)
+	$(DC_PREFIX)/bin/bootstrap/builder --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="the library version" --with-git-info=DC_LIB $(sort $^)
+	$(call footer, $@)
+
+# Then build the cli builder
+$(DC_PREFIX)/bin/dc-tooling-build: $(DC_PREFIX)/bin/bootstrap/dc-mini $(DC_MAKEFILE_DIR)/source/cli-tooling/build
 	$(call title, $@)
 	$(DC_PREFIX)/bin/bootstrap/builder --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="a script builder, part of the dc-tooling set of utilities" --with-git-info $^
 	$(call footer, $@)
-
-# Test is special (embeds shunit2 which requires some shellcheck disabling
-$(DC_PREFIX)/bin/dc-tooling-test: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE_DIR)/source/headers/*.sh $(DC_MAKEFILE_DIR)/source/cli-tooling/test/*.sh
-	$(call title, $@)
-	$(DC_PREFIX)/bin/bootstrap/builder --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="a script tester, part of the dc-tooling set of utilities" --shellcheck-disable=SC2006,SC2003,SC2001 --with-git-info $^
-	$(call footer, $@)
-
 
 #######################################################
 # Base building tasks
 #######################################################
 
-#$(DC_PREFIX)/bin/dc-tooling-%: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE_DIR)/source/headers/*.sh $(DC_MAKEFILE_DIR)/source/cli-tooling/%
-# All other dev tools
-$(DC_PREFIX)/bin/dc-tooling-%: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE_DIR)/source/headers/*.sh $(DC_MAKEFILE_DIR)/source/cli-tooling/%
+# Builds the main library
+$(DC_PREFIX)/lib/dc-mini: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE_DIR)/source/headers/*.sh
 	$(call title, $@)
-	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="part of the dc-tooling set of utilities" --with-git-info $^
+	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="the library version" --with-git-info=DC_LIB $(sort $^)
 	$(call footer, $@)
 
 # Builds the main library
 $(DC_PREFIX)/lib/dc-sh-art: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE_DIR)/source/headers/*.sh $(DC_MAKEFILE_DIR)/source/lib/*.sh
 	$(call title, $@)
-	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="the library version" --with-git-info=DC_LIB $^
+	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="the library version" --with-git-info=DC_LIB $(sort $^)
 	$(call footer, $@)
 
 # Builds the extensions
 $(DC_PREFIX)/lib/dc-sh-art-extensions: $(DC_MAKEFILE_DIR)/source/extensions/**/*.sh
 	$(call title, $@)
-	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="extensions" $^
+	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="extensions" $(sort $^)
 	$(call footer, $@)
+
+# Test is special (embeds shunit2 which requires some shellcheck disabling
+$(DC_PREFIX)/bin/dc-tooling-test: $(DC_PREFIX)/lib/dc-mini $(DC_MAKEFILE_DIR)/source/cli-tooling/test
+	$(call title, $@)
+	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="a script tester, part of the dc-tooling set of utilities" --shellcheck-disable=SC2006,SC2003,SC2001 --with-git-info $^
+	$(call footer, $@)
+
+# All other dev tools
+$(DC_PREFIX)/bin/dc-tooling-%: $(DC_PREFIX)/lib/dc-mini $(DC_MAKEFILE_DIR)/source/cli-tooling/%
+	$(call title, $@)
+	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="part of the dc-tooling set of utilities" --with-git-info $^
+	$(call footer, $@)
+
 
 # Builds all the CLIs that depend just on the main library
 $(DC_PREFIX)/bin/dc-%: $(DC_PREFIX)/lib/dc-sh-art $(DC_MAKEFILE_DIR)/source/cli/%
