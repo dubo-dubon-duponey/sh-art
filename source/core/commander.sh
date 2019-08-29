@@ -185,7 +185,6 @@ dc::commander::declare::flag(){
 # shellcheck disable=SC2120
 dc::commander::initialize(){
   dc::commander::declare::flag "silent" "^$" "no logging (overrides log level)" optional "s"
-  dc::commander::declare::flag "insecure" "^$" "disable TLS verification for network operations (CAREFUL)" optional
 
   local loglevelvar
   local logauthvar

@@ -17,7 +17,7 @@ USER dckr
 ##################################################################
 FROM com.dbdbdp.dckr:ubuntu-lts-old as ubuntu-lts-old
 RUN apt-get update
-RUN apt-get install -y --no-install-recommends make git shellcheck gpg-agent gpg ca-certificates
+RUN apt-get install -y --no-install-recommends make git shellcheck gpgv2 ca-certificates
 RUN apt-get install -y --no-install-recommends curl jq sqlite3
 ENV DC_PREFIX=/tmp
 USER dckr
@@ -50,7 +50,7 @@ USER dckr
 ##################################################################
 FROM com.dbdbdp.dckr:debian-old as debian-old
 RUN apt-get update
-RUN apt-get install -y --no-install-recommends make git shellcheck gpg-agent gpg ca-certificates
+RUN apt-get install -y --no-install-recommends make git shellcheck gpg ca-certificates
 RUN apt-get install -y --no-install-recommends curl jq sqlite3
 ENV DC_PREFIX=/tmp
 USER dckr

@@ -56,3 +56,32 @@ dc::error::register ERROR_ENCODING_UNKNOWN
 # HTTP
 dc::error::register ERROR_CURL_CONNECTION_FAILED
 dc::error::register ERROR_CURL_DNS_FAILED
+
+
+# shellcheck disable=SC2034
+readonly ERROR_SYSTEM_1=1
+# shellcheck disable=SC2034
+readonly ERROR_SYSTEM_2=2
+# shellcheck disable=SC2034
+readonly ERROR_SYSTEM_126=126
+# shellcheck disable=SC2034
+readonly ERROR_SYSTEM_127=127
+# shellcheck disable=SC2034
+readonly ERROR_SYSTEM_128=128
+# shellcheck disable=SC2034
+readonly ERROR_SYSTEM_255=255
+
+# shellcheck disable=SC2034
+readonly ERROR_SYSTEM_SIGHUP=129
+# shellcheck disable=SC2034
+readonly ERROR_SYSTEM_SIGINT=130
+# shellcheck disable=SC2034
+readonly ERROR_SYSTEM_SIGQUIT=131
+# shellcheck disable=SC2034
+readonly ERROR_SYSTEM_SIGABRT=134
+# shellcheck disable=SC2034
+readonly ERROR_SYSTEM_SIGKILL=137
+# shellcheck disable=SC2034
+readonly ERROR_SYSTEM_SIGALRM=142
+# shellcheck disable=SC2034
+readonly ERROR_SYSTEM_SIGTERM=143
