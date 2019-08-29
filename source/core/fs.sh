@@ -38,6 +38,6 @@ dc::fs::isfile(){
   [ ! "$createIfMissing" ] || touch "$path"
   if [ ! -f "$path" ] || [ ! -r "$path" ] || { [ "$writable" ] && [ ! -w "$path" ]; }  ; then
     dc::error::detail::set "$path"
-    exit "$ERROR_FILESYSTEM"
+    return "$ERROR_FILESYSTEM"
   fi
 }

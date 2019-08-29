@@ -110,7 +110,7 @@ dc::commander::declare::arg(){
   fi
 
   # Otherwise, validate
-  dc::args::arg::validate "$number" "$validator" "$optional"
+  dc::args::arg::validate "$number" "$validator" "$optional" || exit
 }
 
 dc::commander::declare::flag(){
@@ -160,16 +160,15 @@ dc::commander::declare::flag(){
   # First make sure we do not have a double dip
   if [ "${!m}" ] && [ "${!s}" ]; then
     dc::logger::error "You cannot specify $name and $alias at the same time"
-    exit "$ERROR_ARGUMENT_INVALID"
+    return "$ERROR_ARGUMENT_INVALID"
   fi
 
   # Validate the alias or the main one
   if [ "${!s}" ]; then
-    dc::args::flag::validate "$alias" "$validator" "$optional"
+    dc::args::flag::validate "$alias" "$validator" "$optional" || exit
   else
-    dc::args::flag::validate "$name" "$validator" "$optional"
+    dc::args::flag::validate "$name" "$validator" "$optional" || exit
   fi
-
 }
 
 # This is the entrypoint you should call in your script

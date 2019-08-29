@@ -21,40 +21,40 @@ testArgumentProcessing(){
   dc-tools::assert::equal "flag ul_u_v" "true" "$DC_ARGE_UL_U_V"
   dc-tools::assert::equal "flag ul_u_v" "Baz baz ∞ bloom" "$DC_ARGV_UL_U_V"
 
-  local exit
-
   dc::args::flag::validate t
+  dc-tools::assert::equal "${FUNCNAME[0]} t" "0" "$?"
   dc::args::flag::validate u "^bar"
+  dc-tools::assert::equal "${FUNCNAME[0]} u" "0" "$?"
   dc::args::flag::validate ul_u_v "^baz" "" insensitive
+  dc-tools::assert::equal "${FUNCNAME[0]} ul_u_v" "0" "$?"
   dc::args::flag::validate w "^baz" optional
+  dc-tools::assert::equal "${FUNCNAME[0]} w" "0" "$?"
 
-  _=$(dc::args::flag::validate ul_u_v "^baz" 2>/dev/null)
-  exit=$?
-  dc-tools::assert::equal "Case sensitiveness failed validation" "$ERROR_ARGUMENT_INVALID" "$exit"
+  dc::args::flag::validate ul_u_v "^baz"
+  dc-tools::assert::equal "${FUNCNAME[0]} case sensitiveness failed validation" "$ERROR_ARGUMENT_INVALID" "$?"
 
-  _=$(dc::args::flag::validate ul_u_v "^Babar" 2>/dev/null)
-  exit=$?
-  dc-tools::assert::equal "Non matching regexp failed validation" "$ERROR_ARGUMENT_INVALID" "$exit"
+  dc::args::flag::validate ul_u_v "^Babar"
+  dc-tools::assert::equal "${FUNCNAME[0]} non matching regexp failed validation" "$ERROR_ARGUMENT_INVALID" "$?"
 
-  _=$(dc::args::flag::validate w 2>/dev/null)
-  exit=$?
-  dc-tools::assert::equal "Non existent flag failed validation" "$ERROR_ARGUMENT_MISSING" "$exit"
+  dc::args::flag::validate w
+  dc-tools::assert::equal "${FUNCNAME[0]} non existent flag failed validation" "$ERROR_ARGUMENT_MISSING" "$?"
 
   dc::args::arg::validate 2
+  dc-tools::assert::equal "${FUNCNAME[0]} 2" "0" "$?"
   dc::args::arg::validate 2 "foo$"
+  dc-tools::assert::equal "${FUNCNAME[0]} 2" "0" "$?"
   dc::args::arg::validate 2 "^FOO" "" insensitive
+  dc-tools::assert::equal "${FUNCNAME[0]} 2" "0" "$?"
   dc::args::arg::validate 10 "foo$" optional
+  dc-tools::assert::equal "${FUNCNAME[0]} 10" "0" "$?"
 
-  _=$(dc::args::arg::validate 2 "^FOO" 2>/dev/null)
-  exit=$?
-  dc-tools::assert::equal "Case sensitiveness failed validation" "$ERROR_ARGUMENT_INVALID" "$exit"
+  dc::args::arg::validate 2 "^FOO"
+  dc-tools::assert::equal "Case sensitiveness failed validation" "$ERROR_ARGUMENT_INVALID" "$?"
 
-  _=$(dc::args::arg::validate 2 "^Babar" 2>/dev/null)
-  exit=$?
-  dc-tools::assert::equal "Non matching regexp failed validation" "$ERROR_ARGUMENT_INVALID" "$exit"
+  dc::args::arg::validate 2 "^Babar"
+  dc-tools::assert::equal "Non matching regexp failed validation" "$ERROR_ARGUMENT_INVALID" "$?"
 
-  _=$(dc::args::arg::validate 10 2>/dev/null)
-  exit=$?
-  dc-tools::assert::equal "Non existent arg failed validation" "$ERROR_ARGUMENT_MISSING" "$exit"
+  dc::args::arg::validate 10
+  dc-tools::assert::equal "Non existent arg failed validation" "$ERROR_ARGUMENT_MISSING" "$?"
 
 }

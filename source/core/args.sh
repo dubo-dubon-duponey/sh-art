@@ -71,14 +71,14 @@ dc::args::flag::validate(){
   if [ ! "${!varexist}" ]; then
     [ "$optional" ] && return
     dc::error::detail::set "$(printf "%s" "$1" | tr "_" "-" | tr '[:upper:]' '[:lower:]')"
-    exit "$ERROR_ARGUMENT_MISSING"
+    return "$ERROR_ARGUMENT_MISSING"
   fi
 
   if [ "$regexp" ]; then
     [ "$regexp" == "^$" ] && [ ! "${!var}" ] && return
     if ! printf "%s" "${!var}" | dc::internal::grep "${args[@]}" "$regexp"; then
       dc::error::detail::set "$(printf "%s" "$1" | tr "_" "-" | tr '[:upper:]' '[:lower:]') (${!var} vs. $regexp)"
-      exit "$ERROR_ARGUMENT_INVALID"
+      return "$ERROR_ARGUMENT_INVALID"
     fi
   fi
 }
@@ -96,7 +96,7 @@ dc::args::arg::validate(){
   if [ ! "${!varexist}" ]; then
     [ "$optional" ] && return
     dc::error::detail::set "$1"
-    exit "$ERROR_ARGUMENT_MISSING"
+    return "$ERROR_ARGUMENT_MISSING"
   fi
 
   if [ "$regexp" ]; then
@@ -104,7 +104,7 @@ dc::args::arg::validate(){
 
     if ! printf "%s" "${!var}" | dc::internal::grep "${args[@]}" "$regexp"; then
       dc::error::detail::set "$1 (${!var} vs. $regexp)"
-      exit "$ERROR_ARGUMENT_INVALID"
+      return "$ERROR_ARGUMENT_INVALID"
     fi
   fi
 }
