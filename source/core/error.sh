@@ -32,7 +32,7 @@ dc::error::appregister(){
 
   _DC_INTERNAL_ERROR_APPCODEPOINT=$(( _DC_INTERNAL_ERROR_APPCODEPOINT + 1 ))
 
-  read -r "${name?}" <<<"$_DC_INTERNAL_ERROR_CODEPOINT"
+  read -r "${name?}" <<<"$_DC_INTERNAL_ERROR_APPCODEPOINT"
   export "${name?}"
   readonly "${name?}"
 }

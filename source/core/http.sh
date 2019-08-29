@@ -85,7 +85,7 @@ dc::wrapped::curl(){
       continue
     fi
     DC_HTTP_HEADERS+=("$key")
-    read -r "DC_HTTP_HEADER_$key" < <(printf "%s" "$value")
+    read -r "DC_HTTP_HEADER_$key" <<<"$value"
 
   done < <(printf "%s" "$err")
 
