@@ -8,6 +8,7 @@
 ##########################################################################
 
 _DC_INTERNAL_ERROR_CODEPOINT=143
+_DC_INTERNAL_ERROR_APPCODEPOINT=2
 _DC_INTERNAL_ERROR_DETAIL=
 
 dc::error::register(){
@@ -19,6 +20,18 @@ dc::error::register(){
 
   # XXX bash3
   # declare -g "${name?}"="$_DC_INTERNAL_ERROR_CODEPOINT"
+  read -r "${name?}" <<<"$_DC_INTERNAL_ERROR_CODEPOINT"
+  export "${name?}"
+  readonly "${name?}"
+}
+
+dc::error::appregister(){
+  local name="$1"
+
+  dc::argument::check name "$DC_TYPE_VARIABLE"
+
+  _DC_INTERNAL_ERROR_APPCODEPOINT=$(( _DC_INTERNAL_ERROR_APPCODEPOINT + 1 ))
+
   read -r "${name?}" <<<"$_DC_INTERNAL_ERROR_CODEPOINT"
   export "${name?}"
   readonly "${name?}"

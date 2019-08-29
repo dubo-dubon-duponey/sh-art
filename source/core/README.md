@@ -184,7 +184,7 @@ dc::http::dump::headers
 dc::http::dump::body
 
 # URI encode "something"
-dc::http::uriencode "something"
+dc::encoding::uriencode "something"
 
 # Perform an http request (method defaults to HEAD if left unspecified)
 dc::http::request URL [METHOD] [PAYLOAD] [request header] ... [request header]
