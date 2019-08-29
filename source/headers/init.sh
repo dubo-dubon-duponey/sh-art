@@ -114,7 +114,9 @@ dc::error::handler(){
     ;;
 
     *)
-      dc::logger::error "UNCAUGHT EXCEPTION $exit $(dc::error::lookup "$exit"): $detail"
+      if [ "$exit" -lt 129 ] || [ "$exit" -gt 143 ]; then
+        dc::logger::error "UNCAUGHT EXCEPTION $exit $(dc::error::lookup "$exit"): $detail"
+      fi
     ;;
   esac
 
@@ -139,6 +141,7 @@ dc::error::handler(){
     "sqlite3: $(command -v sqlite3) $(dc::require::version sqlite3 --version)" \
     "uchardet: $(command -v uchardet) $(dc::require::version uchardet --version)" \
     "make: $(command -v bash) $(dc::require::version make --version)" \
+    "git: $(command -v git) $(dc::require::version git --version)" \
     "gcc: $(command -v gcc) $(dc::require::version gcc --version)" \
     "ps: $(command -v ps)" \
     "read: $(command -v ps)" \

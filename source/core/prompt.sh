@@ -9,7 +9,7 @@ dc::prompt::input(){
   local varname="$1"
   local message="$2"
   local silent="$3"
-  local timeout="$4"
+  local timeout="${4:-1000}"
   local args=("-r")
 
   # Arg validation

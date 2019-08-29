@@ -38,7 +38,7 @@ dc::commander::help(){
     dc::output::h2 "Arguments"
     local v
     while IFS= read -r v || [ "$v" ]; do
-      dc::output::bullet "$v"
+      [ ! "$v" ] || dc::output::bullet "$v"
     done <<< "$long"
     dc::output::break
   fi
