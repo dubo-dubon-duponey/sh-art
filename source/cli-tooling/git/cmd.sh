@@ -34,6 +34,11 @@ dc-tooling::git::resignEverything(){
   git -C "$1" filter-branch -f --commit-filter 'git commit-tree -S "$@";' -- --all
 }
 
+# Import committed keys
+for i in ./keys/*.pub; do
+  gpg --import "$i"
+done
+
 regex="^Signed-off-by: ([^<]+) <([^<>@]+@[^<>]+)>( \\(github: ([a-zA-Z0-9][a-zA-Z0-9-]+)\\))?$"
 
 for commit in $(dc-tooling::git::allCommits "$DC_PARGV_1"); do
@@ -49,11 +54,11 @@ for commit in $(dc-tooling::git::allCommits "$DC_PARGV_1"); do
     continue
   fi
 
-  dc::logger::debug "Commit is signed-off appropriately"
+  dc::logger::info "Commit $commit is signed-off appropriately"
 
   if ! dc-tooling::git::gpgVerify "$DC_PARGV_1" "$commit" 2>/dev/null; then
     # XXX temporarily disabling this
-    # badCommits+=( "$commit" )
+    badCommits+=( "$commit" )
     dc::logger::error "NOT gpg signed properly ($commit)"
   fi
 done
