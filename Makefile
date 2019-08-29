@@ -88,7 +88,7 @@ $(DC_PREFIX)/lib/lib-dc-sh-art-extensions: $(DC_MAKEFILE_DIR)/source/extensions/
 # Test is special (embeds shunit2 which requires some shellcheck disabling
 $(DC_PREFIX)/bin/dc-tooling-test: $(DC_PREFIX)/lib/lib-dc-mini $(DC_MAKEFILE_DIR)/source/cli-tooling/test
 	$(call title, $@)
-	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="a script tester, part of the dc-tooling set of utilities" --shellcheck-disable=SC2006,SC2003,SC2001 --with-git-info $^
+	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="a script tester, part of the dc-tooling set of utilities" --shellcheck-disable=SC2006,SC2003,SC2001,SC2166 --with-git-info $^
 	$(call footer, $@)
 
 # All other dev tools

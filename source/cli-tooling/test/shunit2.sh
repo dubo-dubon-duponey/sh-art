@@ -20,9 +20,11 @@
 #   shellcheck disable=SC2006
 # expr may be antiquated, but it is the only solution in some cases.
 #   shellcheck disable=SC2003
+# Now necessary since we removed all the command calls
+#   shellcheck disable=SC2166
 
 # Return if shunit2 already loaded.
-command [ -n "${SHUNIT_VERSION:-}" ] && exit 0
+[ ! "${SHUNIT_VERSION:-}" ] || exit 0
 SHUNIT_VERSION='2.1.8pre'
 
 # Return values that scripts can use.
@@ -46,9 +48,11 @@ _shunit_fatal() {
 }
 
 # Determine some reasonable command defaults.
-__SHUNIT_CMD_ECHO_ESC='echo -e'
+__SHUNIT_CMD_ECHO_ESC='echo'
 # shellcheck disable=SC2039
-command [ "`echo -e test`" = '-e test' ] && __SHUNIT_CMD_ECHO_ESC='echo'
+if ! [ "`echo -e test`" = '-e test' ]; then
+  __SHUNIT_CMD_ECHO_ESC='echo -e'
+fi
 
 __SHUNIT_UNAME_S=`uname -s`
 case "${__SHUNIT_UNAME_S}" in
@@ -65,12 +69,12 @@ SHUNIT_CMD_TPUT=${SHUNIT_CMD_TPUT:-${__SHUNIT_CMD_TPUT}}
 SHUNIT_COLOR=${SHUNIT_COLOR:-auto}
 
 # Specific shell checks.
-if command [ -n "${ZSH_VERSION:-}" ]; then
+if [ -n "${ZSH_VERSION:-}" ]; then
   setopt |grep "^shwordsplit$" >/dev/null
-  if command [ $? -ne ${SHUNIT_TRUE} ]; then
+  if [ $? -ne ${SHUNIT_TRUE} ]; then
     _shunit_fatal 'zsh shwordsplit option is required for proper operation'
   fi
-  if command [ -z "${SHUNIT_PARENT:-}" ]; then
+  if [ -z "${SHUNIT_PARENT:-}" ]; then
     _shunit_fatal "zsh does not pass \$0 through properly. please declare \
 \"SHUNIT_PARENT=\$0\" before calling shUnit2"
   fi
@@ -100,7 +104,7 @@ __shunit_constants=`set |grep '^__SHUNIT_' |cut -d= -f1`
 echo "${__shunit_constants}" |grep '^Binary file' >/dev/null && \
     __shunit_constants=`set |grep -a '^__SHUNIT_' |cut -d= -f1`
 for __shunit_const in ${__shunit_constants}; do
-  if command [ -z "${ZSH_VERSION:-}" ]; then
+  if [ -z "${ZSH_VERSION:-}" ]; then
     readonly "${__shunit_const}"
   else
     # shellcheck disable=SC2039
@@ -149,7 +153,7 @@ __shunit_assertsSkipped=0
 #
 
 # shellcheck disable=SC2016,SC2089
-_SHUNIT_LINENO_='eval __shunit_lineno=""; if command [ "${1:-}" = "--lineno" ]; then command [ -n "$2" ] && __shunit_lineno="[$2] "; shift 2; fi'
+_SHUNIT_LINENO_='eval __shunit_lineno=""; if [ "${1:-}" = "--lineno" ]; then command [ -n "$2" ] && __shunit_lineno="[$2] "; shift 2; fi'
 
 #-----------------------------------------------------------------------------
 # Assertion functions.
@@ -166,7 +170,7 @@ _SHUNIT_LINENO_='eval __shunit_lineno=""; if command [ "${1:-}" = "--lineno" ]; 
 assertEquals() {
   # shellcheck disable=SC2090
   ${_SHUNIT_LINENO_}
-  if command [ $# -lt 2 -o $# -gt 3 ]; then
+  if [ $# -lt 2 -o $# -gt 3 ]; then
     _shunit_error "assertEquals() requires two or three arguments; $# given"
     _shunit_assertFail
     return ${SHUNIT_ERROR}
@@ -174,7 +178,7 @@ assertEquals() {
   _shunit_shouldSkip && return ${SHUNIT_TRUE}
 
   shunit_message_=${__shunit_lineno}
-  if command [ $# -eq 3 ]; then
+  if [ $# -eq 3 ]; then
     shunit_message_="${shunit_message_}$1"
     shift
   fi
@@ -182,7 +186,7 @@ assertEquals() {
   shunit_actual_=$2
 
   shunit_return=${SHUNIT_TRUE}
-  if command [ "${shunit_expected_}" = "${shunit_actual_}" ]; then
+  if [ "${shunit_expected_}" = "${shunit_actual_}" ]; then
     _shunit_assertPass
   else
     failNotEquals "${shunit_message_}" "${shunit_expected_}" "${shunit_actual_}"
@@ -206,7 +210,7 @@ _ASSERT_EQUALS_='eval assertEquals --lineno "${LINENO:-}"'
 assertNotEquals() {
   # shellcheck disable=SC2090
   ${_SHUNIT_LINENO_}
-  if command [ $# -lt 2 -o $# -gt 3 ]; then
+  if [ $# -lt 2 -o $# -gt 3 ]; then
     _shunit_error "assertNotEquals() requires two or three arguments; $# given"
     _shunit_assertFail
     return ${SHUNIT_ERROR}
@@ -214,7 +218,7 @@ assertNotEquals() {
   _shunit_shouldSkip && return ${SHUNIT_TRUE}
 
   shunit_message_=${__shunit_lineno}
-  if command [ $# -eq 3 ]; then
+  if [ $# -eq 3 ]; then
     shunit_message_="${shunit_message_}$1"
     shift
   fi
@@ -222,7 +226,7 @@ assertNotEquals() {
   shunit_actual_=$2
 
   shunit_return=${SHUNIT_TRUE}
-  if command [ "${shunit_expected_}" != "${shunit_actual_}" ]; then
+  if [ "${shunit_expected_}" != "${shunit_actual_}" ]; then
     _shunit_assertPass
   else
     failSame "${shunit_message_}" "${shunit_expected_}" "${shunit_actual_}"
@@ -246,7 +250,7 @@ _ASSERT_NOT_EQUALS_='eval assertNotEquals --lineno "${LINENO:-}"'
 assertContains() {
   # shellcheck disable=SC2090
   ${_SHUNIT_LINENO_}
-  if command [ $# -lt 2 -o $# -gt 3 ]; then
+  if [ $# -lt 2 -o $# -gt 3 ]; then
     _shunit_error "assertContains() requires two or three arguments; $# given"
     _shunit_assertFail
     return ${SHUNIT_ERROR}
@@ -254,7 +258,7 @@ assertContains() {
   _shunit_shouldSkip && return ${SHUNIT_TRUE}
 
   shunit_message_=${__shunit_lineno}
-  if command [ $# -eq 3 ]; then
+  if [ $# -eq 3 ]; then
     shunit_message_="${shunit_message_}$1"
     shift
   fi
@@ -286,7 +290,7 @@ _ASSERT_CONTAINS_='eval assertContains --lineno "${LINENO:-}"'
 assertNotContains() {
   # shellcheck disable=SC2090
   ${_SHUNIT_LINENO_}
-  if command [ $# -lt 2 -o $# -gt 3 ]; then
+  if [ $# -lt 2 -o $# -gt 3 ]; then
     _shunit_error "assertNotContains() requires two or three arguments; $# given"
     _shunit_assertFail
     return ${SHUNIT_ERROR}
@@ -294,7 +298,7 @@ assertNotContains() {
   _shunit_shouldSkip && return ${SHUNIT_TRUE}
 
   shunit_message_=${__shunit_lineno}
-  if command [ $# -eq 3 ]; then
+  if [ $# -eq 3 ]; then
     shunit_message_="${shunit_message_}$1"
     shift
   fi
@@ -325,7 +329,7 @@ _ASSERT_NOT_CONTAINS_='eval assertNotContains --lineno "${LINENO:-}"'
 assertNull() {
   # shellcheck disable=SC2090
   ${_SHUNIT_LINENO_}
-  if command [ $# -lt 1 -o $# -gt 2 ]; then
+  if [ $# -lt 1 -o $# -gt 2 ]; then
     _shunit_error "assertNull() requires one or two arguments; $# given"
     _shunit_assertFail
     return ${SHUNIT_ERROR}
@@ -333,7 +337,7 @@ assertNull() {
   _shunit_shouldSkip && return ${SHUNIT_TRUE}
 
   shunit_message_=${__shunit_lineno}
-  if command [ $# -eq 2 ]; then
+  if [ $# -eq 2 ]; then
     shunit_message_="${shunit_message_}$1"
     shift
   fi
@@ -356,7 +360,7 @@ _ASSERT_NULL_='eval assertNull --lineno "${LINENO:-}"'
 assertNotNull() {
   # shellcheck disable=SC2090
   ${_SHUNIT_LINENO_}
-  if command [ $# -gt 2 ]; then  # allowing 0 arguments as $1 might actually be null
+  if [ $# -gt 2 ]; then  # allowing 0 arguments as $1 might actually be null
     _shunit_error "assertNotNull() requires one or two arguments; $# given"
     _shunit_assertFail
     return ${SHUNIT_ERROR}
@@ -364,7 +368,7 @@ assertNotNull() {
   _shunit_shouldSkip && return ${SHUNIT_TRUE}
 
   shunit_message_=${__shunit_lineno}
-  if command [ $# -eq 2 ]; then
+  if [ $# -eq 2 ]; then
     shunit_message_="${shunit_message_}$1"
     shift
   fi
@@ -390,7 +394,7 @@ _ASSERT_NOT_NULL_='eval assertNotNull --lineno "${LINENO:-}"'
 assertSame() {
   # shellcheck disable=SC2090
   ${_SHUNIT_LINENO_}
-  if command [ $# -lt 2 -o $# -gt 3 ]; then
+  if [ $# -lt 2 -o $# -gt 3 ]; then
     _shunit_error "assertSame() requires two or three arguments; $# given"
     _shunit_assertFail
     return ${SHUNIT_ERROR}
@@ -398,7 +402,7 @@ assertSame() {
   _shunit_shouldSkip && return ${SHUNIT_TRUE}
 
   shunit_message_=${__shunit_lineno}
-  if command [ $# -eq 3 ]; then
+  if [ $# -eq 3 ]; then
     shunit_message_="${shunit_message_}$1"
     shift
   fi
@@ -422,7 +426,7 @@ _ASSERT_SAME_='eval assertSame --lineno "${LINENO:-}"'
 assertNotSame() {
   # shellcheck disable=SC2090
   ${_SHUNIT_LINENO_}
-  if command [ $# -lt 2 -o $# -gt 3 ]; then
+  if [ $# -lt 2 -o $# -gt 3 ]; then
     _shunit_error "assertNotSame() requires two or three arguments; $# given"
     _shunit_assertFail
     return ${SHUNIT_ERROR}
@@ -430,7 +434,7 @@ assertNotSame() {
   _shunit_shouldSkip && return ${SHUNIT_TRUE}
 
   shunit_message_=${__shunit_lineno}
-  if command [ $# -eq 3 ]; then
+  if [ $# -eq 3 ]; then
     shunit_message_="${shunit_message_:-}$1"
     shift
   fi
@@ -467,7 +471,7 @@ _ASSERT_NOT_SAME_='eval assertNotSame --lineno "${LINENO:-}"'
 assertTrue() {
   # shellcheck disable=SC2090
   ${_SHUNIT_LINENO_}
-  if command [ $# -lt 1 -o $# -gt 2 ]; then
+  if [ $# -lt 1 -o $# -gt 2 ]; then
     _shunit_error "assertTrue() takes one or two arguments; $# given"
     _shunit_assertFail
     return ${SHUNIT_ERROR}
@@ -475,7 +479,7 @@ assertTrue() {
   _shunit_shouldSkip && return ${SHUNIT_TRUE}
 
   shunit_message_=${__shunit_lineno}
-  if command [ $# -eq 2 ]; then
+  if [ $# -eq 2 ]; then
     shunit_message_="${shunit_message_}$1"
     shift
   fi
@@ -484,10 +488,10 @@ assertTrue() {
   # See if condition is an integer, i.e. a return value.
   shunit_match_=`expr "${shunit_condition_}" : '\([0-9]*\)'`
   shunit_return=${SHUNIT_TRUE}
-  if command [ -z "${shunit_condition_}" ]; then
+  if [ -z "${shunit_condition_}" ]; then
     # Null condition.
     shunit_return=${SHUNIT_FALSE}
-  elif command [ -n "${shunit_match_}" -a "${shunit_condition_}" = "${shunit_match_}" ]
+  elif [ -n "${shunit_match_}" -a "${shunit_condition_}" = "${shunit_match_}" ]
   then
     # Possible return value. Treating 0 as true, and non-zero as false.
     command [ "${shunit_condition_}" -ne 0 ] && shunit_return=${SHUNIT_FALSE}
@@ -498,7 +502,7 @@ assertTrue() {
   fi
 
   # Record the test.
-  if command [ ${shunit_return} -eq ${SHUNIT_TRUE} ]; then
+  if [ ${shunit_return} -eq ${SHUNIT_TRUE} ]; then
     _shunit_assertPass
   else
     _shunit_assertFail "${shunit_message_}"
@@ -534,7 +538,7 @@ _ASSERT_TRUE_='eval assertTrue --lineno "${LINENO:-}"'
 assertFalse() {
   # shellcheck disable=SC2090
   ${_SHUNIT_LINENO_}
-  if command [ $# -lt 1 -o $# -gt 2 ]; then
+  if [ $# -lt 1 -o $# -gt 2 ]; then
     _shunit_error "assertFalse() requires one or two arguments; $# given"
     _shunit_assertFail
     return ${SHUNIT_ERROR}
@@ -542,7 +546,7 @@ assertFalse() {
   _shunit_shouldSkip && return ${SHUNIT_TRUE}
 
   shunit_message_=${__shunit_lineno}
-  if command [ $# -eq 2 ]; then
+  if [ $# -eq 2 ]; then
     shunit_message_="${shunit_message_}$1"
     shift
   fi
@@ -551,10 +555,10 @@ assertFalse() {
   # See if condition is an integer, i.e. a return value.
   shunit_match_=`expr "${shunit_condition_}" : '\([0-9]*\)'`
   shunit_return=${SHUNIT_TRUE}
-  if command [ -z "${shunit_condition_}" ]; then
+  if [ -z "${shunit_condition_}" ]; then
     # Null condition.
     shunit_return=${SHUNIT_FALSE}
-  elif command [ -n "${shunit_match_}" -a "${shunit_condition_}" = "${shunit_match_}" ]
+  elif [ -n "${shunit_match_}" -a "${shunit_condition_}" = "${shunit_match_}" ]
   then
     # Possible return value. Treating 0 as true, and non-zero as false.
     command [ "${shunit_condition_}" -eq 0 ] && shunit_return=${SHUNIT_FALSE}
@@ -565,7 +569,7 @@ assertFalse() {
   fi
 
   # Record the test.
-  if command [ "${shunit_return}" -eq "${SHUNIT_TRUE}" ]; then
+  if [ "${shunit_return}" -eq "${SHUNIT_TRUE}" ]; then
     _shunit_assertPass
   else
     _shunit_assertFail "${shunit_message_}"
@@ -590,14 +594,14 @@ _ASSERT_FALSE_='eval assertFalse --lineno "${LINENO:-}"'
 fail() {
   # shellcheck disable=SC2090
   ${_SHUNIT_LINENO_}
-  if command [ $# -gt 1 ]; then
+  if [ $# -gt 1 ]; then
     _shunit_error "fail() requires zero or one arguments; $# given"
     return ${SHUNIT_ERROR}
   fi
   _shunit_shouldSkip && return ${SHUNIT_TRUE}
 
   shunit_message_=${__shunit_lineno}
-  if command [ $# -eq 1 ]; then
+  if [ $# -eq 1 ]; then
     shunit_message_="${shunit_message_}$1"
     shift
   fi
@@ -621,14 +625,14 @@ _FAIL_='eval fail --lineno "${LINENO:-}"'
 failNotEquals() {
   # shellcheck disable=SC2090
   ${_SHUNIT_LINENO_}
-  if command [ $# -lt 2 -o $# -gt 3 ]; then
+  if [ $# -lt 2 -o $# -gt 3 ]; then
     _shunit_error "failNotEquals() requires one or two arguments; $# given"
     return ${SHUNIT_ERROR}
   fi
   _shunit_shouldSkip && return ${SHUNIT_TRUE}
 
   shunit_message_=${__shunit_lineno}
-  if command [ $# -eq 3 ]; then
+  if [ $# -eq 3 ]; then
     shunit_message_="${shunit_message_}$1"
     shift
   fi
@@ -654,14 +658,14 @@ _FAIL_NOT_EQUALS_='eval failNotEquals --lineno "${LINENO:-}"'
 failFound() {
   # shellcheck disable=SC2090
   ${_SHUNIT_LINENO_}
-  if command [ $# -lt 1 -o $# -gt 2 ]; then
+  if [ $# -lt 1 -o $# -gt 2 ]; then
     _shunit_error "failFound() requires one or two arguments; $# given"
     return ${SHUNIT_ERROR}
   fi
   _shunit_shouldSkip && return ${SHUNIT_TRUE}
 
   shunit_message_=${__shunit_lineno}
-  if command [ $# -eq 2 ]; then
+  if [ $# -eq 2 ]; then
     shunit_message_="${shunit_message_}$1"
     shift
   fi
@@ -685,14 +689,14 @@ _FAIL_FOUND_='eval failFound --lineno "${LINENO:-}"'
 failNotFound() {
   # shellcheck disable=SC2090
   ${_SHUNIT_LINENO_}
-  if command [ $# -lt 1 -o $# -gt 2 ]; then
+  if [ $# -lt 1 -o $# -gt 2 ]; then
     _shunit_error "failNotFound() requires one or two arguments; $# given"
     return ${SHUNIT_ERROR}
   fi
   _shunit_shouldSkip && return ${SHUNIT_TRUE}
 
   shunit_message_=${__shunit_lineno}
-  if command [ $# -eq 2 ]; then
+  if [ $# -eq 2 ]; then
     shunit_message_="${shunit_message_}$1"
     shift
   fi
@@ -719,14 +723,14 @@ failSame()
 {
   # shellcheck disable=SC2090
   ${_SHUNIT_LINENO_}
-  if command [ $# -lt 2 -o $# -gt 3 ]; then
+  if [ $# -lt 2 -o $# -gt 3 ]; then
     _shunit_error "failSame() requires two or three arguments; $# given"
     return ${SHUNIT_ERROR}
   fi
   _shunit_shouldSkip && return ${SHUNIT_TRUE}
 
   shunit_message_=${__shunit_lineno}
-  if command [ $# -eq 3 ]; then
+  if [ $# -eq 3 ]; then
     shunit_message_="${shunit_message_}$1"
     shift
   fi
@@ -753,14 +757,14 @@ _FAIL_SAME_='eval failSame --lineno "${LINENO:-}"'
 failNotSame() {
   # shellcheck disable=SC2090
   ${_SHUNIT_LINENO_}
-  if command [ $# -lt 2 -o $# -gt 3 ]; then
+  if [ $# -lt 2 -o $# -gt 3 ]; then
     _shunit_error "failNotSame() requires one or two arguments; $# given"
     return ${SHUNIT_ERROR}
   fi
   _shunit_shouldSkip && return ${SHUNIT_TRUE}
 
   shunit_message_=${__shunit_lineno}
-  if command [ $# -eq 3 ]; then
+  if [ $# -eq 3 ]; then
     shunit_message_="${shunit_message_}$1"
     shift
   fi
@@ -904,10 +908,10 @@ _shunit_mktempDir() {
 
   # The standard `mktemp` didn't work. Use our own.
   # shellcheck disable=SC2039
-  if command [ -r '/dev/urandom' -a -x '/usr/bin/od' ]; then
+  if [ -r '/dev/urandom' -a -x '/usr/bin/od' ]; then
     _shunit_random_=`/usr/bin/od -vAn -N4 -tx4 </dev/urandom \
         |sed 's/^[^0-9a-f]*//'`
-  elif command [ -n "${RANDOM:-}" ]; then
+  elif [ -n "${RANDOM:-}" ]; then
     # $RANDOM works
     _shunit_random_=${RANDOM}${RANDOM}${RANDOM}$$
   else
@@ -962,12 +966,12 @@ _shunit_cleanup() {
       _shunit_signal_=0
       ;;
   esac
-  if command [ "${_shunit_name_}" != 'EXIT' ]; then
+  if [ "${_shunit_name_}" != 'EXIT' ]; then
     _shunit_warn "trapped and now handling the (${_shunit_name_}) signal"
   fi
 
   # Do our work.
-  if command [ ${__shunit_clean} -eq ${SHUNIT_FALSE} ]; then
+  if [ ${__shunit_clean} -eq ${SHUNIT_FALSE} ]; then
     # Ensure tear downs are only called once.
     __shunit_clean=${SHUNIT_TRUE}
 
@@ -981,11 +985,11 @@ _shunit_cleanup() {
     command rm -fr "${__shunit_tmpDir}"
   fi
 
-  if command [ "${_shunit_name_}" != 'EXIT' ]; then
+  if [ "${_shunit_name_}" != 'EXIT' ]; then
     # Handle all non-EXIT signals.
     trap - 0  # Disable EXIT trap.
     exit ${_shunit_signal_}
-  elif command [ ${__shunit_reportGenerated} -eq ${SHUNIT_FALSE} ]; then
+  elif [ ${__shunit_reportGenerated} -eq ${SHUNIT_FALSE} ]; then
     _shunit_assertFail 'unknown failure encountered running a test'
     _shunit_generateReport
     exit ${SHUNIT_ERROR}
@@ -1031,8 +1035,7 @@ _shunit_configureColor() {
 
 # colors returns the number of supported colors for the TERM.
 _shunit_colors() {
-  _shunit_tput_=`${SHUNIT_CMD_TPUT} colors 2>/dev/null`
-  if command [ $? -eq 0 ]; then
+  if _shunit_tput_=`${SHUNIT_CMD_TPUT} colors 2>/dev/null`; then
     echo "${_shunit_tput_}"
   else
     echo 16
@@ -1059,7 +1062,7 @@ _shunit_execSuite() {
     # Execute the test.
     echo "${__SHUNIT_TEST_PREFIX}${_shunit_test_}"
     eval "${_shunit_test_}"
-    if command [ $? -ne ${SHUNIT_TRUE} ]; then
+    if [ $? -ne ${SHUNIT_TRUE} ]; then
       _shunit_error "${_shunit_test_}() returned non-zero return code."
       __shunit_testSuccess=${SHUNIT_ERROR}
       _shunit_incFailedCount
@@ -1071,7 +1074,7 @@ _shunit_execSuite() {
         || _shunit_fatal "tearDown() returned non-zero return code."
 
     # Update stats.
-    if command [ ${__shunit_testSuccess} -eq ${SHUNIT_TRUE} ]; then
+    if [ ${__shunit_testSuccess} -eq ${SHUNIT_TRUE} ]; then
       __shunit_testsPassed=`expr ${__shunit_testsPassed} + 1`
     else
       __shunit_testsFailed=`expr ${__shunit_testsFailed} + 1`
@@ -1099,13 +1102,13 @@ _shunit_generateReport() {
 
   echo
   _shunit_msg_="Ran ${__shunit_ansi_cyan}${__shunit_testsTotal}${__shunit_ansi_none}"
-  if command [ "${__shunit_testsTotal}" -eq 1 ]; then
+  if [ "${__shunit_testsTotal}" -eq 1 ]; then
     ${__SHUNIT_CMD_ECHO_ESC} "${_shunit_msg_} test."
   else
     ${__SHUNIT_CMD_ECHO_ESC} "${_shunit_msg_} tests."
   fi
 
-  if command [ ${_shunit_ok_} -eq ${SHUNIT_TRUE} ]; then
+  if [ ${_shunit_ok_} -eq ${SHUNIT_TRUE} ]; then
     _shunit_msg_="${__shunit_ansi_green}OK${__shunit_ansi_none}"
     command [ "${__shunit_assertsSkipped}" -gt 0 ] \
         && _shunit_msg_="${_shunit_msg_} (${__shunit_ansi_yellow}skipped=${__shunit_assertsSkipped}${__shunit_ansi_none})"
@@ -1258,7 +1261,7 @@ _shunit_extractTestFunctions() {
 #
 
 # Determine the operating mode.
-if command [ $# -eq 0 -o "${1:-}" = '--' ]; then
+if [ $# -eq 0 -o "${1:-}" = '--' ]; then
   __shunit_script=${__SHUNIT_PARENT}
   __shunit_mode=${__SHUNIT_MODE_SOURCED}
 else
@@ -1292,7 +1295,7 @@ noexec 2>/dev/null || _shunit_fatal \
     'Please declare TMPDIR with path on partition with exec permission.'
 
 # We must manually source the tests in standalone mode.
-if command [ "${__shunit_mode}" = "${__SHUNIT_MODE_STANDALONE}" ]; then
+if [ "${__shunit_mode}" = "${__SHUNIT_MODE_STANDALONE}" ]; then
   # shellcheck disable=SC1090
   command . "`_shunit_prepForSourcing \"${__shunit_script}\"`"
 fi
@@ -1306,7 +1309,7 @@ command [ $? -eq ${SHUNIT_TRUE} ] \
     || _shunit_fatal "oneTimeSetUp() returned non-zero return code."
 
 # Command line selected tests or suite selected tests
-if command [ "$#" -ge 2 ]; then
+if [ "$#" -ge 2 ]; then
   # Argument $1 is either the filename of tests or '--'; either way, skip it.
   shift
   # Remaining arguments ($2 .. $#) are assumed to be test function names.
@@ -1323,7 +1326,7 @@ else
 fi
 
 # If no tests or suite specified, dynamically build a list of functions.
-if command [ -z "${__shunit_suite}" ]; then
+if [ -z "${__shunit_suite}" ]; then
   shunit_funcs_=`_shunit_extractTestFunctions "${__shunit_script}"`
   for shunit_func_ in ${shunit_funcs_}; do
     suite_addTest "${shunit_func_}"
