@@ -7,7 +7,7 @@ testDir(){
   result="$?"
   dc-tools::assert::equal "Current dir exists" 0 "$result"
 
-  chmod a+w "${TMPDIR:-/tmp}/foo"
+  chmod a+w "${TMPDIR:-/tmp}/foo" 2>/dev/null
   rm -Rf "${TMPDIR:-/tmp}/foo"
   _=$(dc::fs::isdir "${TMPDIR:-/tmp}/foo" writable create)
   result="$?"
@@ -39,7 +39,7 @@ testFile(){
   dc-tools::assert::equal "Current script exists" 0 "$result"
 
   # Creating a file
-  chmod a+w "${TMPDIR:-/tmp}/foo"
+  chmod a+w "${TMPDIR:-/tmp}/foo" 2>/dev/null
   rm -f "${TMPDIR:-/tmp}/foo"
   _=$(dc::fs::isfile "${TMPDIR:-/tmp}/foo" writable create)
   result="$?"

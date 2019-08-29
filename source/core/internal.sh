@@ -8,9 +8,11 @@
 
 # Used solely below - as a caching mechanism so not to query grep every time preflight
 dc::internal::isgnugrep(){
+  local gver
   if [ ! "${_DC_INTERNAL_NOT_GNUGREP+x}" ]; then
     _DC_INTERNAL_NOT_GNUGREP=1
-    grep --version 2>/dev/null | grep -q "gnu" && _DC_INTERNAL_NOT_GNUGREP=0
+    gver="$(grep --version 2>/dev/null)"
+    _="$(grep -q "gnu" <<<"$gver")" && _DC_INTERNAL_NOT_GNUGREP=0
     export _DC_INTERNAL_NOT_GNUGREP
   fi
   return $_DC_INTERNAL_NOT_GNUGREP
@@ -21,13 +23,15 @@ dc::internal::isgnugrep(){
 # Finally, we of course do not try to validate arguments since that would introduce a circular dep
 dc::internal::grep(){
   local extended="-E"
+  local res
 
   # If gnu grep, use -P for extended
   dc::internal::isgnugrep && extended="-P"
 
-  grep "$extended" "$@" 2>/dev/null
+  res="$(grep "$extended" "$@" 2>/dev/null)"
   case $? in
     0)
+      printf "%s" "$res"
       return 0
     ;;
     1)

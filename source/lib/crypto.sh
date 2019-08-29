@@ -24,7 +24,7 @@ dc::crypto::shasum::verify(){
 
   # Get the type from the expectation string if it's there, or default to arg 3 if provided, fallback to 512256
   #if dc::internal::grep -q "^sha[0-9]+:" <(printf "%s" "$expected"); then
-  if printf "%s" "$expected" | dc::internal::grep -q "^sha[0-9]+:"; then
+  if dc::internal::grep -q "^sha[0-9]+:" <<<"$expected"; then
     type="${expected%:*}"
     type="${type#*sha}"
   fi
