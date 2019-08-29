@@ -199,7 +199,7 @@ dc::commander::initialize(){
   if [ "${!loglevelvar}" ]; then
     # Configure the logger from the LOG_LEVEL env variable
     level="$(printf "DC_LOGGER_%s" "${!loglevelvar}" | tr '[:lower:]' '[:upper:]')"
-    dc::configure::logger::setlevel "${!level}"
+    dc::internal::logger::setlevel "${!level}"
   fi
 
   # If the LOG_AUTH env variable is set, honor it and leak
