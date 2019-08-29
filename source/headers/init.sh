@@ -140,12 +140,12 @@ dc::error::handler(){
     "shasum: $(command -v shasum) $(dc::require::version shasum --version)" \
     "sqlite3: $(command -v sqlite3) $(dc::require::version sqlite3 --version)" \
     "uchardet: $(command -v uchardet) $(dc::require::version uchardet --version)" \
-    "make: $(command -v bash) $(dc::require::version make --version)" \
+    "make: $(command -v make) $(dc::require::version make --version)" \
     "git: $(command -v git) $(dc::require::version git --version)" \
     "gcc: $(command -v gcc) $(dc::require::version gcc --version)" \
     "ps: $(command -v ps)" \
-    "read: $(command -v ps)" \
-    "tput: $(command -v ps)" \
+    "read: $(command -v read)" \
+    "tput: $(command -v tput)" \
     "PATH: $PATH" \
     "ENV: $(env)"
 }

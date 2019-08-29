@@ -50,7 +50,9 @@ for commit in $(dc-tooling::git::allCommits "$DC_PARGV_1"); do
   fi
   if ! dc-tooling::git::commitMessage "$DC_PARGV_1" "$commit" | dc::internal::grep -q "$regex"; then
     badCommits+=( "$commit" )
-    dc::logger::error "NOT signed-off appropriately"
+    dc::logger::error "$commit is NOT signed-off appropriately"
+    dc::logger::error "Content was: $(dc-tooling::git::commitContent "$DC_PARGV_1" "$commit")"
+    dc::logger::error "Message was: $(dc-tooling::git::commitMessage "$DC_PARGV_1" "$commit")"
     continue
   fi
 
