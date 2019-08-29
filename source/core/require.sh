@@ -31,9 +31,10 @@ dc::require::version(){
   if [ ! ${!varname+x} ]; then
     while read -r line; do
       if printf "%s" "$line" | grep -qE "^[^0-9.]*([0-9]+[.][0-9]+).*"; then
-        # Avoiding read -r ${varname?} < <(printf) because of named pipes conflicts
-        # Might use here string though
-        declare -g "${varname?}"="$(printf "%s" "$line" | sed -E 's/^[^0-9.]*([0-9]+[.][0-9]+).*/\1/')"
+        # Duh shit is harder with bash3
+        read -r "${varname?}" <<<"$(sed -E 's/^[^0-9.]*([0-9]+[.][0-9]+).*/\1/' <<<"$line")"
+        # XXX bash 4+ only?
+        # declare -g "${varname?}"="$(printf "%s" "$line" | sed -E 's/^[^0-9.]*([0-9]+[.][0-9]+).*/\1/')"
         break
       fi
     # XXX interestingly, some application will output the result on stderr/stdout (jq version 1.3 is such an example)
@@ -57,8 +58,13 @@ dc::require(){
   varname=_DC_DEPENDENCIES_B_$(printf "%s" "$binary" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
   if [ ! ${!varname+x} ]; then
     command -v "$binary" >/dev/null \
-      || { dc::error::detail::set "$binary${provider}" && return "$ERROR_REQUIREMENT_MISSING"; }
-    declare -g "${varname?}"=true
+      || {
+        dc::error::detail::set "$binary${provider}"
+        return "$ERROR_REQUIREMENT_MISSING"
+      }
+    read -r "${varname?}" <<<"true"
+    # XXX
+    # declare -g "${varname?}"=true
   fi
 
   dc::argument::check versionFlag "^.+$" || return 0

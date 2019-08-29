@@ -17,7 +17,9 @@ dc::error::register(){
 
   _DC_INTERNAL_ERROR_CODEPOINT=$(( _DC_INTERNAL_ERROR_CODEPOINT + 1 ))
 
-  declare -g "${name?}"="$_DC_INTERNAL_ERROR_CODEPOINT"
+  # XXX bash3
+  # declare -g "${name?}"="$_DC_INTERNAL_ERROR_CODEPOINT"
+  read -r "${name?}" <<<"$_DC_INTERNAL_ERROR_CODEPOINT"
   export "${name?}"
   readonly "${name?}"
 }
