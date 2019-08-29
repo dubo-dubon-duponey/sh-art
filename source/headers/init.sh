@@ -144,7 +144,7 @@ dc::error::handler(){
     "git: $(command -v git) $(dc::require::version git --version)" \
     "gcc: $(command -v gcc) $(dc::require::version gcc --version)" \
     "ps: $(command -v ps)" \
-    "read: $(command -v read)" \
+    "[: $(command -v \[)" \
     "tput: $(command -v tput)" \
     "PATH: $PATH" \
     "ENV: $(env)"
