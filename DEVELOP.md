@@ -1,11 +1,27 @@
 # Developing sh-art
 
+## You
+
+ * behave: batshit stupid and toxic behavior gets the boot
+ * set up gpg: all commits must be signed
+
+## GPG
+
+Have a gpg key.
+
+```
+./bin/dc-tooling-gpg --email=YOUR_KEY_EMAIL configure
+./bin/dc-tooling-gpg --email=YOUR_KEY_EMAIL save
+```
+
 ## Layout
 
 ### Source
 
- * `source/core`: base library source code
- * `source/extensions`: extensions modules
+ * `source/core`: core part of the library providing primitives
+ * `source/headers`: headers for above
+ * `source/lib`: library
+ * `source/extensions`: extension to the library
  * `source/cli`: regular CLIs depending on the core library
  * `source/cli-ext`: CLIs depending on the core library and extensions
  * `source/cli-tooling`: development CLIs (builder, etc)
@@ -33,6 +49,7 @@
  * `make lint-code`: source validation
  * `make test-unit`: run unit tests
  * `make test-integration`: run integration tests
+ * `make test-all`: run integration tests on all supported linux platforms (require docker and dckr)
 
 ### Down and dirty
 
@@ -49,7 +66,7 @@ Individual binaries may be built / targeted as well, for example:
 
 ## Tools
 
-`dc-tooling-build`, `dc-tooling-git`, `dc-tooling-lint` and `dc-tooling-test` are powering-up 
+`dc-tooling-build`, `dc-tooling-git`, `dc-tooling-lint`, `dc-tooling-gpg` and `dc-tooling-test` are powering-up 
 the corresponding make targets and may be used individually.
 
 Look into the individual `--help`s for details.
@@ -75,25 +92,15 @@ By default, this will target Ubuntu 18.04 (aka `ubuntu-lts-current`).
 
 To specify a different target, pass it as an environment variable: `TARGET=ubuntu-lts-previous dckr make test-unit`
 
-Available targets are:
+Available targets are currently: ubuntu-lts-old ubuntu-lts-current ubuntu-current ubuntu-next debian-old debian-current debian-next alpine-current alpine-next
 
- * ubuntu-lts-previous: Ubuntu 16.04
- * ubuntu-lts-current: Ubuntu 18.04
- * debian-current: Debian stretch
- * debian-next: Debian buster
- * alpine-current: Alpine 3.8
+You should also use `NO_CACHE=true` to disable CI caching (which actually slows dckr on repetitive runs).
 
-To run tests for all targets, you can:
-
-```
-for i in ubuntu-lts-previous ubuntu-lts-current debian-current debian-next alpine-current; do
-  TARGET="$i" dckr make test
-done
-```
+To run tests for all targets, `make test-all`
 
 ## Travis
 
-Currently test on macOS, Ubuntu 14.04 and 16.04.
+RAS.
 
 ## TODO & research
 
@@ -123,10 +130,6 @@ set -u
 set -x
 # Trap errors
 set -E
-
-trap "echo EXIT trap fired!" EXIT
-trap "echo SIGINT trap fired!" INT
-trap "echo SIGTERM trap fired!" TERM
 ```
 -->
 

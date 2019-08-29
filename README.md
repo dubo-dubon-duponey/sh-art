@@ -9,7 +9,7 @@ Developing marginally complex command line utilities using bash in a consistent 
 
 This project aims at providing a generic library facilitating that task, driven by personal needs.
 
-Specifically, it takes care of argument parsing and validation, logging, http, string manipulation
+Specifically, it takes care of argument parsing and validation, exception handling, logging, http, string manipulation
 and other commodities in a consistent fashion.
 
 ## TL;DR
