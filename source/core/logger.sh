@@ -32,7 +32,7 @@ dc::internal::logger::log(){
 
   [ "$TERM" ] && [ -t 2 ] && >&2 tput "${!style}"
   for i in "$@"; do
-    >&2 printf "[%s] [%s] %s\\n" "$(date)" "$prefix" "$i"
+    >&2 printf "[%s] [%s] %s\n" "$(date)" "$prefix" "$i"
   done
   [ "$TERM" ] && [ -t 2 ] && >&2 tput op
 }

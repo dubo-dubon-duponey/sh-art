@@ -28,7 +28,7 @@ dc::prompt::input(){
     return "$ERROR_ARGUMENT_TIMEOUT"
   fi
 
-  [ ! "$silent" ] || [ ! -t 2 ] || >&2 printf "\\n"
+  [ ! "$silent" ] || [ ! -t 2 ] || >&2 printf "\n"
 }
 
 dc::prompt::question() {

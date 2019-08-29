@@ -88,5 +88,5 @@ dc::string::toUpper(){
 dc::string::trimSpace(){
   local fd="${1:-/dev/stdin}"
 
-  sed -E "s/^[[:space:]\\n]*//" < "$fd" | sed -E "s/[[:space:]\\n]*\$//"
+  sed -E "s/^[[:space:]\n]*//" < "$fd" | sed -E "s/[[:space:]\n]*\$//"
 }

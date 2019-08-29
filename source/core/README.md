@@ -20,13 +20,13 @@ Examples:
 
 `myscript -h`
 ```bash
-[ "$DC_ARGE_H" ] && printf "%s\\n" "-h has been passed"
-[ ! "$DC_ARGV_H" ] && printf "%s\\n" "with no value"
+[ "$DC_ARGE_H" ] && printf "%s\n" "-h has been passed"
+[ ! "$DC_ARGV_H" ] && printf "%s\n" "with no value"
 ```
 `myscript --something-special=foo`
 ```bash
-[ "$DC_ARGE_SOMETHING_SPECIAL" ] && printf "%s\\n" "-something-special has been passed"
-[ "$DC_ARGV_SOMETHING_SPECIAL" == "foo" ] && printf "%s\\n" "with value foo"
+[ "$DC_ARGE_SOMETHING_SPECIAL" ] && printf "%s\n" "-something-special has been passed"
+[ "$DC_ARGV_SOMETHING_SPECIAL" == "foo" ] && printf "%s\n" "with value foo"
 ```
 
 ### colors

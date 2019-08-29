@@ -39,8 +39,8 @@ dc-tooling::build::header "$destination" "${DC_ARGV_DESCRIPTION:-another fancy p
 for item in "$@"; do
   [ "${item:0:1}" != "-" ] || continue
   if [ ! -r "$item" ]; then
-    dc::logger::error "$item cannot be read"
-    exit "$ERROR_ARGUMENT_INVALID"
+    dc::error::detail::set "$item"
+    exit "$ERROR_FILESYSTEM"
   fi
   if [ -f "$item" ]; then
     dc-tooling::build::append "$item" "$destination"

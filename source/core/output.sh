@@ -26,20 +26,20 @@ dc::output::h1(){
   ln=${#i}
   even=$(( (ln + width) & 1 ))
 
-  printf "\\n"
+  printf "\n"
   printf " %.s" $(seq -s" " $(( width / 4 )))
   dc::internal::style H1_START
   printf " %.s" $(seq -s" " $(( width / 4 )))
   printf " %.s" $(seq -s" " $(( width / 4 )))
   dc::internal::style H1_END
   printf " %.s" $(seq -s" " $(( width / 4 + even )))
-  printf "\\n"
+  printf "\n"
 
   printf " %.s" $(seq -s" " $(( (width - ln) / 2)))
   printf "%s" "$i" | tr '[:lower:]' '[:upper:]'
   printf " %.s" $(seq -s" " $(( (width - ln) / 2)))
-  printf "\\n"
-  printf "\\n"
+  printf "\n"
+  printf "\n"
 }
 
 dc::output::h2(){
@@ -48,7 +48,7 @@ dc::output::h2(){
 
   width=$(tput cols)
 
-  printf "\\n"
+  printf "\n"
   printf "  "
 
   dc::internal::style H2_START
@@ -56,8 +56,8 @@ dc::output::h2(){
   printf " %.s" $(seq -s" " $(( width / 2 - ${#i} - 4 )))
   dc::internal::style H2_END
 
-  printf "\\n"
-  printf "\\n"
+  printf "\n"
+  printf "\n"
 }
 
 dc::output::emphasis(){
@@ -84,7 +84,7 @@ dc::output::bullet(){
   local i
 
   for i in "$@"; do
-    printf "    • %s\\n" "$i"
+    printf "    • %s\n" "$i"
   done
 }
 
@@ -99,7 +99,7 @@ dc::output::quote(){
 
   dc::internal::style QUOTE_START
   for i in "$@"; do
-    printf "  > %s\\n" "$i"
+    printf "  > %s\n" "$i"
   done
   dc::internal::style QUOTE_END
 }
@@ -125,7 +125,7 @@ dc::output::rule(){
 }
 
 dc::output::break(){
-  printf "\\n"
+  printf "\n"
 }
 
 dc::output::json() {

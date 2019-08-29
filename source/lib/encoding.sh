@@ -12,7 +12,10 @@ dc::encoding::toutf8(){
   fi
 
   dc::wrapped::iconv -f "$source" -t utf-8 "$fd" \
-    || { dc::logger::error "Failed converting file $fd from $source to utf8" && return "$ERROR_ENCODING_CONVERSION_FAIL"; }
+    || {
+      dc::error::detail::set "$fd ($source->utf8)"
+      return "$ERROR_ENCODING_CONVERSION_FAIL"
+    }
 }
 
 # A helper to encode uri fragments

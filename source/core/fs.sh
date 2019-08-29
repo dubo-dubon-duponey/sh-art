@@ -30,3 +30,14 @@ dc::fs::isdir(){
     return "$ERROR_FILESYSTEM"
   fi
 }
+
+dc::fs::isfile(){
+  local path="$1"
+  local writable=$2
+  local createIfMissing=$3
+  [ ! "$createIfMissing" ] || touch "$path"
+  if [ ! -f "$path" ] || [ ! -r "$path" ] || { [ "$writable" ] && [ ! -w "$path" ]; }  ; then
+    dc::error::detail::set "$path"
+    exit "$ERROR_FILESYSTEM"
+  fi
+}

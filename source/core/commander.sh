@@ -8,12 +8,8 @@
 # or even rewrite your own initialization method
 ##########################################################################
 
-readonly DC_CLI_NAME=$(basename "$0")
-readonly DC_CLI_VERSION="$DC_VERSION (core script)"
-readonly DC_CLI_LICENSE="MIT License"
-readonly DC_CLI_DESC="A fancy piece of shcript"
-export DC_CLI_USAGE=""
-export DC_CLI_OPTS=()
+export _DC_INTERNAL_CLI_USAGE=""
+export _DC_INTERNAL_CLI_OPTS=()
 
 # The method being called when the "help" flag is used (by default --help or -h) is passed to the script
 # Override this method in your script to define your own help
@@ -43,13 +39,13 @@ dc::commander::help(){
     local v
     while IFS= read -r v || [ "$v" ]; do
       dc::output::bullet "$v"
-    done < <(printf "%s" "$long")
+    done <<< "$long"
     dc::output::break
   fi
 
   dc::output::h2 "Logging control"
-  dc::output::bullet "$(printf "%s" "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_LEVEL=(debug|info|warning|error) will adjust logging level (default to info)"
-  dc::output::bullet "$(printf "%s" "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_AUTH=true will also log sensitive/credentials information (CAREFUL)"
+  dc::output::bullet "$(printf "%s" "${name}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_LEVEL=(debug|info|warning|error) will adjust logging level (default to info)"
+  dc::output::bullet "$(printf "%s" "${name}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_AUTH=true will also log sensitive/credentials information (CAREFUL)"
 
 # This is visible through the --version flag anyway...
 #  dc::output::h2 "Version"
@@ -61,13 +57,13 @@ dc::commander::help(){
     local v
     while IFS= read -r v || [ "$v" ]; do
       if [ "${v:0:1}" == ">" ]; then
-        printf "    %s\\n" "$v"
+        printf "    %s\n" "$v"
       elif [ "$v" ]; then
         dc::output::bullet "$v"
       else
         dc::output::break
       fi
-    done < <(printf "%s" "$examples")
+    done <<< "$examples"
     dc::output::break
   fi
 
@@ -81,7 +77,7 @@ dc::commander::help(){
 # The method being called when the "version" flag is used (by default --version or -v) is passed to the script
 # Override this method in your script to define your own version output
 dc::commander::version(){
-  printf "%s %s\\n" "$1" "$2"
+  printf "%s %s\n" "$1" "$2"
 }
 
 
@@ -101,12 +97,12 @@ dc::commander::declare::arg(){
     long="$long           "
   fi
 
-  if [ "${DC_CLI_USAGE}" ]; then
+  if [ "${_DC_INTERNAL_CLI_USAGE}" ]; then
     fancy=" $fancy"
   fi
 
-  DC_CLI_USAGE="${DC_CLI_USAGE}$fancy"
-  DC_CLI_OPTS+=( "$long $description" )
+  _DC_INTERNAL_CLI_USAGE="${_DC_INTERNAL_CLI_USAGE}$fancy"
+  _DC_INTERNAL_CLI_OPTS+=( "$long $description" )
 
   # Asking for help or version, do not validate
   if [ "${DC_ARGE_HELP}" ] || [ "${DC_ARGE_H}" ] || [ "${DC_ARGE_VERSION}" ]; then
@@ -141,13 +137,13 @@ dc::commander::declare::flag(){
   else
     long="$long           "
   fi
-  if [ "${DC_CLI_USAGE}" ]; then
+  if [ "${_DC_INTERNAL_CLI_USAGE}" ]; then
     display=" $display"
   fi
 
-  DC_CLI_USAGE="${DC_CLI_USAGE}$display"
+  _DC_INTERNAL_CLI_USAGE="${_DC_INTERNAL_CLI_USAGE}$display"
   # XXX add padding
-  DC_CLI_OPTS+=( "$long $description" )
+  _DC_INTERNAL_CLI_OPTS+=( "$long $description" )
 
   # Asking for help or version, do not validate
   if [ "${DC_ARGE_HELP}" ] || [ "${DC_ARGE_H}" ] || [ "${DC_ARGE_VERSION}" ]; then
@@ -195,8 +191,8 @@ dc::commander::initialize(){
   local loglevelvar
   local logauthvar
   local level
-  loglevelvar="$(printf "%s" "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_LEVEL"
-  logauthvar="$(printf "%s" "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_AUTH"
+  loglevelvar="$(printf "%s" "${CLI_NAME:-${DC_DEFAULT_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_LEVEL"
+  logauthvar="$(printf "%s" "${CLI_NAME:-${DC_DEFAULT_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_AUTH"
 
   [ ! "${1}" ] || loglevelvar="$1"
   [ ! "${2}" ] || logauthvar="$2"
@@ -230,15 +226,15 @@ dc::commander::boot(){
 
     local opts=
     local i
-    for i in "${DC_CLI_OPTS[@]}"; do
+    for i in "${_DC_INTERNAL_CLI_OPTS[@]}"; do
       opts="$opts$i"$'\n'
     done
 
     dc::commander::help \
-      "${CLI_NAME:-${DC_CLI_NAME}}" \
-      "${CLI_LICENSE:-${DC_CLI_LICENSE}}" \
-      "${CLI_DESC:-${DC_CLI_DESC}}" \
-      "${CLI_USAGE:-${DC_CLI_USAGE}}" \
+      "${CLI_NAME:-${DC_DEFAULT_CLI_NAME}}" \
+      "${CLI_LICENSE:-${DC_DEFAULT_CLI_LICENSE}}" \
+      "${CLI_DESC:-${DC_DEFAULT_CLI_DESC}}" \
+      "${CLI_USAGE:-${_DC_INTERNAL_CLI_USAGE}}" \
       "${CLI_OPTS:-$opts}" \
       "${CLI_EXAMPLES}"
     exit
@@ -246,7 +242,7 @@ dc::commander::boot(){
 
   # If we have been asked for --version, show the version
   if [ "${DC_ARGE_VERSION}" ]; then
-    dc::commander::version "${CLI_NAME:-${DC_CLI_NAME}}" "${CLI_VERSION:-${DC_CLI_VERSION}}"
+    dc::commander::version "${CLI_NAME:-${DC_DEFAULT_CLI_NAME}}" "${CLI_VERSION:-${DC_DEFAULT_CLI_VERSION}}"
     exit
   fi
 

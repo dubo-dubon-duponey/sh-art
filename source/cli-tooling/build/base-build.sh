@@ -10,7 +10,7 @@ dc-tooling::build::append(){
   do
     # Ignore file headers
     if [ "$start" ] || ! printf "%s" "$i" | grep -q "^[ ]*#"; then
-      printf "%s\\n" "$i"
+      printf "%s\n" "$i"
       start="done"
     fi
   done < "$source" >> "$destination"
@@ -51,7 +51,7 @@ dc-tooling::build::version(){
   # XXX --tags
   cat <<-EOF >> "$destination"
 ${prefix}_VERSION="$(git -C "$source" describe --match 'v[0-9]*' --dirty='.m' --always)"
-${prefix}_REVISION="$(git -C "$source" rev-parse HEAD)$(if ! git -C "$source" diff --no-ext-diff --quiet --exit-code; then printf ".m\\n"; fi)"
+${prefix}_REVISION="$(git -C "$source" rev-parse HEAD)$(if ! git -C "$source" diff --no-ext-diff --quiet --exit-code; then printf ".m\n"; fi)"
 ${prefix}_BUILD_DATE="$(date -R)"
 ${prefix}_BUILD_PLATFORM="$(uname -a)"
 EOF

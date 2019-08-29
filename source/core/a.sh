@@ -20,16 +20,16 @@ haveBash(){
       psout="${psout##* }"
     fi
     if [ "$psout" != "bash" ]; then
-      >&2 printf "[%s] %s\\n" "$(date)" "This only works with bash"
+      >&2 printf "[%s] %s\n" "$(date)" "This only works with bash"
       return 144
     fi
     return 0
   fi
 
   # This is really a survival fallback, and probably not that robust
-  >&2 printf "[%s] %s\\n" "$(date)" "Your system lacks ps"
+  >&2 printf "[%s] %s\n" "$(date)" "Your system lacks ps"
   if [ ! "$BASH" ] || [ "$(command -v bash)" != "$BASH" ]; then
-    >&2 printf "[%s] %s\\n" "$(date)" "This only works with bash. BASH: $BASH - command -v bash: $(command -v bash)"
+    >&2 printf "[%s] %s\n" "$(date)" "This only works with bash. BASH: $BASH - command -v bash: $(command -v bash)"
     return 144
   fi
   return 0
@@ -39,7 +39,7 @@ haveGrep(){
   # The reason we check that now is that grep is central to many validation mechanism
   # If we would check using the library itself, that would introduce circular deps (require vs. internal) and costly lookups
   if ! command -v "grep" >/dev/null; then
-    >&2 printf "[%s] %s\\n" "$(date)" "You need grep for this to work"
+    >&2 printf "[%s] %s\n" "$(date)" "You need grep for this to work"
     return 144
   fi
 }

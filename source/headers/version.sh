@@ -4,6 +4,7 @@
 # ------
 ##########################################################################
 
+# These are populated by the builder from git info
 readonly DC_LIB_VERSION=${DC_LIB_VERSION:-unknown}
 readonly DC_LIB_REVISION=${DC_LIB_REVISION:-unknown}
 readonly DC_LIB_BUILD_DATE=${DC_LIB_BUILD_DATE:-unknown}
