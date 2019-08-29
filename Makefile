@@ -68,44 +68,44 @@ $(DC_PREFIX)/bin/dc-tooling-build: $(DC_PREFIX)/bin/bootstrap/dc-mini $(DC_MAKEF
 #######################################################
 
 # Builds the main library
-$(DC_PREFIX)/lib/dc-mini: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE_DIR)/source/headers/*.sh
+$(DC_PREFIX)/lib/lib-dc-mini: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE_DIR)/source/headers/*.sh
 	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="the library version" --with-git-info=DC_LIB $(sort $^)
 	$(call footer, $@)
 
 # Builds the main library
-$(DC_PREFIX)/lib/dc-sh-art: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE_DIR)/source/headers/*.sh $(DC_MAKEFILE_DIR)/source/lib/*.sh
+$(DC_PREFIX)/lib/lib-dc-sh-art: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE_DIR)/source/headers/*.sh $(DC_MAKEFILE_DIR)/source/lib/*.sh
 	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="the library version" --with-git-info=DC_LIB $(sort $^)
 	$(call footer, $@)
 
 # Builds the extensions
-$(DC_PREFIX)/lib/dc-sh-art-extensions: $(DC_MAKEFILE_DIR)/source/extensions/**/*.sh
+$(DC_PREFIX)/lib/lib-dc-sh-art-extensions: $(DC_MAKEFILE_DIR)/source/extensions/**/*.sh
 	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="extensions" $(sort $^)
 	$(call footer, $@)
 
 # Test is special (embeds shunit2 which requires some shellcheck disabling
-$(DC_PREFIX)/bin/dc-tooling-test: $(DC_PREFIX)/lib/dc-mini $(DC_MAKEFILE_DIR)/source/cli-tooling/test
+$(DC_PREFIX)/bin/dc-tooling-test: $(DC_PREFIX)/lib/lib-dc-mini $(DC_MAKEFILE_DIR)/source/cli-tooling/test
 	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="a script tester, part of the dc-tooling set of utilities" --shellcheck-disable=SC2006,SC2003,SC2001 --with-git-info $^
 	$(call footer, $@)
 
 # All other dev tools
-$(DC_PREFIX)/bin/dc-tooling-%: $(DC_PREFIX)/lib/dc-mini $(DC_MAKEFILE_DIR)/source/cli-tooling/%
+$(DC_PREFIX)/bin/dc-tooling-%: $(DC_PREFIX)/lib/lib-dc-mini $(DC_MAKEFILE_DIR)/source/cli-tooling/%
 	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="part of the dc-tooling set of utilities" --with-git-info $^
 	$(call footer, $@)
 
 
 # Builds all the CLIs that depend just on the main library
-$(DC_PREFIX)/bin/dc-%: $(DC_PREFIX)/lib/dc-sh-art $(DC_MAKEFILE_DIR)/source/cli/%
+$(DC_PREFIX)/bin/dc-%: $(DC_PREFIX)/lib/lib-dc-sh-art $(DC_MAKEFILE_DIR)/source/cli/%
 	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="another fancy piece of shcript" --with-git-info $^
 	$(call footer, $@)
 
 # Builds all the CLIs that depend on the main library and extensions
-$(DC_PREFIX)/bin/dc-%: $(DC_PREFIX)/lib/dc-sh-art $(DC_PREFIX)/lib/dc-sh-art-extensions $(DC_MAKEFILE_DIR)/source/cli-ext/%
+$(DC_PREFIX)/bin/dc-%: $(DC_PREFIX)/lib/lib-dc-sh-art $(DC_PREFIX)/lib/lib-dc-sh-art-extensions $(DC_MAKEFILE_DIR)/source/cli-ext/%
 	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="another fancy piece of shcript" --with-git-info $^
 	$(call footer, $@)
@@ -120,7 +120,7 @@ build-builder: $(DC_PREFIX)/bin/bootstrap/builder $(DC_PREFIX)/bin/dc-tooling-bu
 build-tooling: build-builder $(patsubst $(DC_MAKEFILE_DIR)/source/cli-tooling/%/cmd.sh,$(DC_PREFIX)/bin/dc-tooling-%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli-tooling/*/cmd.sh))
 
 # High-level task to build the library, and extensions
-build-library: build-builder $(DC_PREFIX)/lib/dc-sh-art $(DC_PREFIX)/lib/dc-sh-art-extensions
+build-library: build-builder $(DC_PREFIX)/lib/lib-dc-sh-art $(DC_PREFIX)/lib/lib-dc-sh-art-extensions
 
 # High-level task to build all non tooling CLIs
 build-binaries: build-library $(patsubst $(DC_MAKEFILE_DIR)/source/cli-ext/%/cmd.sh,$(DC_PREFIX)/bin/dc-%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli-ext/*/cmd.sh)) \
