@@ -16,7 +16,7 @@ haveBash(){
     if ! psout="$(ps -p $$ -c -o command= 2>/dev/null)"; then
       # busybox...
       # shellcheck disable=SC2009
-      psout="$(ps -o ppid,comm | grep $$)"
+      psout="$(ps -o ppid,comm | grep "^\s*$$ ")"
       psout="${psout##* }"
     fi
     if [ "$psout" != "bash" ]; then
