@@ -122,3 +122,5 @@ dc::trap::err() {
   dc::logger::error "Error at line $lineno" "Command was: $3" "Exception: $(dc::error::lookup "$2")" "Exit: $2"
   exit "$2"
 }
+
+# experimenting with: code="$(cat -n "$0" |  grep -E "^\s+$lineno\s")" || true
