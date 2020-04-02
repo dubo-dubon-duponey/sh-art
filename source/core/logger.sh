@@ -5,21 +5,6 @@
 # Logger infrastructure
 ##########################################################################
 
-#####################################
-# Configuration hooks
-#####################################
-
-dc::internal::logger::setlevel() {
-  local level="$1"
-
-  dc::argument::check level "$DC_TYPE_INTEGER" && [ "$level" -ge "$DC_LOGGER_ERROR" ] && [ "$level" -le "$DC_LOGGER_DEBUG" ] || level="$DC_LOGGER_INFO"
-
-  _DC_INTERNAL_LOGGER_LEVEL="$level"
-  if [ "$_DC_INTERNAL_LOGGER_LEVEL" == "$DC_LOGGER_DEBUG" ]; then
-    dc::logger::warning "[Logger] YOU ARE LOGGING AT THE DEBUG LEVEL. This is NOT recommended for production use, and WILL LIKELY LEAK sensitive information to stderr."
-  fi
-}
-
 dc::internal::logger::log(){
   local prefix="$1"
   shift
@@ -30,11 +15,22 @@ dc::internal::logger::log(){
 
   [ "$_DC_INTERNAL_LOGGER_LEVEL" -lt "${!level}" ] && return
 
-  [ "$TERM" ] && [ -t 2 ] && >&2 tput "${!style}"
+  [ ! "$TERM" ] || [ ! -t 2 ] || >&2 tput "${!style}"
   for i in "$@"; do
     >&2 printf "[%s] [%s] %s\n" "$(date)" "$prefix" "$i"
   done
-  [ "$TERM" ] && [ -t 2 ] && >&2 tput op
+  [ ! "$TERM" ] || [ ! -t 2 ] || >&2 tput op
+}
+
+dc::internal::logger::setlevel() {
+  local level="$1"
+
+  # Level is an int between ERROR and DEBUG, or fallback to INFO
+  dc::argument::check level "$DC_TYPE_INTEGER" && [ "$level" -ge "$DC_LOGGER_ERROR" ] && [ "$level" -le "$DC_LOGGER_DEBUG" ] || level="$DC_LOGGER_INFO"
+
+  _DC_INTERNAL_LOGGER_LEVEL="$level"
+  [ "$level" != "$DC_LOGGER_DEBUG" ] ||
+    dc::internal::logger::log "WARNING" "[Logger] YOU ARE LOGGING AT THE DEBUG LEVEL. This is NOT recommended for production use, and WILL LIKELY LEAK sensitive information to stderr."
 }
 
 dc::configure::logger::setlevel::debug(){
