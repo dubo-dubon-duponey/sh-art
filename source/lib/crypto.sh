@@ -86,7 +86,7 @@ dc::crypto::csr::new(){
   # XXX argument validation here? New type for email?
   local email="$7"
 
-  dc::argument::check email "$DC_TYPE_EMAIL"
+  dc::argument::check email "$DC_TYPE_EMAIL" || return
 
   dc::wrapped::openssl req -new -sha256 -key /dev/stdin -subj "/C=$country/ST=$state/L=$city/O=$organization/OU=$organizationUnit/CN=$name/emailAddress=$email"
 }
@@ -103,7 +103,7 @@ dc::crypto::pem::headers::has(){
   local value="${2:-.*}"
   local fd="${3:-/dev/stdin}"
 
-  dc::argument::check key "$DC_TYPE_ALPHANUM"
+  dc::argument::check key "$DC_TYPE_ALPHANUM" || return
 
   dc::internal::grep -q "^$key: $value$" "$fd" \
     || { dc::error::detail::set "$key: $value" && return "$ERROR_CRYPTO_PEM_NO_SUCH_HEADER"; }
@@ -128,7 +128,7 @@ dc::crypto::pem::headers::set(){
 
   local line
 
-  dc::argument::check key "$DC_TYPE_ALPHANUM"
+  dc::argument::check key "$DC_TYPE_ALPHANUM" || return
 
   while IFS= read -r line || [ "$line" ]; do
     printf "%s\n" "$line"

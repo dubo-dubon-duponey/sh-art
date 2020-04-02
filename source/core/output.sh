@@ -116,7 +116,7 @@ dc::output::text(){
 dc::output::rule(){
   local width
 
-  dc::argument::check width "$DC_TYPE_INTEGER"
+  dc::argument::check width "$DC_TYPE_INTEGER" || return
 
   width=$(tput cols)
   dc::internal::style RULE_START

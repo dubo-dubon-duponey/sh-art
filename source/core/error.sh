@@ -14,7 +14,7 @@ _DC_INTERNAL_ERROR_DETAIL=
 dc::error::register(){
   local name="$1"
 
-  dc::argument::check name "$DC_TYPE_VARIABLE"
+  dc::argument::check name "$DC_TYPE_VARIABLE" || return
 
   _DC_INTERNAL_ERROR_CODEPOINT=$(( _DC_INTERNAL_ERROR_CODEPOINT + 1 ))
 
@@ -25,10 +25,11 @@ dc::error::register(){
   readonly "${name?}"
 }
 
+# XXX should we error when reaching the maximum number of errors? Is this even scalable?
 dc::error::appregister(){
   local name="$1"
 
-  dc::argument::check name "$DC_TYPE_VARIABLE"
+  dc::argument::check name "$DC_TYPE_VARIABLE" || return
 
   _DC_INTERNAL_ERROR_APPCODEPOINT=$(( _DC_INTERNAL_ERROR_APPCODEPOINT + 1 ))
 
@@ -41,7 +42,7 @@ dc::error::lookup(){
   local code="$1"
   local errname
 
-  dc::argument::check code "$DC_TYPE_UNSIGNED"
+  dc::argument::check code "$DC_TYPE_UNSIGNED" || return
 
   errname="$(env | dc::internal::grep "^ERROR_[^=]+=$code$")"
   printf "%s" "${errname%=*}"
