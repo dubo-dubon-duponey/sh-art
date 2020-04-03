@@ -86,7 +86,7 @@ dc::commander::declare::arg(){
   local validator="$2"
   local fancy="$3"
   local description="$4"
-  local optional="$5"
+  local optional="${5:-}"
 
   local long="$fancy"
   long=$(printf "%-20s" "$long")
@@ -105,7 +105,7 @@ dc::commander::declare::arg(){
   _DC_INTERNAL_CLI_OPTS+=( "$long $description" )
 
   # Asking for help or version, do not validate
-  if [ "${DC_ARGE_HELP}" ] || [ "${DC_ARGE_H}" ] || [ "${DC_ARGE_VERSION}" ]; then
+  if [ "${DC_ARGE_HELP:-}" ] || [ "${DC_ARGE_H:-}" ] || [ "${DC_ARGE_VERSION:-}" ]; then
     return
   fi
 
@@ -117,8 +117,8 @@ dc::commander::declare::flag(){
   local name="$1"
   local validator="$2"
   local description="$3"
-  local optional="$4"
-  local alias="$5"
+  local optional="${4:-}"
+  local alias="${5:-}"
 
   local display="--$name"
   local long="--$name"
@@ -146,7 +146,7 @@ dc::commander::declare::flag(){
   _DC_INTERNAL_CLI_OPTS+=( "$long $description" )
 
   # Asking for help or version, do not validate
-  if [ "${DC_ARGE_HELP}" ] || [ "${DC_ARGE_H}" ] || [ "${DC_ARGE_VERSION}" ]; then
+  if [ "${DC_ARGE_HELP:-}" ] || [ "${DC_ARGE_H:-}" ] || [ "${DC_ARGE_VERSION:-}" ]; then
     return
   fi
 
@@ -157,16 +157,17 @@ dc::commander::declare::flag(){
   m="DC_ARGE_$(printf "%s" "$name" | tr "-" "_" | tr '[:lower:]' '[:upper:]')"
   s="DC_ARGE_$(printf "%s" "$alias" | tr "-" "_" | tr '[:lower:]' '[:upper:]')"
 
-  # First make sure we do not have a double dip
-  if [ "${!m}" ] && [ "${!s}" ]; then
-    dc::logger::error "You cannot specify $name and $alias at the same time"
-    return "$ERROR_ARGUMENT_INVALID"
-  fi
-
   # Validate the alias or the main one
-  if [ "${!s}" ]; then
+  if [ "${!s:-}" ]; then
+    # First make sure we do not have a double dip
+    if [ "${!m:-}" ]; then
+      dc::logger::error "You cannot specify $name and $alias at the same time"
+      return "$ERROR_ARGUMENT_INVALID"
+    fi
+    # Ok? Validate the alias
     dc::args::flag::validate "$alias" "$validator" "$optional" || exit
   else
+    # Otherwise, the main arg
     dc::args::flag::validate "$name" "$validator" "$optional" || exit
   fi
 }
@@ -192,18 +193,18 @@ dc::commander::initialize(){
   loglevelvar="$(printf "%s" "${CLI_NAME:-${DC_DEFAULT_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_LEVEL"
   logauthvar="$(printf "%s" "${CLI_NAME:-${DC_DEFAULT_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_AUTH"
 
-  [ ! "${1}" ] || loglevelvar="$1"
-  [ ! "${2}" ] || logauthvar="$2"
+  [ ! "${1:-}" ] || loglevelvar="$1"
+  [ ! "${2:-}" ] || logauthvar="$2"
 
   # If we have a log level, set it
-  if [ "${!loglevelvar}" ]; then
+  if [ "${!loglevelvar:-}" ]; then
     # Configure the logger from the LOG_LEVEL env variable
     level="$(printf "DC_LOGGER_%s" "${!loglevelvar}" | tr '[:lower:]' '[:upper:]')"
     dc::internal::logger::setlevel "${!level}"
   fi
 
   # If the LOG_AUTH env variable is set, honor it and leak
-  if [ "${!logauthvar}" ]; then
+  if [ "${!logauthvar:-}" ]; then
     dc::configure::http::leak
   fi
 
@@ -220,7 +221,7 @@ dc::commander::initialize(){
 
 dc::commander::boot(){
   # If we have been asked for --help or -h, show help
-  if [ "${DC_ARGE_HELP}" ] || [ "${DC_ARGE_H}" ]; then
+  if [ "${DC_ARGE_HELP:-}" ] || [ "${DC_ARGE_H:-}" ]; then
 
     local opts=
     local i
@@ -239,7 +240,7 @@ dc::commander::boot(){
   fi
 
   # If we have been asked for --version, show the version
-  if [ "${DC_ARGE_VERSION}" ]; then
+  if [ "${DC_ARGE_VERSION:-}" ]; then
     dc::commander::version "${CLI_NAME:-${DC_DEFAULT_CLI_NAME}}" "${CLI_VERSION:-${DC_DEFAULT_CLI_VERSION}}"
     exit
   fi

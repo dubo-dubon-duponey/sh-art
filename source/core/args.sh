@@ -25,7 +25,7 @@ dc::internal::parse_args(){
     if [ "$isFlag" == "false" ]; then
       x=$(( x + 1 ))
       n=DC_PARGE_$x
-      if [ ! "${!n}" ]; then
+      if [ ! "${!n:-}" ]; then
         # shellcheck disable=SC2140
         readonly "DC_PARGE_$x"=true
         # shellcheck disable=SC2140
@@ -59,8 +59,8 @@ dc::args::flag::validate(){
   local var
   local varexist
   local regexp="$2"
-  local optional="$3"
-  local caseInsensitive="$4"
+  local optional="${3:-}"
+  local caseInsensitive="${4:-}"
 
   local args=(-q)
   [ ! "$caseInsensitive" ] || args+=(-i)
@@ -68,7 +68,7 @@ dc::args::flag::validate(){
   var="DC_ARGV_$(printf "%s" "$1" | tr "-" "_" | tr '[:lower:]' '[:upper:]')"
   varexist="DC_ARGE_$(printf "%s" "$1" | tr "-" "_" | tr '[:lower:]' '[:upper:]')"
 
-  if [ ! "${!varexist}" ]; then
+  if [ ! "${!varexist:-}" ]; then
     [ "$optional" ] && return
     dc::error::detail::set "$(printf "%s" "$1" | tr "_" "-" | tr '[:upper:]' '[:lower:]')"
     return "$ERROR_ARGUMENT_MISSING"
@@ -87,13 +87,13 @@ dc::args::arg::validate(){
   local var="DC_PARGV_$1"
   local varexist="DC_PARGE_$1"
   local regexp="$2"
-  local optional="$3"
-  local caseInsensitive="$4"
+  local optional="${3:-}"
+  local caseInsensitive="${4:-}"
 
   local args=(-q)
   [ ! "$caseInsensitive" ] || args+=(-i)
 
-  if [ ! "${!varexist}" ]; then
+  if [ ! "${!varexist:-}" ]; then
     [ "$optional" ] && return
     dc::error::detail::set "$1"
     return "$ERROR_ARGUMENT_MISSING"

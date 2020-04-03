@@ -32,8 +32,8 @@ dc-tooling::build::header "$destination" "${DC_ARGV_DESCRIPTION:-another fancy p
 
 # Add git information
 # Always use the last argument as git information source (first arg may be a library out of the tree)
-[ ! "$DC_ARGE_SHELLCHECK_DISABLE" ] || dc-tooling::build::disable "$destination" "$DC_ARGV_SHELLCHECK_DISABLE"
-[ ! "$DC_ARGE_WITH_GIT_INFO" ] || dc-tooling::build::version "$destination" "${@: -1}" "$DC_ARGV_WITH_GIT_INFO"
+[ ! "${DC_ARGE_SHELLCHECK_DISABLE:-}" ] || dc-tooling::build::disable "$destination" "$DC_ARGV_SHELLCHECK_DISABLE"
+[ ! "${DC_ARGE_WITH_GIT_INFO:-}" ] || dc-tooling::build::version "$destination" "${@: -1}" "$DC_ARGV_WITH_GIT_INFO"
 
 # XXX somewhat cavalier
 for item in "$@"; do
