@@ -15,3 +15,7 @@ dc-tools::assert::equal(){
 dc-tools::assert::notequal(){
   assertNotEquals "$@"
 }
+
+dc-tools::assert::contains(){
+  assertContains "$@"
+}
