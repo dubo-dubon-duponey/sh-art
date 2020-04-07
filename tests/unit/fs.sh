@@ -1,75 +1,224 @@
 #!/usr/bin/env bash
 
-testDir(){
+testDirExisting() {
   local exitcode
+  local path
+
+  path="$(dirname "${BASH_SOURCE[0]}")"
 
   exitcode=0
-  dc::fs::isdir "$(dirname "${BASH_SOURCE[0]}")" || exitcode=$?
-  dc-tools::assert::equal "Current dir exists" 0 "$exitcode"
-
-  chmod a+w "${TMPDIR:-/tmp}/foo" 2>/dev/null || true
-  rm -Rf "${TMPDIR:-/tmp}/foo"
+  dc::fs::isdir "$path" || exitcode=$?
+  dc-tools::assert::equal "Directory $path exists?" NO_ERROR "$(dc::error::lookup $exitcode)"
 
   exitcode=0
-  dc::fs::isdir "${TMPDIR:-/tmp}/foo" writable create || exitcode=$?
-  dc-tools::assert::equal "Creatable dir" 0 "$exitcode"
+  dc::fs::isdir "$path" writable || exitcode=$?
+  dc-tools::assert::equal "Directory $path is writable?" NO_ERROR "$(dc::error::lookup $exitcode)"
 
   exitcode=0
-  dc::fs::isdir "${TMPDIR:-/tmp}/foo" writable || exitcode=$?
-  dc-tools::assert::equal "Current dir is writable" 0 "$exitcode"
-
-  chmod a+w "${TMPDIR:-/tmp}/foo"
-  rm -Rf "${TMPDIR:-/tmp}/foo"
+  dc::fs::isdir "$path" writable create || exitcode=$?
+  dc-tools::assert::equal "Directory $path can be created?" NO_ERROR "$(dc::error::lookup $exitcode)"
 
   exitcode=0
-  dc::fs::isdir "${TMPDIR:-/tmp}/foo" 2>/dev/null || exitcode=$?
-  dc-tools::assert::equal "Non existent dir does not exist" "$ERROR_FILESYSTEM" "$exitcode"
-
-  touch "${TMPDIR:-/tmp}/foo"
-  chmod a-w "${TMPDIR:-/tmp}/foo"
-
-  exitcode=0
-  dc::fs::isdir "${TMPDIR:-/tmp}/foo" writable 2>/dev/null || exitcode=$?
-  dc-tools::assert::equal "Non writable dir is not writable" "$ERROR_FILESYSTEM" "$exitcode"
+  dc::fs::isdir "$path" "" create || exitcode=$?
+  dc-tools::assert::equal "Directory $path can be created? (wether writable or not)" NO_ERROR "$(dc::error::lookup $exitcode)"
 }
 
-testFile(){
+testDirNoArg() {
+  local exitcode
+  local path=""
+
+  exitcode=0
+  dc::fs::isdir "$path" || exitcode=$?
+  dc-tools::assert::equal "Directory $path exists?" ARGUMENT_INVALID "$(dc::error::lookup $exitcode)"
+
+  exitcode=0
+  dc::fs::isdir "$path" writable || exitcode=$?
+  dc-tools::assert::equal "Directory $path is writable?" ARGUMENT_INVALID "$(dc::error::lookup $exitcode)"
+
+  exitcode=0
+  dc::fs::isdir "$path" writable create || exitcode=$?
+  dc-tools::assert::equal "Directory $path can be created?" ARGUMENT_INVALID "$(dc::error::lookup $exitcode)"
+
+  exitcode=0
+  dc::fs::isdir "$path" "" create || exitcode=$?
+  dc-tools::assert::equal "Directory $path can be created? (wether writable or not)" ARGUMENT_INVALID "$(dc::error::lookup $exitcode)"
+
+  exitcode=0
+  dc::fs::isdir || exitcode=$?
+  dc-tools::assert::equal "Directory '' exists?" ARGUMENT_INVALID "$(dc::error::lookup $exitcode)"
+}
+
+testDirNonExisting() {
+  local exitcode
+  local path
+
+  # Setup
+  path="${TMPDIR:-/tmp}/foo"
+  chmod a+rwx "$path" 2>/dev/null || true
+  rm -Rf "$path"
+
+  # Non existing directory
+  exitcode=0
+  dc::fs::isdir "$path" || exitcode=$?
+  dc-tools::assert::equal "Directory $path exists?" FILESYSTEM "$(dc::error::lookup $exitcode)"
+
+  exitcode=0
+  dc::fs::isdir "$path" writable || exitcode=$?
+  dc-tools::assert::equal "Directory $path is writable?" FILESYSTEM "$(dc::error::lookup $exitcode)"
+
+  # Create it
+  exitcode=0
+  dc::fs::isdir "$path" writable create || exitcode=$?
+  dc-tools::assert::equal "Directory $path can be created?" NO_ERROR "$(dc::error::lookup $exitcode)"
+
+  # Create again without the writable flag
+  rm -Rf "$path"
+  exitcode=0
+  dc::fs::isdir "$path" "" create || exitcode=$?
+  dc-tools::assert::equal "Directory $path can be created? (wether writable or not)" NO_ERROR "$(dc::error::lookup $exitcode)"
+
+  # Standard test for existing dir now
+  exitcode=0
+  dc::fs::isdir "$path" || exitcode=$?
+  dc-tools::assert::equal "Directory $path exists?" NO_ERROR "$(dc::error::lookup $exitcode)"
+
+  exitcode=0
+  dc::fs::isdir "$path" writable || exitcode=$?
+  dc-tools::assert::equal "Directory $path is writable?" NO_ERROR "$(dc::error::lookup $exitcode)"
+
+  exitcode=0
+  dc::fs::isdir "$path" writable create || exitcode=$?
+  dc-tools::assert::equal "Directory $path can be created?" NO_ERROR "$(dc::error::lookup $exitcode)"
+
+  exitcode=0
+  dc::fs::isdir "$path" "" create || exitcode=$?
+  dc-tools::assert::equal "Directory $path can be created? (wether writable or not)" NO_ERROR "$(dc::error::lookup $exitcode)"
+
+  # Change it to non writable
+  chmod a-w "$path"
+
+  exitcode=0
+  dc::fs::isdir "$path" || exitcode=$?
+  dc-tools::assert::equal "Directory $path exists?" NO_ERROR "$(dc::error::lookup $exitcode)"
+
+  exitcode=0
+  dc::fs::isdir "$path" writable || exitcode=$?
+  dc-tools::assert::equal "Directory $path is writable?" FILESYSTEM "$(dc::error::lookup $exitcode)"
+
+  exitcode=0
+  dc::fs::isdir "$path" writable create || exitcode=$?
+  dc-tools::assert::equal "Directory $path can be created?" FILESYSTEM "$(dc::error::lookup $exitcode)"
+
+  exitcode=0
+  dc::fs::isdir "$path" "" create || exitcode=$?
+  dc-tools::assert::equal "Directory $path can be created? (wether writable or not)" NO_ERROR "$(dc::error::lookup $exitcode)"
+
+  # Change it to non executable
+  chmod a-x "$path"
+
+  exitcode=0
+  dc::fs::isdir "$path" || exitcode=$?
+  dc-tools::assert::equal "Directory $path exists?" NO_ERROR "$(dc::error::lookup $exitcode)"
+
+  exitcode=0
+  dc::fs::isdir "$path" writable || exitcode=$?
+  dc-tools::assert::equal "Directory $path is writable?" FILESYSTEM "$(dc::error::lookup $exitcode)"
+
+  exitcode=0
+  dc::fs::isdir "$path" writable create || exitcode=$?
+  dc-tools::assert::equal "Directory $path can be created?" FILESYSTEM "$(dc::error::lookup $exitcode)"
+
+  exitcode=0
+  dc::fs::isdir "$path" "" create || exitcode=$?
+  dc-tools::assert::equal "Directory $path can be created? (wether writable or not)" NO_ERROR "$(dc::error::lookup $exitcode)"
+
+  # Change it to non readable
+  chmod a-r "$path"
+
+  exitcode=0
+  dc::fs::isdir "$path" || exitcode=$?
+  dc-tools::assert::equal "Directory $path exists?" FILESYSTEM "$(dc::error::lookup $exitcode)"
+
+  exitcode=0
+  dc::fs::isdir "$path" writable || exitcode=$?
+  dc-tools::assert::equal "Directory $path is writable?" FILESYSTEM "$(dc::error::lookup $exitcode)"
+
+  exitcode=0
+  dc::fs::isdir "$path" writable create || exitcode=$?
+  dc-tools::assert::equal "Directory $path can be created?" FILESYSTEM "$(dc::error::lookup $exitcode)"
+
+  exitcode=0
+  dc::fs::isdir "$path" "" create || exitcode=$?
+  dc-tools::assert::equal "Directory $path can be created? (wether writable or not)" FILESYSTEM "$(dc::error::lookup $exitcode)"
+
+  # Change it to just non writable
+  chmod a+rx "$path"
+
+  # Try to create inside
+  exitcode=0
+  dc::fs::isdir "$path/bar" "" create || exitcode=$?
+  dc-tools::assert::equal "Directory $path/bar can be created? (wether writable or not)" FILESYSTEM "$(dc::error::lookup $exitcode)"
+
+  # Change back to writable
+  chmod a+w "$path"
+  touch "$path/bar"
+
+  exitcode=0
+  dc::fs::isdir "$path/bar" || exitcode=$?
+  dc-tools::assert::equal "Directory $path/bar exists?" FILESYSTEM "$(dc::error::lookup $exitcode)"
+
+  exitcode=0
+  dc::fs::isdir "$path/bar" writable || exitcode=$?
+  dc-tools::assert::equal "Directory $path/bar is writable?" FILESYSTEM "$(dc::error::lookup $exitcode)"
+
+  exitcode=0
+  dc::fs::isdir "$path/bar" writable create || exitcode=$?
+  dc-tools::assert::equal "Directory $path/bar can be created?" FILESYSTEM "$(dc::error::lookup $exitcode)"
+
+  exitcode=0
+  dc::fs::isdir "$path/bar" "" create || exitcode=$?
+  dc-tools::assert::equal "Directory $path/bar can be created? (wether writable or not)" FILESYSTEM "$(dc::error::lookup $exitcode)"
+}
+
+testFile() {
   local exitcode
 
   # Current script is readable
   exitcode=0
   dc::fs::isfile "${BASH_SOURCE[0]}" || exitcode=$?
-  dc-tools::assert::equal "Current script exists" 0 "$exitcode"
+  dc-tools::assert::equal "Current script exists" NO_ERROR "$(dc::error::lookup $exitcode)"
 
   # Creating a file
   chmod a+w "${TMPDIR:-/tmp}/foo" 2>/dev/null || true
-  rm -f "${TMPDIR:-/tmp}/foo"
+  rm -Rf "${TMPDIR:-/tmp}/foo"
 
   exitcode=0
-  dc::fs::isfile "${TMPDIR:-/tmp}/foo" writable create  || exitcode=$?
-  dc-tools::assert::equal "Creatable file" 0 "$exitcode"
+  dc::fs::isfile "${TMPDIR:-/tmp}/foo" writable create || exitcode=$?
+  dc-tools::assert::equal "Creatable file" NO_ERROR "$(dc::error::lookup $exitcode)"
 
   # Created file is writable
   exitcode=0
   dc::fs::isfile "${TMPDIR:-/tmp}/foo" writable || exitcode=$?
-  dc-tools::assert::equal "Created file is writable" 0 "$exitcode"
+  dc-tools::assert::equal "Created file is writable" NO_ERROR "$(dc::error::lookup $exitcode)"
 
   chmod a+w "${TMPDIR:-/tmp}/foo"
   rm -f "${TMPDIR:-/tmp}/foo"
 
   exitcode=0
   dc::fs::isfile "${TMPDIR:-/tmp}/foo" 2>/dev/null || exitcode=$?
-  dc-tools::assert::equal "Non existent file does not exist" "$ERROR_FILESYSTEM" "$exitcode"
+  dc-tools::assert::equal "Non existent file does not exist" "FILESYSTEM" "$(dc::error::lookup $exitcode)"
 
   touch "${TMPDIR:-/tmp}/foo"
   chmod a-w "${TMPDIR:-/tmp}/foo"
 
   exitcode=0
   dc::fs::isfile "${TMPDIR:-/tmp}/foo" writable 2>/dev/null || exitcode=$?
-  dc-tools::assert::equal "Non writable file is not writable" "$ERROR_FILESYSTEM" "$exitcode"
+  dc-tools::assert::equal "Non writable file is not writable" "FILESYSTEM" "$(dc::error::lookup $exitcode)"
 
   # No file
   exitcode=0
+  #  dc::fs::isfile || exitcode=$?
   dc::fs::isfile 2>/dev/null || exitcode=$?
-  dc-tools::assert::equal "Non writable file is not writable" "$ERROR_ARGUMENT_INVALID" "$exitcode"
+
+  dc-tools::assert::equal "No path argument fails" "ARGUMENT_INVALID" "$(dc::error::lookup $exitcode)"
 }
