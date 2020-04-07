@@ -11,6 +11,48 @@
 export _DC_INTERNAL_CLI_USAGE=""
 export _DC_INTERNAL_CLI_OPTS=()
 
+dc::commander::requirements(){
+  # Can't really do anything without this
+  dc::require printf || return
+
+  # We have to use this in a number of occasions (bash 3), and of course for prompting, etc
+  dc::require read || return
+
+  dc::require jq || {
+    dc::logger::warning "You are missing the jq binary. JSON formatting and validation will be non-existent."
+  }
+
+  dc::require tput || {
+    dc::logger::warning "You are missing the tput binary. No fancy formatting for you."
+  }
+
+  dc::require date || {
+    dc::logger::warning "You are missing the date binary. No date in lgos for you."
+  }
+
+  dc::require sed || {
+    dc::logger::warning "You are missing the sed binary. At the very least, dependencies version detection will be broken."
+  }
+
+  dc::require tr || {
+    dc::logger::warning "You are missing the tr binary. Some operations involving variable manipulation will fail in subtle and confusing ways."
+  }
+
+  dc::require curl || {
+    dc::logger::warning "You are missing the curl binary. Network operations will not work."
+  }
+
+  # shellcheck disable=SC2015
+  dc::require rm && dc::require mktemp && dc::require mkdir && dc::require touch || {
+    dc::logger::warning "You are missing mktemp or mkdir or touch. FS operations will fail with a lot of drama."
+  }
+}
+
+dc::commander::trap(){
+  # Set up the traps
+  dc::trap::setup
+}
+
 # The method being called when the "help" flag is used (by default --help or -h) is passed to the script
 # Override this method in your script to define your own help
 dc::commander::help(){
@@ -44,8 +86,8 @@ dc::commander::help(){
   fi
 
   dc::output::h2 "Logging control"
-  dc::output::bullet "$(printf "%s" "${name}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_LEVEL=(debug|info|warning|error) will adjust logging level (default to info)"
-  dc::output::bullet "$(printf "%s" "${name}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_AUTH=true will also log sensitive/credentials information (CAREFUL)"
+  dc::output::bullet "$(dc::internal::varnorm "$name")_LOG_LEVEL=(debug|info|warning|error) will adjust logging level (default to info)"
+  dc::output::bullet "$(dc::internal::varnorm "$name")_LOG_AUTH=true will also log sensitive/credentials information (CAREFUL)"
 
 # This is visible through the --version flag anyway...
 #  dc::output::h2 "Version"
@@ -97,20 +139,20 @@ dc::commander::declare::arg(){
     long="$long           "
   fi
 
-  if [ "${_DC_INTERNAL_CLI_USAGE}" ]; then
-    fancy=" $fancy"
-  fi
+  #if [ "${_DC_INTERNAL_CLI_USAGE}" ]; then
+  #  fancy=" $fancy"
+  #fi
 
-  _DC_INTERNAL_CLI_USAGE="${_DC_INTERNAL_CLI_USAGE}$fancy"
+  _DC_INTERNAL_CLI_USAGE="${_DC_INTERNAL_CLI_USAGE}$fancy "
   _DC_INTERNAL_CLI_OPTS+=( "$long $description" )
 
   # Asking for help or version, do not validate
-  if [ "${DC_ARGE_HELP:-}" ] || [ "${DC_ARGE_H:-}" ] || [ "${DC_ARGE_VERSION:-}" ]; then
+  if dc::args::exist "help" || dc::args::exist "h" || dc::args::exist "version"; then
     return
   fi
 
   # Otherwise, validate
-  dc::args::arg::validate "$number" "$validator" "$optional" || exit
+  dc::args::validate "$number" "$validator" "$optional" || exit
 }
 
 dc::commander::declare::flag(){
@@ -137,38 +179,31 @@ dc::commander::declare::flag(){
   else
     long="$long           "
   fi
-  if [ "${_DC_INTERNAL_CLI_USAGE}" ]; then
-    display=" $display"
-  fi
+  # if [ "${_DC_INTERNAL_CLI_USAGE}" ]; then
+  #  display=" $display"
+  # fi
 
-  _DC_INTERNAL_CLI_USAGE="${_DC_INTERNAL_CLI_USAGE}$display"
+  _DC_INTERNAL_CLI_USAGE="${_DC_INTERNAL_CLI_USAGE}$display "
   # XXX add padding
   _DC_INTERNAL_CLI_OPTS+=( "$long $description" )
 
   # Asking for help or version, do not validate
-  if [ "${DC_ARGE_HELP:-}" ] || [ "${DC_ARGE_H:-}" ] || [ "${DC_ARGE_VERSION:-}" ]; then
+  if dc::args::exist "help" || dc::args::exist "h" || dc::args::exist "version"; then
     return
   fi
 
-  local m
-  local s
-
-  # Otherwise, validate
-  m="DC_ARGE_$(printf "%s" "$name" | tr "-" "_" | tr '[:lower:]' '[:upper:]')"
-  s="DC_ARGE_$(printf "%s" "$alias" | tr "-" "_" | tr '[:lower:]' '[:upper:]')"
-
   # Validate the alias or the main one
-  if [ "${!s:-}" ]; then
+  if [ "$(dc::args::exist "$alias")" ]; then
     # First make sure we do not have a double dip
-    if [ "${!m:-}" ]; then
+    if [ "$(dc::args::exist "$name")" ]; then
       dc::logger::error "You cannot specify $name and $alias at the same time"
       return "$ERROR_ARGUMENT_INVALID"
     fi
     # Ok? Validate the alias
-    dc::args::flag::validate "$alias" "$validator" "$optional" || exit
+    dc::args::validate "$alias" "$validator" "$optional" || exit
   else
     # Otherwise, the main arg
-    dc::args::flag::validate "$name" "$validator" "$optional" || exit
+    dc::args::validate "$name" "$validator" "$optional" || exit
   fi
 }
 
@@ -185,13 +220,16 @@ dc::commander::declare::flag(){
 
 # shellcheck disable=SC2120
 dc::commander::initialize(){
+  dc::commander::requirements
+  dc::commander::trap
+
   dc::commander::declare::flag "silent" "^$" "no logging (overrides log level)" optional "s"
 
   local loglevelvar
   local logauthvar
   local level
-  loglevelvar="$(printf "%s" "${CLI_NAME:-${DC_DEFAULT_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_LEVEL"
-  logauthvar="$(printf "%s" "${CLI_NAME:-${DC_DEFAULT_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_AUTH"
+  loglevelvar="$(dc::internal::varnorm "${CLI_NAME:-${DC_DEFAULT_CLI_NAME}}")_LOG_LEVEL"
+  logauthvar="$(dc::internal::varnorm "${CLI_NAME:-${DC_DEFAULT_CLI_NAME}}")_LOG_AUTH"
 
   [ ! "${1:-}" ] || loglevelvar="$1"
   [ ! "${2:-}" ] || logauthvar="$2"
@@ -200,28 +238,26 @@ dc::commander::initialize(){
   if [ "${!loglevelvar:-}" ]; then
     # Configure the logger from the LOG_LEVEL env variable
     level="$(printf "DC_LOGGER_%s" "${!loglevelvar}" | tr '[:lower:]' '[:upper:]')"
-    dc::internal::logger::setlevel "${!level}"
+    dc::logger::level::set "${!level}"
   fi
 
   # If the LOG_AUTH env variable is set, honor it and leak
   if [ "${!logauthvar:-}" ]; then
-    dc::configure::http::leak
+    dc::http::leak::set
   fi
 
   # If the "-s" flag is passed, mute the logger entirely
-  if [ -n "${DC_ARGV_SILENT+x}" ] || [ -n "${DC_ARGV_S+x}" ]; then
-    dc::configure::logger::mute
+  if dc::args::exist silent || dc::args::exist s; then
+    dc::logger::mute
   fi
 
   # If the --insecure flag is passed, allow insecure TLS connections
-  if [ "${DC_ARGV_INSECURE+x}" ]; then
-    dc::configure::http::insecure
-  fi
+  ! dc::args::exist insecure || dc::http::insecure::set
 }
 
 dc::commander::boot(){
   # If we have been asked for --help or -h, show help
-  if [ "${DC_ARGE_HELP:-}" ] || [ "${DC_ARGE_H:-}" ]; then
+  if dc::args::exist help || dc::args::exist h; then
 
     local opts=
     local i
@@ -240,7 +276,7 @@ dc::commander::boot(){
   fi
 
   # If we have been asked for --version, show the version
-  if [ "${DC_ARGE_VERSION:-}" ]; then
+  if dc::args::exist version; then
     dc::commander::version "${CLI_NAME:-${DC_DEFAULT_CLI_NAME}}" "${CLI_VERSION:-${DC_DEFAULT_CLI_VERSION}}"
     exit
   fi

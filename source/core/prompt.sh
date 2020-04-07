@@ -3,12 +3,13 @@
 # Prompt
 # ------
 # Ask questions
+# XXX do not like the parameters order in this API
 ##########################################################################
 
 dc::prompt::input(){
   local varname="$1"
-  local message="$2"
-  local silent="$3"
+  local message="${2:-}"
+  local silent="${3:-}"
   local timeout="${4:-1000}"
   local args=("-r")
 
@@ -18,7 +19,7 @@ dc::prompt::input(){
 
   # Arg processing
   [ ! "$silent" ]   || args+=("-s")
-  [ ! "$timeout" ]  || args+=("-t" "$timeout")
+  [ "$timeout" == 0 ]  || args+=("-t" "$timeout")
 
   # Prompt and read
   [ ! -t 2 ] || >&2 printf "%s" "$message"
@@ -28,6 +29,7 @@ dc::prompt::input(){
     return "$ERROR_ARGUMENT_TIMEOUT"
   fi
 
+  # XXX should this really be avoided in silent mode?
   [ ! "$silent" ] || [ ! -t 2 ] || >&2 printf "\n"
 }
 
@@ -35,16 +37,12 @@ dc::prompt::question() {
   local message="$1"
   local varname="$2"
 
-  dc::argument::check varname "$DC_TYPE_VARIABLE" || return
-
   dc::prompt::input "$varname" "$message"
 }
 
 dc::prompt::password() {
   local message="$1"
   local varname="$2"
-
-  dc::argument::check varname "$DC_TYPE_VARIABLE" || return
 
   dc::prompt::input "$varname" "$message" silent
 }
@@ -54,9 +52,6 @@ dc::prompt::credentials() {
   local varname="$2"
   local pmessage="$1"
   local pvarname="$2"
-
-  dc::argument::check varname "$DC_TYPE_VARIABLE" || return
-  dc::argument::check pvarname "$DC_TYPE_VARIABLE" || return
 
   dc::prompt::question "$message" "$varname"
 
@@ -72,8 +67,8 @@ dc::prompt::confirm(){
   local _
 
   # Flash it
-  >&2 tput bel
-  >&2 tput flash
+  >&2 dc::internal::wrap tput bel 2>/dev/null
+  >&2 dc::internal::wrap tput flash 2>/dev/null
 
   # Don't care about the return value
   dc::prompt::input _ "$message"

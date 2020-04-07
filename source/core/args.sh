@@ -6,12 +6,11 @@
 # Examples:
 # * myscript -h
 # * myscript --something=foo
-# Flags value are available as DC_ARGV_NAME (where NAME is the capitalized form of the flag).
-# If a flag has been passed (with or without a value), DC_ARGE_NAME will be set
+# Flags value are available as DC_ARG_NAME (where NAME is the capitalized form of the flag).
 # Flags must be passed before any other argument.
 ##########################################################################
 
-dc::internal::parse_args(){
+dc::args::parse(){
   # Flag parsing
   local isFlag=true
   local x=0
@@ -20,73 +19,83 @@ dc::internal::parse_args(){
   local value
 
   for i in "$@"; do
-    # First argument no starting with a dash means we are done with flags and processing arguments
+    # First argument not starting with a dash means we are done with flags and processing arguments
     [ "${i:0:1}" == "-" ] || isFlag=false
     if [ "$isFlag" == "false" ]; then
       x=$(( x + 1 ))
-      n=DC_PARGE_$x
-      if [ ! "${!n:-}" ]; then
-        # shellcheck disable=SC2140
-        readonly "DC_PARGE_$x"=true
-        # shellcheck disable=SC2140
-        readonly "DC_PARGV_$x"="$i"
+      # If ran twice (eg: testing) this is necessary
+      if ! dc::args::exist "$x"; then
+        read -r "DC_ARG_$x" <<<"$i"
+        readonly "DC_ARG_$x"
+        # readonly "DC_ARG_$x"="$i"
       fi
       continue
     fi
 
     # Otherwise, it's a flag, get everything after the leading -
     name="${i:1}"
-    value=
+    value=""
     # Remove a possible second char -
     [ "${name:0:1}" != "-" ] || name=${name:1}
     # Get the value, if we have an equal sign
     [[ $name == *"="* ]] && value=${name#*=}
     # Now, Get the name
-    name=${name%=*}
+    name="${name%=*}"
     # Clean up the name: replace dash by underscore and uppercase everything
-    name=$(printf "%s" "$name" | tr "-" "_" | tr '[:lower:]' '[:upper:]')
+    name="$(dc::internal::varnorm "$name")"
 
     # Set the variable
-    # shellcheck disable=SC2140
-    readonly "DC_ARGV_$name"="$value"
-    # shellcheck disable=SC2140
-    readonly "DC_ARGE_$name"=true
+    read -r "DC_ARG_${name}" <<<"$value"
+    readonly "DC_ARG_${name}"
   done
 }
 
-# Makes the named argument mandatory on the command-line
-dc::args::flag::validate(){
-  local var
-  local varexist
-  local regexp="$2"
+dc::args::exist(){
+  local slug
+  slug="$(dc::internal::varnorm "$1")"
+  local var="DC_ARG_$slug"
+  [ "${!var+x}" ] || {
+    dc::error::detail::set "$1"
+    return "$ERROR_ARGUMENT_MISSING"
+  }
+}
+
+dc::args::validate(){
+  local slug
+  slug="$(dc::internal::varnorm "$1")"
+  local var="DC_ARG_$slug"
+  local regexp="${2:-}"
   local optional="${3:-}"
   local caseInsensitive="${4:-}"
 
   local args=(-q)
   [ ! "$caseInsensitive" ] || args+=(-i)
 
-  var="DC_ARGV_$(printf "%s" "$1" | tr "-" "_" | tr '[:lower:]' '[:upper:]')"
-  varexist="DC_ARGE_$(printf "%s" "$1" | tr "-" "_" | tr '[:lower:]' '[:upper:]')"
-
-  if [ ! "${!varexist:-}" ]; then
+  if [ ! "${!var+x}" ]; then
     [ "$optional" ] && return
-    dc::error::detail::set "$(printf "%s" "$1" | tr "_" "-" | tr '[:upper:]' '[:lower:]')"
+    dc::error::detail::set "$slug"
     return "$ERROR_ARGUMENT_MISSING"
   fi
 
   if [ "$regexp" ]; then
     [ "$regexp" == "^$" ] && [ ! "${!var}" ] && return
-    if ! printf "%s" "${!var}" | dc::internal::grep "${args[@]}" "$regexp"; then
-      dc::error::detail::set "$(printf "%s" "$1" | tr "_" "-" | tr '[:upper:]' '[:lower:]') (${!var} vs. $regexp)"
+    dc::wrapped::grep "${args[@]}" "$regexp" <<<"${!var}" || {
+      dc::error::detail::set "$slug (${!var} vs. $regexp)"
       return "$ERROR_ARGUMENT_INVALID"
-    fi
+    }
   fi
 }
 
-dc::args::arg::validate(){
-  local var="DC_PARGV_$1"
-  local varexist="DC_PARGE_$1"
-  local regexp="$2"
+
+
+
+
+# Makes the named argument mandatory on the command-line
+dc::args::flag::validate() {
+  local slug
+  slug="$(dc::internal::varnorm "$1")"
+  local var="DC_ARG_$slug"
+  local regexp="${2:-}"
   local optional="${3:-}"
   local caseInsensitive="${4:-}"
 
@@ -95,16 +104,43 @@ dc::args::arg::validate(){
 
   if [ ! "${!varexist:-}" ]; then
     [ "$optional" ] && return
-    dc::error::detail::set "$1"
+    dc::error::detail::set "$slug"
     return "$ERROR_ARGUMENT_MISSING"
   fi
 
   if [ "$regexp" ]; then
     [ "$regexp" == "^$" ] && [ ! "${!var}" ] && return
 
-    if ! printf "%s" "${!var}" | dc::internal::grep "${args[@]}" "$regexp"; then
-      dc::error::detail::set "$1 (${!var} vs. $regexp)"
+    dc::wrapped::grep "${args[@]}" "$regexp" <<<"${!var}" || {
+      dc::error::detail::set "$slug (${!var} vs. $regexp)"
       return "$ERROR_ARGUMENT_INVALID"
-    fi
+    }
+  fi
+}
+
+dc::args::arg::validate() {
+  local slug
+  slug="$(dc::internal::varnorm "$1")"
+  local var="DC_PARG_$slug"
+  local regexp="${2:-}"
+  local optional="${3:-}"
+  local caseInsensitive="${4:-}"
+
+  local args=(-q)
+  [ ! "$caseInsensitive" ] || args+=(-i)
+
+  if [ ! "${!varexist:-}" ]; then
+    [ "$optional" ] && return
+    dc::error::detail::set "$slug"
+    return "$ERROR_ARGUMENT_MISSING"
+  fi
+
+  if [ "$regexp" ]; then
+    [ "$regexp" == "^$" ] && [ ! "${!var}" ] && return
+
+    dc::wrapped::grep "${args[@]}" "$regexp" <<<"${!var}" || {
+      dc::error::detail::set "$slug (${!var} vs. $regexp)"
+      return "$ERROR_ARGUMENT_INVALID"
+    }
   fi
 }

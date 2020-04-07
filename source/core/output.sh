@@ -6,12 +6,12 @@
 ##########################################################################
 
 # Output fancy shit. Used by the output module.
-dc::internal::style(){
+_dc::private::style(){
   local vName="DC_OUTPUT_$1[@]"
   local i
   for i in "${!vName}"; do
     # shellcheck disable=SC2086
-    [ "$TERM" ] && [ -t 1 ] && >&1 tput $i
+    [ ! "$TERM" ] || [ ! -t 1 ] || >&1 dc::internal::wrap tput $i 2>/dev/null || true
   done
 }
 
@@ -22,21 +22,21 @@ dc::output::h1(){
   local even
   local ln
 
-  width=$(tput cols)
+  width=$(dc::internal::wrap tput cols 2>/dev/null || printf 60)
   ln=${#i}
   even=$(( (ln + width) & 1 ))
 
   printf "\n"
   printf " %.s" $(seq -s" " $(( width / 4 )))
-  dc::internal::style H1_START
+  _dc::private::style H1_START
   printf " %.s" $(seq -s" " $(( width / 4 )))
   printf " %.s" $(seq -s" " $(( width / 4 )))
-  dc::internal::style H1_END
+  _dc::private::style H1_END
   printf " %.s" $(seq -s" " $(( width / 4 + even )))
   printf "\n"
 
   printf " %.s" $(seq -s" " $(( (width - ln) / 2)))
-  printf "%s" "$i" | tr '[:lower:]' '[:upper:]'
+  tr '[:lower:]' '[:upper:]' <<<"$i" 2>/dev/null || printf "%s" "$i"
   printf " %.s" $(seq -s" " $(( (width - ln) / 2)))
   printf "\n"
   printf "\n"
@@ -46,15 +46,15 @@ dc::output::h2(){
   local i="$1"
   local width
 
-  width=$(tput cols)
+  width=$(dc::internal::wrap tput cols 2>/dev/null || printf 60)
 
   printf "\n"
   printf "  "
 
-  dc::internal::style H2_START
+  _dc::private::style H2_START
   printf "%s" "  $i"
   printf " %.s" $(seq -s" " $(( width / 2 - ${#i} - 4 )))
-  dc::internal::style H2_END
+  _dc::private::style H2_END
 
   printf "\n"
   printf "\n"
@@ -63,21 +63,21 @@ dc::output::h2(){
 dc::output::emphasis(){
   local i
 
-  dc::internal::style EMPHASIS_START
+  _dc::private::style EMPHASIS_START
   for i in "$@"; do
     printf "%s " "$i"
   done
-  dc::internal::style EMPHASIS_END
+  _dc::private::style EMPHASIS_END
 }
 
 dc::output::strong(){
   local i
 
-  dc::internal::style STRONG_START
+  _dc::private::style STRONG_START
   for i in "$@"; do
     printf "%s " "$i"
   done
-  dc::internal::style STRONG_END
+  _dc::private::style STRONG_END
 }
 
 dc::output::bullet(){
@@ -97,11 +97,11 @@ dc::output::bullet(){
 dc::output::quote(){
   local i
 
-  dc::internal::style QUOTE_START
+  _dc::private::style QUOTE_START
   for i in "$@"; do
     printf "  > %s\n" "$i"
   done
-  dc::internal::style QUOTE_END
+  _dc::private::style QUOTE_END
 }
 
 dc::output::text(){
@@ -116,12 +116,11 @@ dc::output::text(){
 dc::output::rule(){
   local width
 
-  dc::argument::check width "$DC_TYPE_INTEGER" || return
+  width=$(dc::internal::wrap tput cols 2>/dev/null || printf 60)
 
-  width=$(tput cols)
-  dc::internal::style RULE_START
+  _dc::private::style RULE_START
   printf " %.s" $(seq -s" " "$width")
-  dc::internal::style RULE_END
+  _dc::private::style RULE_END
 }
 
 dc::output::break(){

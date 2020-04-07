@@ -7,51 +7,43 @@
 # - lookup to get a readable constant out of an error code
 ##########################################################################
 
-_DC_INTERNAL_ERROR_CODEPOINT=143
-_DC_INTERNAL_ERROR_APPCODEPOINT=2
-_DC_INTERNAL_ERROR_DETAIL=
+_DC_PRIVATE_ERROR_APPCODEPOINT=2
+_DC_PRIVATE_ERROR_APPMAX=125
+_DC_PRIVATE_ERROR_DETAIL=
 
-dc::error::register(){
-  local name="$1"
-
-  dc::argument::check name "$DC_TYPE_VARIABLE" || return
-
-  _DC_INTERNAL_ERROR_CODEPOINT=$(( _DC_INTERNAL_ERROR_CODEPOINT + 1 ))
-
-  # XXX bash3
-  # declare -g "${name?}"="$_DC_INTERNAL_ERROR_CODEPOINT"
-  read -r "${name?}" <<<"$_DC_INTERNAL_ERROR_CODEPOINT"
-  export "${name?}"
-  readonly "${name?}"
+dc::error::detail::set(){
+  _DC_PRIVATE_ERROR_DETAIL="$1"
 }
 
-# XXX should we error when reaching the maximum number of errors? Is this even scalable?
-dc::error::appregister(){
-  local name="$1"
-
-  dc::argument::check name "$DC_TYPE_VARIABLE" || return
-
-  _DC_INTERNAL_ERROR_APPCODEPOINT=$(( _DC_INTERNAL_ERROR_APPCODEPOINT + 1 ))
-
-  read -r "${name?}" <<<"$_DC_INTERNAL_ERROR_APPCODEPOINT"
-  export "${name?}"
-  readonly "${name?}"
+dc::error::detail::get(){
+  printf "%s" "$_DC_PRIVATE_ERROR_DETAIL"
 }
 
 dc::error::lookup(){
   local code="$1"
   local errname
 
-  dc::argument::check code "$DC_TYPE_UNSIGNED" || return
+  dc::argument::check code "$DC_TYPE_UNSIGNED" \
+    && [ "$code" -le "255" ] \
+    && errname="$(dc::internal::wrap env 2>/dev/null | dc::wrapped::grep "^ERROR_[^=]+=$code$")" \
+    || return "$ERROR_ARGUMENT_INVALID"
 
-  errname="$(env | dc::internal::grep "^ERROR_[^=]+=$code$")"
-  printf "%s" "${errname%=*}"
+  errname="${errname%=*}"
+  printf "%s" "${errname#*ERROR_}"
 }
 
-dc::error::detail::set(){
-  _DC_INTERNAL_ERROR_DETAIL="$1"
+dc::error::register(){
+  local name="$1"
+
+  dc::argument::check name "$DC_TYPE_VARIABLE" || return
+
+  _DC_PRIVATE_ERROR_APPCODEPOINT=$(( _DC_PRIVATE_ERROR_APPCODEPOINT + 1 ))
+
+  [ $_DC_PRIVATE_ERROR_APPCODEPOINT -le $_DC_PRIVATE_ERROR_APPMAX ] || return "$ERROR_LIMIT"
+
+  read -r "ERROR_${name?}" <<<"$_DC_PRIVATE_ERROR_APPCODEPOINT"
+  export "ERROR_${name?}"
+  readonly "ERROR_${name?}"
 }
 
-dc::error::detail::get(){
-  printf "%s" "$_DC_INTERNAL_ERROR_DETAIL"
-}
+# TODO: introduce a reverse lookup method and have all return statements use it instead (guarantee no typo and no unintenional return 0

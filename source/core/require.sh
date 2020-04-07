@@ -6,7 +6,11 @@
 ##########################################################################
 
 dc::require::platform(){
-  [[ "$*" == *"$(uname)"* ]] || return "$ERROR_REQUIREMENT_MISSING"
+  local required="${1:-}"
+
+  dc::argument::check required "$DC_TYPE_STRING" || return
+
+  [[ "$required" == *"$(uname)"* ]] || return "$ERROR_REQUIREMENT_MISSING"
 }
 
 dc::require::platform::mac(){
@@ -19,43 +23,24 @@ dc::require::platform::linux(){
   dc::require::platform "$DC_PLATFORM_LINUX"
 }
 
-dc::require::version(){
-  local binary="$1"
-  local versionFlag="$2"
-  local varname
-
-  dc::argument::check binary "^.+$" || return
-  dc::argument::check versionFlag "^.+$" || return
-
-  varname=DC_DEPENDENCIES_V_$(printf "%s" "$binary" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
-  if [ ! ${!varname+x} ]; then
-    while read -r line; do
-      if printf "%s" "$line" | grep -qE "^[^0-9.]*([0-9]+[.][0-9]+).*"; then
-        # Duh shit is harder with bash3
-        read -r "${varname?}" <<<"$(sed -E 's/^[^0-9.]*([0-9]+[.][0-9]+).*/\1/' <<<"$line")"
-        # XXX bash 4+ only?
-        # declare -g "${varname?}"="$(printf "%s" "$line" | sed -E 's/^[^0-9.]*([0-9]+[.][0-9]+).*/\1/')"
-        break
-      fi
-    # XXX interestingly, some application will output the result on stderr/stdout (jq version 1.3 is such an example)
-    # We do not try to workaround here
-    done <<< "$($binary "$versionFlag" 2>/dev/null)"
-  fi
-  printf "%s" "${!varname}"
-}
-
+# @argument string binary
+# @argument float version
+# @argument [string versionFlag]
+# @argument [string provider]
+# @returns REQUIREMENT_MISSING
+# @returns ARGUMENT_INVALID
 dc::require(){
-  local binary="$1"
-  local versionFlag="$2"
-  local version="$3"
-  local provider="$4"
-  [ "$provider" ] && provider="$(printf " (provided by: %s)" "$provider")"
+  local binary="${1:-}"
+  local version="${2:-}"
+  local versionFlag="${3:-}"
+  local provider="${4:-}"
+  [ ! "$provider" ] || provider=" (provided by: $provider)"
+
   local varname
-  local cVersion
 
-  dc::argument::check binary "^.+$" || return
+  dc::argument::check binary "$DC_TYPE_STRING" || return
 
-  varname=_DC_DEPENDENCIES_B_$(printf "%s" "$binary" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
+  varname="$(dc::internal::varnorm "_DC_DEPENDENCIES_B_$binary")"
   if [ ! ${!varname+x} ]; then
     command -v "$binary" >/dev/null \
       || {
@@ -63,14 +48,37 @@ dc::require(){
         return "$ERROR_REQUIREMENT_MISSING"
       }
     read -r "${varname?}" <<<"true"
+    # XXX this makes it hard to test/mock, disabling
+    # readonly "${varname?}"
+    # Meaning sub shells will benefit from that as well
+    export "${varname?}"
     # XXX
     # declare -g "${varname?}"=true
   fi
 
-  [ "$versionFlag" ] || return 0
-  dc::argument::check version "$DC_TYPE_FLOAT" || return
+  [ ! "$version" ] && return
 
-  cVersion="$(dc::require::version "$binary" "$versionFlag")"
+  dc::argument::check version "$DC_TYPE_FLOAT" || return
+  [ ! "$versionFlag" ] || dc::argument::check versionFlag "$DC_TYPE_STRING" || return
+
+  local cVersion
+
+  varname="$(dc::internal::varnorm "DC_DEPENDENCIES_V_$binary")"
+  if [ ! ${!varname+x} ]; then
+    read -r cVersion <<<"$(dc::internal::version::get "$binary" "$versionFlag")"
+    # The returned version could be empty, which means the passed version flag is invalid
+    [ "${cVersion%.*}" ] || {
+      dc::error::detail::set "$binary$provider: $cVersion"
+      return "$ERROR_ARGUMENT_INVALID"
+    }
+    # Otherwise, cache it, lock it, export it
+    read -r "${varname?}" <<<"$cVersion"
+    readonly "${varname?}"
+    export "${varname?}"
+  fi
+
+  cVersion="${!varname}"
+  # If not empty, we have a guarantee that it's an int (see implem)
   [ "${cVersion%.*}" -gt "${version%.*}" ] \
     || { [ "${cVersion%.*}" == "${version%.*}" ] && [ "${cVersion#*.}" -ge "${version#*.}" ]; } \
     || {

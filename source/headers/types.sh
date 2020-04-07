@@ -3,22 +3,20 @@
 true
 
 # shellcheck disable=SC2034
-readonly DC_TYPE_INTEGER="^-?[0-9]+$"
-# shellcheck disable=SC2034
-readonly DC_TYPE_UNSIGNED="^[0-9]+$"
-# shellcheck disable=SC2034
-readonly DC_TYPE_FLOAT="^-?[0-9]+([.][0-9]+)?$"
-# shellcheck disable=SC2034
-readonly DC_TYPE_BOOLEAN="^(true|false)$"
-
-# https://pubs.opengroup.org/onlinepubs/000095399/basedefs/xbd_chap08.html
-# Not really compliant with https://en.wikipedia.org/wiki/Portable_character_set minus "=" and NUL, but then good enough
-# shellcheck disable=SC2034
-readonly DC_TYPE_VARIABLE="^[a-zA-Z_]{1,}[a-zA-Z0-9_]{0,}$"
-
-# shellcheck disable=SC2034
-readonly DC_TYPE_ALPHANUM="^[a-zA-Z0-9]$"
-# shellcheck disable=SC2034
-readonly DC_TYPE_HEX="^[a-fA-Z0-9]$"
-# shellcheck disable=SC2034
 readonly DC_TYPE_EMAIL="^[a-zA-Z0-9!#$%&'*+/=?^_\`{|}~.-]+@[a-zA-Z0-9!#$%&'*+/=?^_\`{|}~.-]+$"
+
+# XXX validate and test this
+# Network
+_dc_ip="[0-9]{1,3}[.][0-9]{1,3}[.][0-9]{1,3}[.][0-9]{1,3}"
+_dc_domain="(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]"
+# shellcheck disable=SC2034
+readonly DC_TYPE_IPV4="^$_dc_ip$"
+# XXX 1-32
+# shellcheck disable=SC2034
+readonly DC_TYPE_CIDR="^[0-9]{1,3}[.][0-9]{1,3}[.][0-9]{1,3}[.][0-9]{1,3}/[0-9]{1,2}$"
+# shellcheck disable=SC2034
+readonly DC_TYPE_USER="^[a-zA-Z0-9_.~!$&'()*+,;=:-]+$"
+# shellcheck disable=SC2034
+readonly DC_TYPE_DOMAIN="^$_dc_domain$"
+# shellcheck disable=SC2034
+readonly DC_TYPE_DOMAIN_OR_IP="^(?:$_dc_domain|$_dc_ip)$"

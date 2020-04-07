@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+. source/cli-tooling/test/_assert.sh
+
 # Test the tester
 testAssert() {
   dc-tools::assert::notequal " " $'\n'

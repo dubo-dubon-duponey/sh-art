@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 
-true
+# Crypto
+dc::internal::error::register CRYPTO_SHASUM_WRONG_ALGORITHM
+dc::internal::error::register CRYPTO_SHASUM_FILE_ERROR
+dc::internal::error::register CRYPTO_SSL_INVALID_KEY
+dc::internal::error::register CRYPTO_SSL_WRONG_PASSWORD
+dc::internal::error::register CRYPTO_SSL_WRONG_ARGUMENTS
+dc::internal::error::register CRYPTO_SHASUM_VERIFY_ERROR
+dc::internal::error::register CRYPTO_PEM_NO_SUCH_HEADER
 
 # shellcheck disable=SC2034
 readonly DC_CRYPTO_SHASUM_1=1

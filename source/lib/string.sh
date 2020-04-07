@@ -17,12 +17,11 @@ dc::string::split(){
 dc::string::splitN(){
   local subject=${!1}
   local sep="${!2}"
-  local count
+  local count="${3:--1}"
   local counter=1
   local dcss_segment
 
-  count="$(printf "%s" "$3" | grep -E '^[0-9-]+$')"
-  count=${count:--1}
+  [ ! "$count" ] || dc::argument::check count "$DC_TYPE_INTEGER" || return
 
   if [ "$count" == 0 ]; then
     # Should return nil
@@ -61,9 +60,9 @@ dc::string::join(){
   local i
   local sep=
 
-  for i in "${!varname}"; do
+  for i in "${!varname:-}"; do
     printf "%s%s" "$sep" "$i"
-    sep="$2"
+    sep="${2:-}"
   done
 }
 

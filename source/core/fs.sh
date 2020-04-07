@@ -21,8 +21,8 @@ dc::fs::mktemp(){
 
 dc::fs::isdir(){
   local path="$1"
-  local writable="$2"
-  local createIfMissing="$3"
+  local writable="${2:-}"
+  local createIfMissing="${3:-}"
 
   [ ! "$createIfMissing" ] || mkdir -p "$path" 2>/dev/null || return "$ERROR_FILESYSTEM"
   if [ ! -d "$path" ] || [ ! -r "$path" ] || { [ "$writable" ] && [ ! -w "$path" ]; }  ; then
@@ -33,8 +33,11 @@ dc::fs::isdir(){
 
 dc::fs::isfile(){
   local path="$1"
-  local writable=$2
-  local createIfMissing=$3
+  local writable="${2:-}"
+  local createIfMissing="${3:-}"
+
+  dc::argument::check path "$DC_TYPE_STRING"
+
   [ ! "$createIfMissing" ] || touch "$path"
   if [ ! -f "$path" ] || [ ! -r "$path" ] || { [ "$writable" ] && [ ! -w "$path" ]; }  ; then
     dc::error::detail::set "$path"

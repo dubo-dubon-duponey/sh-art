@@ -1,5 +1,19 @@
 #!/usr/bin/env bash
 
+dc::wrapped::uchardet(){
+  dc::require uchardet || return
+
+  uchardet "$@" 2>/dev/null \
+    || { dc::error::detail::set "uchardet" && return "$ERROR_BINARY_UNKNOWN_ERROR"; }
+}
+
+dc::wrapped::iconv(){
+  dc::require iconv || return
+
+  iconv "$@" 2>/dev/null \
+    || { dc::error::detail::set "iconv" && return "$ERROR_BINARY_UNKNOWN_ERROR"; }
+}
+
 # Convert all files to utf8
 dc::encoding::toutf8(){
   local fd="${1:-/dev/stdin}"

@@ -7,12 +7,18 @@
 
 # This method obviously does not check its own arguments
 dc::argument::check(){
-  local value="${!1}"
+  # Referenced argument could be non-existent
+  local value="${!1:-}"
   local regexp="$2"
+  local grepreturn
 
-  dc::internal::grep -q "$regexp" <<< "$value" \
+  dc::wrapped::grep -q "$regexp" <<< "$value" \
     || {
-      dc::error::detail::set "$1 ($value - $regexp)"
-      return "$ERROR_ARGUMENT_INVALID"
+      grepreturn="$?"
+      [ "$grepreturn" == 145 ] && {
+        dc::error::detail::set "$1 ($value - $regexp)"
+        return "$ERROR_ARGUMENT_INVALID"
+      }
+      return "$grepreturn"
     }
 }

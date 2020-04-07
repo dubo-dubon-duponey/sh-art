@@ -3,23 +3,34 @@
 dc::error::handler(){
   local exit="$1"
   local detail="$2"
+  local command="$3"
+  local lineno="$4"
+
+  dc::logger::error "[CONSOLE HANDLER] Exit code:       $exit"
+  dc::logger::error "[CONSOLE HANDLER]      condition:  $(dc::error::lookup "$exit")"
+  dc::logger::error "[CONSOLE HANDLER]      detail:     $detail"
+  dc::logger::error "[CONSOLE HANDLER]      command:    $command"
+  dc::logger::error "[CONSOLE HANDLER]      line:       $lineno"
+
+  cat -n "$0" |  grep -E "^\s+$((lineno - 2))\s"
+  cat -n "$0" |  grep -E "^\s+$((lineno - 1))\s"
+  # Coloring
+  cat -n "$0" |  grep -E "^\s+$((lineno))\s"
+  cat -n "$0" |  grep -E "^\s+$((lineno + 1))\s"
+  cat -n "$0" |  grep -E "^\s+$((lineno + 2))\s"
+
   case "$exit" in
     # https://www.tldp.org/LDP/abs/html/exitcodes.html
     1)
-      dc::logger::error "Generic bash error that should have been caught"
       dc::logger::error "Generic script failure"
     ;;
     2)
-      dc::logger::error "Generic bash error that should have been caught"
       dc::logger::error "Misused shell builtin is a likely explanation"
-      dc::logger::error "Last good command was: $3"
     ;;
     126)
-      dc::logger::error "Generic bash error that should have been caught"
       dc::logger::error "Permission issue, or cannot execute command"
     ;;
     127)
-      dc::logger::error "Generic bash error that should have been caught"
       dc::logger::error "Missing binary or a typo in a command name"
     ;;
     # none of these two will be triggered with bash apparently
@@ -44,8 +55,14 @@ dc::error::handler(){
     ##################################
     # Basic core: these could bubble up
 
+    # Typical filesystem errors: file does not exist, is unreadable, or permission denied
+    "$ERROR_FILESYSTEM")
+      dc::logger::error "Verify that the provided path ($detail) exist and/or is writable"
+    ;;
+
+
     # This is a lazy catch-all for non specific problems.
-    "$ERROR_FAILED")
+    "$ERROR_GENERIC_FAILURE")
       dc::logger::error "Script failed: $detail"
     ;;
     # Denotes that something is not implemented or unsupported on the given platform
@@ -55,10 +72,6 @@ dc::error::handler(){
     # Some requirements are missing
     "$ERROR_REQUIREMENT_MISSING")
       dc::logger::error "Sorry, you need $detail for this to work."
-    ;;
-    # Typical filesystem errors: file does not exist, is unreadable, or permission denied
-    "$ERROR_FILESYSTEM")
-      dc::logger::error "Filesystem error: $detail"
     ;;
     # Provided argument doesn't validate
     "$ERROR_ARGUMENT_INVALID")
@@ -115,7 +128,7 @@ dc::error::handler(){
 
     *)
       if [ "$exit" -lt 129 ] || [ "$exit" -gt 143 ]; then
-        dc::logger::error "UNCAUGHT EXCEPTION $exit $(dc::error::lookup "$exit"): $detail"
+        dc::logger::error "UNCAUGHT EXCEPTION: $exit $(dc::error::lookup "$exit"): $detail"
       fi
     ;;
   esac
@@ -131,37 +144,33 @@ dc::error::handler(){
     "DC_LIB_BUILD_PLATFORM: $DC_LIB_BUILD_PLATFORM"
 
   dc::logger::debug "Runtime information" \
-    "uname: $(uname -a)" \
-    "bash: $(command -v bash) $(dc::require::version bash --version)" \
-    "curl: $(command -v curl) $(dc::require::version curl --version)" \
-    "grep: $(command -v grep) $(dc::require::version grep --version)" \
-    "jq: $(command -v jq) $(dc::require::version jq --version)" \
-    "openssl: $(command -v openssl) $(dc::require::version openssl version)" \
-    "shasum: $(command -v shasum) $(dc::require::version shasum --version)" \
-    "sqlite3: $(command -v sqlite3) $(dc::require::version sqlite3 --version)" \
-    "uchardet: $(command -v uchardet) $(dc::require::version uchardet --version)" \
-    "make: $(command -v make) $(dc::require::version make --version)" \
-    "git: $(command -v git) $(dc::require::version git --version)" \
-    "gcc: $(command -v gcc) $(dc::require::version gcc --version)" \
-    "ps: $(command -v ps)" \
-    "[: $(command -v \[)" \
-    "tput: $(command -v tput)" \
+    "uname: $(uname -a || true)" \
+    "bash: $(command -v bash || true) $(dc::internal::version::get bash || true)" \
+    "grep: $(command -v grep || true) $(dc::internal::version::get grep || true)" \
+    "ps: $(command -v ps || true)" \
+    "[: $(command -v \[ || true)" \
+    "tput: $(command -v tput || true)" \
+    "read: $(command -v read || true)" \
+    "date: $(command -v date || true)" \
+    "sed: $(command -v sed || true)" \
+    "printf: $(command -v printf || true)" \
+    "tr: $(command -v tr || true)" \
+    "rm: $(command -v rm || true)" \
+    "mkdir: $(command -v mkdir || true)" \
+    "mktemp: $(command -v mktemp || true)" \
+    "curl: $(command -v curl || true) $(dc::internal::version::get curl || true)" \
+    "jq: $(command -v jq || true) $(dc::internal::version::get jq || true)" \
+    "openssl: $(command -v openssl || true) $(dc::internal::version::get openssl version || true)" \
+    "shasum: $(command -v shasum || true) $(dc::internal::version::get shasum || true)" \
+    "sqlite3: $(command -v sqlite3 || true) $(dc::internal::version::get sqlite3 || true)" \
+    "uchardet: $(command -v uchardet || true) $(dc::internal::version::get uchardet || true)" \
+    "iconv: $(command -v iconv || true) $(dc::internal::version::get iconv || true)" \
+    "make: $(command -v make || true) $(dc::internal::version::get make || true)" \
+    "git: $(command -v git || true) $(dc::internal::version::get git || true)" \
+    "gcc: $(command -v gcc || true) $(dc::internal::version::get gcc || true)" \
     "PATH: $PATH" \
     "ENV: $(env)"
 }
 
-# Set up the traps
-trap 'dc::trap::signal::HUP     "$LINENO" "$?" "$BASH_COMMAND"' 1
-trap 'dc::trap::signal::INT     "$LINENO" "$?" "$BASH_COMMAND"' 2
-trap 'dc::trap::signal::QUIT    "$LINENO" "$?" "$BASH_COMMAND"' 3
-trap 'dc::trap::signal::ABRT    "$LINENO" "$?" "$BASH_COMMAND"' 6
-trap 'dc::trap::signal::ALRM    "$LINENO" "$?" "$BASH_COMMAND"' 14
-trap 'dc::trap::signal::TERM    "$LINENO" "$?" "$BASH_COMMAND"' 15
-trap 'dc::trap::exit            "$LINENO" "$?" "$BASH_COMMAND"' EXIT
-trap 'dc::trap::err             "$LINENO" "$?" "$BASH_COMMAND"' ERR
-
 # Attach the error handler
 dc::trap::register dc::error::handler
-
-# Parse arguments
-dc::internal::parse_args "$@"

@@ -1,9 +1,69 @@
 #!/usr/bin/env bash
 
+
+dc::wrapped::shasum(){
+  dc::require shasum || return
+
+  local err
+
+  exec 3>&1
+  if ! err="$(shasum "$@" 2>&1 1>&3)"; then
+    exec 3>&-
+    if printf "%s" "$err" | dc::wrapped::grep -q "(invalid for option a|Unrecognized algorithm)"; then
+      return "$ERROR_CRYPTO_SHASUM_WRONG_ALGORITHM"
+    fi
+    if [ ! "$err" ]; then
+      return "$ERROR_CRYPTO_SHASUM_FILE_ERROR"
+    fi
+    dc::error::detail::set "$err"
+    return "$ERROR_BINARY_UNKNOWN_ERROR"
+  fi
+  exec 3>&-
+}
+
+# ASN1: interface description - https://en.wikipedia.org/wiki/Abstract_Syntax_Notation_One
+# DER: binary encoding method - https://en.wikipedia.org/wiki/X.690#DER_encoding
+# PEM: base64 + headers representation of a binary message - https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail
+
+# Analyze key: openssl asn1parse -i -dump < root-key.pem
+# More details: openssl ec -noout -text -in test-key.pem
+# Analyze CSR: openssl req -in test.csr -noout -text
+
+# Key manipulation
+dc::wrapped::openssl(){
+  dc::require openssl 1.0 version || return
+
+  local err
+
+  exec 3>&1
+  if ! err="$(openssl "$@" 2>&1 1>&3)"; then
+    exec 3>&-
+
+    # Known error conditions
+    printf "%s" "$err" | dc::wrapped::grep -q ":no start line:" \
+      && return "$ERROR_CRYPTO_SSL_INVALID_KEY"
+    printf "%s" "$err" | dc::wrapped::grep -q "(Error reading password from BIO|routines:(PEM_do_header|CRYPTO_internal):bad decrypt)" \
+      && return "$ERROR_CRYPTO_SSL_WRONG_PASSWORD"
+    printf "%s" "$err" | dc::wrapped::grep -q "(:string too short:|end of string encountered while processing type of subject)" \
+      && return "$ERROR_CRYPTO_SSL_WRONG_ARGUMENTS"
+
+    # Generic unspecified error
+    dc::error::detail::set "$err"
+    return "$ERROR_BINARY_UNKNOWN_ERROR"
+  fi
+
+  # With openssl 1.1 you can create a CSR with no data as subject: /C=/ST=/L=/O=/OU=/CN=/emailAddress=
+  # This here is just to safe-guard against it - mostly for test consistency...
+  [ "${*: -1}" == "/C=/ST=/L=/O=/OU=/CN=/emailAddress=" ] && return "$ERROR_CRYPTO_SSL_WRONG_ARGUMENTS"
+
+  exec 3>&-
+  # routines:CRYPTO_internal:bad password read <- errr, not sure how I produced that, but that was the way to prevent openssl from prompting for a password
+}
+
 dc::crypto::shasum::compute(){
   local fd="${1:-/dev/stdin}"
   local type="${2:-$DC_CRYPTO_SHASUM_512256}"
-  local prefixed="$3"
+  local prefixed="${3:-}"
   local digest
 
   # For some versions, hashing a directory does not error out like it should
@@ -23,8 +83,8 @@ dc::crypto::shasum::verify(){
   [ -d "$fd" ] && return "$ERROR_BINARY_UNKNOWN_ERROR"
 
   # Get the type from the expectation string if it's there, or default to arg 3 if provided, fallback to 512256
-  #if dc::internal::grep -q "^sha[0-9]+:" <(printf "%s" "$expected"); then
-  if dc::internal::grep -q "^sha[0-9]+:" <<<"$expected"; then
+  #if dc::wrapped::grep -q "^sha[0-9]+:" <(printf "%s" "$expected"); then
+  if dc::wrapped::grep -q "^sha[0-9]+:" <<<"$expected"; then
     type="${expected%:*}"
     type="${type#*sha}"
   fi
@@ -77,16 +137,15 @@ dc::crypto::pkcs8::to::ec(){
 }
 
 dc::crypto::csr::new(){
-  local country="$1"
-  local state="$2"
-  local city="$3"
-  local organization="$4"
-  local organizationUnit="$5"
-  local name="$6"
-  # XXX argument validation here? New type for email?
-  local email="$7"
+  local country="${1:-}"
+  local state="${2:-}"
+  local city="${3:-}"
+  local organization="${4:-}"
+  local organizationUnit="${5:-}"
+  local name="${6:-}"
+  local email="${7:-}"
 
-  dc::argument::check email "$DC_TYPE_EMAIL" || return
+  [ ! "$email" ] || dc::argument::check email "$DC_TYPE_EMAIL" || return
 
   dc::wrapped::openssl req -new -sha256 -key /dev/stdin -subj "/C=$country/ST=$state/L=$city/O=$organization/OU=$organizationUnit/CN=$name/emailAddress=$email"
 }
@@ -95,7 +154,7 @@ dc::crypto::csr::new(){
 dc::crypto::pem::headers::strip(){
   local fd=${1:-/dev/stdin}
 
-  dc::internal::grep -v "^([a-zA-Z]+:.*)?$" "$fd"
+  dc::wrapped::grep -v "^([a-zA-Z]+:.*)?$" "$fd"
 }
 
 dc::crypto::pem::headers::has(){
@@ -105,7 +164,7 @@ dc::crypto::pem::headers::has(){
 
   dc::argument::check key "$DC_TYPE_ALPHANUM" || return
 
-  dc::internal::grep -q "^$key: $value$" "$fd" \
+  dc::wrapped::grep -q "^$key: $value$" "$fd" \
     || { dc::error::detail::set "$key: $value" && return "$ERROR_CRYPTO_PEM_NO_SUCH_HEADER"; }
 }
 
@@ -118,7 +177,7 @@ dc::crypto::pem::headers::get(){
 
   while IFS= read -r value || [ "$value" ]; do
     printf "%s\n" "${value#* }"
-  done < <(dc::internal::grep "^$key:" "$fd")
+  done < <(dc::wrapped::grep "^$key:" "$fd")
 }
 
 dc::crypto::pem::headers::set(){
@@ -145,5 +204,5 @@ dc::crypto::pem::headers::delete(){
 
   dc::crypto::pem::headers::has "$key" "$fd" || return
 
-  dc::internal::grep -v "^$key:" "$fd"
+  dc::wrapped::grep -v "^$key:" "$fd"
 }

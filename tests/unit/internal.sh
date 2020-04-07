@@ -1,54 +1,37 @@
 #!/usr/bin/env bash
 
-testGnuGrep(){
-  if dc::require::platform::mac; then
-    dc::internal::isgnugrep
-    dc-tools::assert::equal "grep system on macOS is NOT gnu" "1" "$?"
-  fi
+testInternalWrap(){
+  local exitcode
 
-  if dc::require::platform::linux; then
-    dc::internal::isgnugrep
-    dc-tools::assert::equal "grep system on linux is gnu" "0" "$?"
-  fi
+  exitcode=0
+  dc::internal::wrap ls >/dev/null || exitcode=$?
+  dc-tools::assert::equal "normal ls" "0" "$exitcode"
 
-  # Internals: reset state
-  unset _DC_INTERNAL_NOT_GNUGREP
-
-  # A bit tricky, but since grep itself is used to match grep output, this always match, hence will say "yes we have gnu grep"
-  grep(){
-    return 0
-  }
-
-  dc::internal::isgnugrep
-  dc-tools::assert::equal "grep GNU" "0" "$?"
-
-  # Internals: reset state
-  unset _DC_INTERNAL_NOT_GNUGREP
-
-  # A bit tricky, but since grep itself is used to match grep output, this always match, hence will say "yes we have gnu grep"
-  grep(){
-    return 1
-  }
-
-  dc::internal::isgnugrep
-  dc-tools::assert::equal "grep non-GNU" "1" "$?"
-
-  unset _DC_INTERNAL_NOT_GNUGREP
-  unset grep
+  exitcode=0
+  PATH="" dc::internal::wrap ls >/dev/null || exitcode=$?
+  dc-tools::assert::equal "no path ls" "0" "$exitcode"
 }
 
-testGrep(){
-  dc::internal::grep "-q" "^foo" <(printf "foo foo bar foo\n")
-  dc-tools::assert::equal "grep start match" "0" "$?"
-  dc::internal::grep "-q" "bar foo$" <(printf "foo foo bar foo")
-  dc-tools::assert::equal "grep end match" "0" "$?"
+testInternalVarNorm(){
+  local exitcode
+  local result
 
-  dc::internal::grep "-q" "baz" <(printf "foo foo bar foo")
-  dc-tools::assert::equal "grep not match" "ERROR_GREP_NO_MATCH" "$(dc::error::lookup $?)"
+  exitcode=0
+  result="$(dc::internal::varnorm "foobar-baz")" || exitcode=$?
+  dc-tools::assert::equal "varnorm" "0" "$exitcode"
+  dc-tools::assert::equal "varnorm" "FOOBAR_BAZ" "$result"
 
-  dc::internal::grep "-bogus" "baz" <(printf "foo foo bar foo")
-  dc-tools::assert::equal "grep not match" "ERROR_BINARY_UNKNOWN_ERROR" "$(dc::error::lookup $?)"
+  tr(){
+    return 42
+  }
 
-  dc::internal::grep
-  dc-tools::assert::equal "grep not match" "ERROR_BINARY_UNKNOWN_ERROR" "$(dc::error::lookup $?)"
+  exitcode=0
+  result="$(PATH="" dc::internal::varnorm "foobar-baz")" || exitcode=$?
+  dc-tools::assert::equal "varnorm" "144" "$exitcode"
+  dc-tools::assert::equal "varnorm" "" "$result"
+
+  exitcode=0
+  result="$(PATH="" dc::internal::varnorm "foobar_baz")" || exitcode=$?
+  dc-tools::assert::equal "varnorm" "0" "$exitcode"
+  dc-tools::assert::equal "varnorm" "foobar_baz" "$result"
 }

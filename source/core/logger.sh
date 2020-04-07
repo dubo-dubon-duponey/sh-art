@@ -5,52 +5,41 @@
 # Logger infrastructure
 ##########################################################################
 
-dc::internal::logger::log(){
-  local prefix="$1"
-  shift
-
-  local level="DC_LOGGER_$prefix"
-  local style="DC_LOGGER_STYLE_${prefix}[@]"
-  local i
-
-  [ "$_DC_INTERNAL_LOGGER_LEVEL" -lt "${!level}" ] && return
-
-  [ ! "$TERM" ] || [ ! -t 2 ] || >&2 tput "${!style}"
-  for i in "$@"; do
-    >&2 printf "[%s] [%s] %s\n" "$(date)" "$prefix" "$i"
-  done
-  [ ! "$TERM" ] || [ ! -t 2 ] || >&2 tput op
-}
-
-dc::internal::logger::setlevel() {
-  local level="$1"
+dc::logger::level::set() {
+  local level="${1:-}"
 
   # Level is an int between ERROR and DEBUG, or fallback to INFO
-  dc::argument::check level "$DC_TYPE_INTEGER" && [ "$level" -ge "$DC_LOGGER_ERROR" ] && [ "$level" -le "$DC_LOGGER_DEBUG" ] || level="$DC_LOGGER_INFO"
+  # shellcheck disable=SC2015
+  dc::argument::check level "$DC_TYPE_INTEGER" && [ "$level" -ge "$DC_LOGGER_ERROR" ] && [ "$level" -le "$DC_LOGGER_DEBUG" ] || {
+    dc::error::detail::set "level ($level - $DC_TYPE_INTEGER - > $DC_LOGGER_ERROR and < $DC_LOGGER_DEBUG"
+    return "$ERROR_ARGUMENT_INVALID"
+  }
 
-  _DC_INTERNAL_LOGGER_LEVEL="$level"
+  _DC_PRIVATE_LOGGER_LEVEL="$level"
   [ "$level" != "$DC_LOGGER_DEBUG" ] ||
-    dc::internal::logger::log "WARNING" "[Logger] YOU ARE LOGGING AT THE DEBUG LEVEL. This is NOT recommended for production use, and WILL LIKELY LEAK sensitive information to stderr."
+    _dc::private::logger::log "WARNING" "[Logger] YOU ARE LOGGING AT THE DEBUG LEVEL. This is NOT recommended for production use, and WILL LIKELY LEAK sensitive information to stderr."
 }
 
-dc::configure::logger::setlevel::debug(){
-  dc::internal::logger::setlevel "$DC_LOGGER_DEBUG"
+# Sugar
+dc::logger::level::set::debug(){
+  dc::logger::level::set "$DC_LOGGER_DEBUG"
 }
 
-dc::configure::logger::setlevel::info(){
-  dc::internal::logger::setlevel "$DC_LOGGER_INFO"
+dc::logger::level::set::info(){
+  dc::logger::level::set "$DC_LOGGER_INFO"
 }
 
-dc::configure::logger::setlevel::warning(){
-  dc::internal::logger::setlevel "$DC_LOGGER_WARNING"
+dc::logger::level::set::warning(){
+  dc::logger::level::set "$DC_LOGGER_WARNING"
 }
 
-dc::configure::logger::setlevel::error(){
-  dc::internal::logger::setlevel "$DC_LOGGER_ERROR"
+dc::logger::level::set::error(){
+  dc::logger::level::set "$DC_LOGGER_ERROR"
 }
 
-dc::configure::logger::mute() {
-  _DC_INTERNAL_LOGGER_LEVEL=0
+dc::logger::mute() {
+  # shellcheck disable=SC2034
+  _DC_PRIVATE_LOGGER_LEVEL=0
 }
 
 #####################################
@@ -58,17 +47,17 @@ dc::configure::logger::mute() {
 #####################################
 
 dc::logger::debug(){
-  dc::internal::logger::log "DEBUG" "$@"
+  _dc::private::logger::log "DEBUG" "$@"
 }
 
 dc::logger::info(){
-  dc::internal::logger::log "INFO" "$@"
+  _dc::private::logger::log "INFO" "$@"
 }
 
 dc::logger::warning(){
-  dc::internal::logger::log "WARNING" "$@"
+  _dc::private::logger::log "WARNING" "$@"
 }
 
 dc::logger::error(){
-  dc::internal::logger::log "ERROR" "$@"
+  _dc::private::logger::log "ERROR" "$@"
 }

@@ -3,14 +3,14 @@
 # Entrypoint: bash
 # ------
 # This is meant to run before anything else, and should have zero dependency on the rest.
-# The purpose is JUST to ensure we are running with bash.
+# The purpose of this is ONLY to ensure we are running with bash.
 # The "date" binary is being called on, though it will fail gracefully if not here.
 # This works better with ps, though we can survive without.
 ##########################################################################
 
 # Ensure we are running with bash
 # Trying very hard here to have this run on all shells (so, no fancy function name, etc)
-hasBash(){
+_dc_private_hasBash(){
   local psout
 
   # The best approach requires procps to be installed
@@ -40,7 +40,7 @@ hasBash(){
   >&2 printf "[%s] WARNING: %s\n" "$(date 2>/dev/null || true)" "Your system lacks ps"
 
   # Say something
-  if [ "$(command -v bash)" != "$BASH" ]; then
+  if ! command -v bash; then
     >&2 printf "[%s] WARNING: %s\n" "$(date 2>/dev/null || true)" "Cannot find bash in your path"
   fi
 
@@ -53,4 +53,6 @@ hasBash(){
   return 0
 }
 
-hasBash || exit
+_dc_private_hasBash || exit
+
+set -eu -o pipefail

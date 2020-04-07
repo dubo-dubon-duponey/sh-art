@@ -3,6 +3,9 @@
 . source/lib/string.sh
 
 testStringUpLow(){
+  local source="∞Foo"
+  local result
+
   source="∞Foo"
   result=$(dc::string::toUpper <(printf "%s" "$source"))
   dc-tools::assert::equal "$source to upper" "$result" "∞FOO"

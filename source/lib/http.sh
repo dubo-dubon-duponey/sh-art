@@ -9,9 +9,10 @@
 # Private
 #####################################
 
-_DC_INTERNAL_HTTP_REDACT=true
+_DC_PRIVATE_HTTP_INSECURE=""
+_DC_PRIVATE_HTTP_REDACT=true
 # Given the nature of the matching we do, any header that contains these words will match, including proxy-authorization and set-cookie
-_DC_INTERNAL_HTTP_PROTECTED_HEADERS=( authorization cookie user-agent )
+_DC_PRIVATE_HTTP_PROTECTED_HEADERS=( authorization cookie user-agent )
 
 DC_HTTP_STATUS=
 DC_HTTP_REDIRECTED=
@@ -27,7 +28,7 @@ dc::wrapped::curl(){
 
   # Reset everything
   local i
-  for i in "${DC_HTTP_HEADERS[@]}"; do
+  for i in "${DC_HTTP_HEADERS[@]:-}"; do
     read -r "DC_HTTP_HEADER_$i" <<< ""
   done
   DC_HTTP_HEADERS=()
@@ -59,7 +60,7 @@ dc::wrapped::curl(){
     [ "$line" ] || continue
 
     # Is it a status line
-    if printf "%s" "$line" | dc::internal::grep -q "^HTTP/[0-9.]+ [0-9]+"; then
+    if printf "%s" "$line" | dc::wrapped::grep -q "^HTTP/[0-9.]+ [0-9]+"; then
       isRedirect=
       line="${line#* }"
       DC_HTTP_STATUS="${line%% *}"
@@ -73,11 +74,11 @@ dc::wrapped::curl(){
     [[ "$line" == *":"* ]] || continue
 
     # Parse header
-    key="$(printf "%s" "${line%%:*}" | tr "-" "_" | tr '[:lower:]' '[:upper:]')"
+    key="$(dc::internal::varnorm "${line%%:*}")"
     value="${line#*: }"
 
     # Expunge what we log
-    [ "$_DC_INTERNAL_HTTP_REDACT" ] && [[ "${_DC_INTERNAL_HTTP_PROTECTED_HEADERS[*]}" == *"$key"* ]] && value=REDACTED
+    [ "$_DC_PRIVATE_HTTP_REDACT" ] && [[ "${_DC_PRIVATE_HTTP_PROTECTED_HEADERS[*]}" == *"$key"* ]] && value=REDACTED
     dc::logger::debug "[dc-http] $key | $value"
 
     if [ "$isRedirect" ]; then
@@ -109,13 +110,13 @@ dc::wrapped::curl(){
 # Configuration hooks
 #####################################
 
-dc::configure::http::leak(){
+dc::http::leak::set(){
   dc::logger::warning "[dc-http] YOU ASKED FOR FULL-BLOWN HTTP DEBUGGING: THIS WILL LEAK SENSITIVE INFORMATION TO STDERR."
   dc::logger::warning "[dc-http] Unless you are debugging actively and you really know what you are doing, you MUST STOP NOW."
-  _DC_INTERNAL_HTTP_REDACT=
+  _DC_PRIVATE_HTTP_REDACT=
 }
 
-dc::configure::http::insecure(){
+dc::http::insecure::set(){
   dc::logger::warning "[dc-http] YOU ARE USING THE INSECURE FLAG."
   dc::logger::warning "[dc-http] This basically means your communication with the server is as secure as if there was NO TLS AT ALL."
   dc::logger::warning "[dc-http] Unless you really, really, REALLY know what you are doing, you MUST RECONSIDER NOW."
@@ -140,7 +141,7 @@ dc::http::dump::headers() {
 
   for i in "${DC_HTTP_HEADERS[@]}"; do
     value=DC_HTTP_HEADER_$i
-    [ "$_DC_INTERNAL_HTTP_REDACT" ] && [[ "${_DC_INTERNAL_HTTP_PROTECTED_HEADERS[*]}" == *"$i"* ]] && value=redacted
+    [ "$_DC_PRIVATE_HTTP_REDACT" ] && [[ "${_DC_PRIVATE_HTTP_PROTECTED_HEADERS[*]}" == *"$i"* ]] && value=redacted
     dc::logger::warning "[dc-http] $i: ${!value}"
   done
 }
@@ -151,7 +152,7 @@ dc::http::request(){
   # Grab the named parameters first
   local url="$1"
   local method="${2:-HEAD}"
-  local payloadFile="$3"
+  local payloadFile="${3:-}"
   local outputFile="${4:-/dev/stdout}"
   shift
   shift
@@ -181,7 +182,7 @@ dc::http::request(){
 
     # If we redact, filter out sensitive headers
     # XXX this is overly aggressive, and will match any header that is a substring of one of the protected headers
-    [ "$_DC_INTERNAL_HTTP_REDACT" ] && [[ "${_DC_INTERNAL_HTTP_PROTECTED_HEADERS[*]}" == *$(printf "%s" "${i%%:*}" | tr '[:upper:]' '[:lower:]')* ]] \
+    [ "$_DC_PRIVATE_HTTP_REDACT" ] && [[ "${_DC_PRIVATE_HTTP_PROTECTED_HEADERS[*]}" == *$(printf "%s" "${i%%:*}" | tr '[:upper:]' '[:lower:]')* ]] \
       && output="$output \"${i%%:*}: REDACTED\"" \
       && continue
 
