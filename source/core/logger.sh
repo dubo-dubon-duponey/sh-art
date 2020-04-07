@@ -42,6 +42,11 @@ dc::logger::mute() {
   _DC_PRIVATE_LOGGER_LEVEL=0
 }
 
+dc::logger::ismute() {
+  # shellcheck disable=SC2034
+  [ "$_DC_PRIVATE_LOGGER_LEVEL" == 0 ] || return "$ERROR_GENERIC_FAILURE"
+}
+
 #####################################
 # Public API
 #####################################

@@ -20,7 +20,7 @@ dc::error::detail::get(){
 }
 
 dc::error::lookup(){
-  local code="$1"
+  local code="${1:-}"
   local errname
 
   dc::argument::check code "$DC_TYPE_UNSIGNED" \
@@ -33,7 +33,7 @@ dc::error::lookup(){
 }
 
 dc::error::register(){
-  local name="$1"
+  local name="${1:-}"
 
   dc::argument::check name "$DC_TYPE_VARIABLE" || return
 

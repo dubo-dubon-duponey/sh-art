@@ -16,15 +16,19 @@ dc::reporter::send(){
     "Bugsnag-Payload-Version: 5"
     "Bugsnag-Sent-At: $now"
   )
-  dc::http::request "https://notify.bugsnag.com/" POST <(printf "%s" "$payload") "${headers[@]}"
+  # XXX this is broken right now
+  dc::http::request "https://notify.bugsnag.com/" POST <(printf "%s" "$payload") /dev/stdout "${headers[@]}"
 }
 
 dc::reporter::handler(){
+  local exit="$1"
+  local detail="$2"
+  local command="$3"
+  local lineno="$4"
+
   # Walk out if we are not registered
   [ "$_DC_INTERNAL_BUGSNAG_KEY" ] || return 0
 
-  local exit="$1"
-  local detail="$2"
   # shellcheck disable=SC2034
   local versions=(
     "\"DC_VERSION\": \"$DC_VERSION\""
@@ -35,21 +39,30 @@ dc::reporter::handler(){
     "\"DC_LIB_REVISION\": \"$DC_LIB_REVISION\""
     "\"DC_LIB_BUILD_DATE\": \"$DC_LIB_BUILD_DATE\""
     "\"DC_LIB_BUILD_PLATFORM\": \"$DC_LIB_BUILD_PLATFORM\""
-    "\"uname\": \"$(uname -a)\""
-    "\"bash\": \"$(command -v bash) $(dc::require::version bash --version)\""
-    "\"curl\": \"$(command -v curl) $(dc::require::version curl --version)\""
-    "\"grep\": \"$(command -v grep) $(dc::require::version grep --version)\""
-    "\"jq\": \"$(command -v jq) $(dc::require::version jq --version)\""
-    "\"openssl\": \"$(command -v openssl) $(dc::require::version openssl version)\""
-    "\"shasum\": \"$(command -v shasum) $(dc::require::version shasum --version)\""
-    "\"sqlite3\": \"$(command -v sqlite3) $(dc::require::version sqlite3 --version)\""
-    "\"uchardet\": \"$(command -v uchardet) $(dc::require::version uchardet --version)\""
-    "\"make\": \"$(command -v make) $(dc::require::version make --version)\""
-    "\"git\": \"$(command -v git) $(dc::require::version git --version)\""
-    "\"gcc\": \"$(command -v gcc) $(dc::require::version gcc --version)\""
-    "\"ps\": \"$(command -v ps)\""
-    "\"[\": \"$(command -v \[)\""
-    "\"tput\": \"$(command -v tput)\""
+    "\"uname\": \"$(uname -a || true)\""
+    "\"bash\": \"$(command -v bash || true) $(dc::internal::version::get bash)\""
+    "\"grep\": \"$(command -v grep || true) $(dc::internal::version::get grep)\""
+    "\"ps\": \"$(command -v ps || true)\""
+    "\"[\": \"$(command -v \[ || true)\""
+    "\"tput\": \"$(command -v tput || true)\""
+    "\"read\": \"$(command -v read || true)\""
+    "\"date\": \"$(command -v date || true)\""
+    "\"sed\": \"$(command -v sed || true)\""
+    "\"printf\": \"$(command -v printf || true)\""
+    "\"tr\": \"$(command -v tr || true)\""
+    "\"rm\": \"$(command -v rm || true)\""
+    "\"mkdir\": \"$(command -v mkdir || true)\""
+    "\"mktemp\": \"$(command -v mktemp || true)\""
+    "\"curl\": \"$(command -v curl || true) $(dc::internal::version::get curl || true)\""
+    "\"jq\": \"$(command -v jq || true) $(dc::internal::version::get jq || true)\""
+    "\"openssl\": \"$(command -v openssl || true) $(dc::internal::version::get openssl version || true)\""
+    "\"shasum\": \"$(command -v shasum || true) $(dc::internal::version::get shasum || true)\""
+    "\"sqlite3\": \"$(command -v sqlite3 || true) $(dc::internal::version::get sqlite3 || true)\""
+    "\"uchardet\": \"$(command -v uchardet || true) $(dc::internal::version::get uchardet || true)\""
+    "\"iconv\": \"$(command -v uchardet || true) $(dc::internal::version::get iconv || true)\""
+    "\"make\": \"$(command -v make || true) $(dc::internal::version::get make || true)\""
+    "\"git\": \"$(command -v git || true) $(dc::internal::version::get git || true)\""
+    "\"gcc\": \"$(command -v gcc || true) $(dc::internal::version::get gcc || true)\""
   )
 
   # XXX env doesn't work yet
@@ -66,7 +79,8 @@ dc::reporter::handler(){
         --arg appUrl "https://github.com/dubo-dubon-duponey/sh-art" \
         --arg error "$(dc::error::lookup "$exit") - $exit" \
         --arg file "${BASH_SOURCE[0]}" \
-        --arg line 1 \
+        --arg line "$lineno" \
+        --arg command "$command" \
         --arg message "$detail" \
         --arg path "$PATH" \
         --arg appId "org.dubodubonduponey.sh-art" '{
@@ -87,7 +101,7 @@ dc::reporter::handler(){
                 {
                   "file": $file,
                   "lineNumber": $line,
-                  "method": ""
+                  "method": $command
                 }
               ]
             }

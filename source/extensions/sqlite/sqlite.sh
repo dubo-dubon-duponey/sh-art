@@ -7,8 +7,8 @@
 _DC_EXT_SQLITE_DB=
 
 dc-ext::sqlite::init(){
-  dc::require sqlite3 || exit
-  mkdir -p "$(dirname "$1")"
+  dc::require sqlite3 || return
+  dc::fs::isdir "$(dirname "$1")" || return
   _DC_EXT_SQLITE_DB="$1"
 }
 

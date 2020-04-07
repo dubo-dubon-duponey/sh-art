@@ -44,4 +44,3 @@ _dc_internal_ext::simplerequest(){
   fi
   DC_HTTP_BODY="$(base64 "$DC_HTTP_BODY")"
 }
-

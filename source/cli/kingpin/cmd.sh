@@ -11,9 +11,9 @@ dc::commander::declare::arg 1 "^(go|node|python)$" "target" "target environment 
 dc::commander::boot
 
 # Requirements
-dc::require::platform::mac || exit
-dc::require brew || exit
-dc::require git || exit
+dc::require::platform::mac
+dc::require brew
+dc::require git
 
 _ensure_install(){
   # Install through brew
@@ -22,7 +22,7 @@ _ensure_install(){
 
 _profile_link(){
   local posh="$1"
-  if ! dc::internal::grep -q "$posh" "$HOME/.profile"; then
+  if ! dc::wrapped::grep -q "$posh" "$HOME/.profile"; then
     printf "%s\n" "# shellcheck source=$HOME/$posh" >> "$HOME/.profile"
     printf "%s\n" ". \"\$HOME/$posh\"" >> "$HOME/.profile"
   fi
@@ -58,8 +58,10 @@ get::go(){
 
 export GOPATH="\$HOME/Projects/Go"
 export PATH="\$GOPATH/bin:\${PATH}"
+set +u
 # shellcheck source=/dev/null
 [ -s "\${POSH_BIN:-\$HOME/Applications/bin}/gvm/scripts/gvm" ] && . "\${POSH_BIN:-\$HOME/Applications/bin}/gvm/scripts/gvm"
+set -u
 EOF
 # XXX ^ gvm will force add the last line to .profile regardless
 
@@ -86,7 +88,9 @@ get::node(){
   dc::logger::info "Installing node development environment"
   # nvm is an alias - as such, it's lost if we don't source
   # shellcheck source=/dev/null
+  set +u
   . "$HOME/.profile"
+  set -u
   if command -v nvm >/dev/null; then
     dc::logger::info "nvm already installed"
     return
@@ -178,4 +182,4 @@ EOF
   dc::logger::info "Done with python"
 }
 
-get::"$DC_PARGV_1"
+get::"$DC_ARG_1"

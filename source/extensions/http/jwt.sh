@@ -11,7 +11,7 @@ DC_JWT_PAYLOAD=
 DC_JWT_ACCESS=
 
 dc-ext::jwt::read(){
-  dc::require jq || exit
+  dc::require jq || return
 
   export DC_JWT_TOKEN="$1"
 

@@ -14,22 +14,22 @@ dc::commander::declare::arg 1 "^(create|mount|unmount)$" "action" "action to per
 dc::commander::boot
 
 # Requirements
-dc::require::platform::mac || exit
+dc::require::platform::mac
 
-directory=${DC_ARGV_SOURCE:-$(pwd)}
-dc::fs::isdir "$directory" || exit
+directory=${DC_ARG_SOURCE:-$(pwd)}
+dc::fs::isdir "$directory"
 
-iname="${DC_ARGV_FILE%.iso$*:-$(basename "$directory")}"
-vname="${DC_ARGV_NAME:-$iname}"
+iname="${DC_ARG_FILE%.iso$*:-$(basename "$directory")}"
+vname="${DC_ARG_NAME:-$iname}"
 
-case "$DC_PARGV_1" in
+case "$DC_ARG_1" in
   create)
     dc::logger::info "Creating ISO $iname.iso with volume name $vname from $directory"
     dc::logger::debug "hdiutil makehybrid -udf -udf-volume-name \"$vname\" -o \"$iname.iso\" \"$directory\""
 
     if ! hdiutil makehybrid -udf -udf-volume-name "$vname" -o "$iname.iso" "$directory"; then
       dc::logger::error "Failed to create ISO!"
-      exit "$ERROR_FAILED"
+      exit "$ERROR_GENERIC_FAILURE"
     fi
   ;;
   unmount)
@@ -38,7 +38,7 @@ case "$DC_PARGV_1" in
 
     if ! hdiutil unmount "/Volumes/$vname"; then
       dc::logger::error "Failed to unmount ISO!"
-      exit "$ERROR_FAILED"
+      exit "$ERROR_GENERIC_FAILURE"
     fi
   ;;
   mount)
@@ -47,7 +47,7 @@ case "$DC_PARGV_1" in
 
     if ! hdiutil mount "$iname.iso"; then
       dc::logger::error "Failed to mount ISO!"
-      exit "$ERROR_FAILED"
+      exit "$ERROR_GENERIC_FAILURE"
     fi
   ;;
 esac

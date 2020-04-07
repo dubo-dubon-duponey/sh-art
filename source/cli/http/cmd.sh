@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 true
+
 # shellcheck disable=SC2034
 readonly CLI_DESC="just curl, in a nicer, json-way"
 # shellcheck disable=SC2034
@@ -20,28 +21,26 @@ Or:
 > dc-http -s --method=PUT --file=/dev/stdin http://server < <(printf '%s' 'some payload')
 "
 
-# Initialize
 dc::commander::initialize
 dc::commander::declare::flag "method" "^[a-zA-Z]+$" "http method (default to GET)" optional "m"
-dc::commander::declare::flag "file" ".+" "file to use as payload" optional "f"
-dc::commander::declare::arg 1 ".+" "url" "url to query"
+dc::commander::declare::flag "file" "$DC_TYPE_STRING" "file to use as payload" optional "f"
+dc::commander::declare::arg 1 "$DC_TYPE_STRING" "url" "url to query"
 # dc::commander::declare::arg 2 "" "method" "http method (default to GET)" optional
 # dc::commander::declare::arg 2 "" "payload" "file payload to post" optional
-dc::commander::declare::arg 2 "^$" "[...headers]" "additional headers to be passed" optional
+dc::commander::declare::arg 2 "" "[...headers]" "additional headers to be passed" optional
 dc::commander::boot
 
 # Requirements
-dc::require jq || exit
+dc::require jq
 
 # URL METHOD PAYLOAD HEADERS
-opts=( "$DC_PARGV_1" "${DC_ARGV_METHOD:-$DC_ARGV_M}" "${DC_ARGV_FILE:-$DC_ARGV_F}" )
+opts=( "$DC_ARG_1" "${DC_ARG_METHOD:-$DC_ARG_M}" "${DC_ARG_FILE:-${DC_ARG_F:-}}" )
 x=2
-e="DC_PARGE_$x"
-while [ "${!e}" ]; do
-  n="DC_PARGV_$x"
+
+while dc::args::exist "$x"; do
+  n="DC_ARG_$x"
   opts+=("${!n}")
   x=$(( x + 1 ))
-  e="DC_PARGE_$x"
 done
 
 tmpfile="$(dc::fs::mktemp "dc-http")"
@@ -55,6 +54,7 @@ if [ ! "$DC_HTTP_STATUS" ]; then
   exit "$ERROR_NETWORK"
 fi
 
+heads=""
 for i in "${DC_HTTP_HEADERS[@]}"; do
   [ "$heads" ] && heads="$heads,"
   name="DC_HTTP_HEADER_$i"
