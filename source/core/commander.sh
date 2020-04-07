@@ -220,8 +220,12 @@ dc::commander::declare::flag(){
 
 # shellcheck disable=SC2120
 dc::commander::initialize(){
+  # Enfore basic requirements and some
   dc::commander::requirements
+  # Trap signals
   dc::commander::trap
+  # Attach the default error handler
+  dc::trap::register dc::error::handler
 
   dc::commander::declare::flag "silent" "^$" "no logging (overrides log level)" optional "s"
 
@@ -271,7 +275,7 @@ dc::commander::boot(){
       "${CLI_DESC:-${DC_DEFAULT_CLI_DESC}}" \
       "${CLI_USAGE:-${_DC_INTERNAL_CLI_USAGE}}" \
       "${CLI_OPTS:-$opts}" \
-      "${CLI_EXAMPLES}"
+      "${CLI_EXAMPLES:-}"
     exit
   fi
 
