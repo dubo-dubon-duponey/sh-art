@@ -1006,14 +1006,14 @@ _shunit_configureColor() {
   esac
 
   case ${_shunit_color_} in
-    ${SHUNIT_TRUE})
+    "${SHUNIT_TRUE}")
       __shunit_ansi_none=${__SHUNIT_ANSI_NONE}
       __shunit_ansi_red=${__SHUNIT_ANSI_RED}
       __shunit_ansi_green=${__SHUNIT_ANSI_GREEN}
       __shunit_ansi_yellow=${__SHUNIT_ANSI_YELLOW}
       __shunit_ansi_cyan=${__SHUNIT_ANSI_CYAN}
       ;;
-    ${SHUNIT_FALSE})
+    "${SHUNIT_FALSE}")
       __shunit_ansi_none=''
       __shunit_ansi_red=''
       __shunit_ansi_green=''
