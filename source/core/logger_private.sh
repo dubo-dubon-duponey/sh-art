@@ -5,7 +5,7 @@
 # Logger infrastructure
 ##########################################################################
 
-_DC_PRIVATE_LOGGER_LEVEL=1
+_DC_PRIVATE_LOGGER_LEVEL=2
 
 _dc::private::logger::log(){
   local prefix="$1"
