@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+. source/headers/docker.sh
+. source/headers/types.sh
 . source/lib/docker.sh
 
 testDockerNetworkLookup() {

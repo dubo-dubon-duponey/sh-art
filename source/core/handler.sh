@@ -54,11 +54,19 @@ dc::error::handler(){
 
     ##################################
     # Basic core: these could bubble up
-
     # Typical filesystem errors: file does not exist, is unreadable, or permission denied
     "$ERROR_FILESYSTEM")
       dc::logger::error "Verify that the provided path ($detail) exist and/or is writable"
     ;;
+    # Some requirements are missing
+    "$ERROR_REQUIREMENT_MISSING")
+      dc::logger::error "Sorry, you need to install $detail for this to work."
+    ;;
+
+
+
+
+
 
 
     # This is a lazy catch-all for non specific problems.
@@ -68,10 +76,6 @@ dc::error::handler(){
     # Denotes that something is not implemented or unsupported on the given platform
     "$ERROR_UNSUPPORTED")
       dc::logger::error "The requested operation is not supported: $detail"
-    ;;
-    # Some requirements are missing
-    "$ERROR_REQUIREMENT_MISSING")
-      dc::logger::error "Sorry, you need $detail for this to work."
     ;;
     # Provided argument doesn't validate
     "$ERROR_ARGUMENT_INVALID")
@@ -126,11 +130,11 @@ dc::error::handler(){
       dc::logger::error "Failed to connect to server at $detail"
     ;;
 
-    *)
-      if [ "$exit" -lt 129 ] || [ "$exit" -gt 143 ]; then
-        dc::logger::error "UNCAUGHT EXCEPTION: $exit $(dc::error::lookup "$exit"): $detail"
-      fi
-    ;;
+#    *)
+#      if [ "$exit" -lt 129 ] || [ "$exit" -gt 143 ]; then
+#        dc::logger::error "UNCAUGHT EXCEPTION: $exit $(dc::error::lookup "$exit"): $detail"
+#      fi
+#    ;;
   esac
 
   dc::logger::debug "Build information" \

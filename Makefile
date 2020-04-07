@@ -52,7 +52,7 @@ $(DC_PREFIX)/bin/bootstrap/builder: $(DC_MAKEFILE_DIR)/bootstrap
 	$(call footer, $@)
 
 # Builds the minimal library
-$(DC_PREFIX)/bin/bootstrap/dc-mini: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE_DIR)/source/headers/*.sh
+$(DC_PREFIX)/bin/bootstrap/dc-mini: $(DC_MAKEFILE_DIR)/source/core/*.sh
 	$(call title, $@)
 	$(DC_PREFIX)/bin/bootstrap/builder --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="the library version" --with-git-info=DC_LIB $(sort $^)
 	$(call footer, $@)
@@ -68,7 +68,7 @@ $(DC_PREFIX)/bin/dc-tooling-build: $(DC_PREFIX)/bin/bootstrap/dc-mini $(DC_MAKEF
 #######################################################
 
 # Builds the main library
-$(DC_PREFIX)/lib/lib-dc-mini: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE_DIR)/source/headers/*.sh
+$(DC_PREFIX)/lib/lib-dc-mini: $(DC_MAKEFILE_DIR)/source/core/*.sh
 	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="the library version" --with-git-info=DC_LIB $(sort $^)
 	$(call footer, $@)

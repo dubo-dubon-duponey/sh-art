@@ -1,28 +1,30 @@
 #!/usr/bin/env bash
 
-dc::error::register ERROR_LINT_FAIL
+dc::error::register LINT_FAIL
 
 dc-tooling::sc::filecheck(){
   dc::logger::info "[linter] checking \"$1\""
   # Hadolint
   if [[ "$1" = *"Dockerfile"* ]]; then
-    hadolint "$1" && return
-    dc::logger::error "[linter] hadolint failed on: \"$1\""
-    return "$ERROR_LINT_FAIL"
+    if ! hadolint "$1"; then
+      return "$ERROR_LINT_FAIL"
+    fi
+    return
   fi
   # Shellcheck
-  head -n1 "$1" | dc::internal::grep -q -w "sh|bash|ksh" \
-    || { dc::logger::warning "[linter] shellcheck ignoring $1 (no recognized shebang)" && return; }
+  head -n1 "$1" | dc::wrapped::grep -q -w "sh|bash|ksh" \
+    || {
+      dc::logger::warning "[linter] shellcheck ignoring $1 (no recognized shebang)"
+      return
+    }
 
-  shellcheck -a -x "$1" \
-   || { dc::logger::error "[linter] shellcheck failed on: \"$1\"" && return "$ERROR_LINT_FAIL"; }
-
+  shellcheck -a -x "$1" || return "$ERROR_LINT_FAIL"
 }
 
 dc-tooling::sc::dircheck(){
   local error
 # XXX neither approach are satisfying...
-#  git ls-tree -r HEAD | grep -E '^1007|.*\..*sh$' | awk '{print $4}' | grep -v tests
+#  git ls-tree -r HEAD | dc::wrapped::grep -E '^1007|.*\..*sh$' | awk '{print $4}' | dc::wrapped::grep -v tests
   while read -r script; do
     dc-tooling::sc::filecheck "$script" || error=true
   done < <(

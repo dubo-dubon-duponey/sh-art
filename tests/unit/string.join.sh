@@ -57,5 +57,7 @@ testStringJoin(){
   expected="∞"$'\n'"∞"$'\n'"∞"
   exitcode=0
   result=$(dc::string::join haystack $'\n') || exitcode=$?
+  # XXX dirty lazy short term
+  dc-tools::assert::equal "0" "$exitcode"
   dc-tools::assert::equal "${haystack[*]:-} to be joined into $expected" "$expected" "$result"
 }

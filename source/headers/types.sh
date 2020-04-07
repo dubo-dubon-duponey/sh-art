@@ -2,9 +2,6 @@
 
 true
 
-# shellcheck disable=SC2034
-readonly DC_TYPE_EMAIL="^[a-zA-Z0-9!#$%&'*+/=?^_\`{|}~.-]+@[a-zA-Z0-9!#$%&'*+/=?^_\`{|}~.-]+$"
-
 # XXX validate and test this
 # Network
 _dc_ip="[0-9]{1,3}[.][0-9]{1,3}[.][0-9]{1,3}[.][0-9]{1,3}"

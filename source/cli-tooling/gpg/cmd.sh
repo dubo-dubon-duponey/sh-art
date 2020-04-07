@@ -1,21 +1,20 @@
 #!/usr/bin/env bash
 
 true
+
 # shellcheck disable=SC2034
 readonly CLI_DESC="git / gpg configuration helper"
 
-# Initialize
 dc::commander::initialize
 dc::commander::declare::flag email "$DC_TYPE_EMAIL" "Email for the gpg signing key you intend on using"
-dc::commander::declare::arg 1 "(save|configure)" "command" "save or configure"
-# Start commander
+dc::commander::declare::arg 1 "^(save|configure)$" "command" "save or configure"
 dc::commander::boot
 
 # Requirements
-dc::require git || exit
-dc::require gpg || exit
+dc::require git
+dc::require gpg
 
-dc::fs::isdir "./keys" writable create || exit
+dc::fs::isdir "./keys" writable create
 
 gpg::newKey(){
   gpg --default-new-key-algo rsa4096 --gen-key
@@ -26,13 +25,13 @@ gpg::savePubKey(){
   local destination="$2"
   local id
 
-  id="$(gpg --list-keys "$mail" | grep "^      ")" || {
+  id="$(gpg --list-keys "$mail" | dc::wrapped::grep "^      ")" || {
     dc::logger::error "No key found for $mail"
-    exit "$DC_ERROR_FAILED"
+    exit "$ERROR_GENERIC_FAILURE"
   }
 
   gpg --output "$destination/$mail.pub" --armor --export "$id" || return
-  git add "./keys/$DC_ARGV_EMAIL.pub" || return
+  git add "./keys/$DC_ARG_EMAIL.pub" || return
 }
 
 git::setConfig(){
@@ -53,20 +52,20 @@ git::setConfig(){
   fi
 }
 
-case "$DC_PARGV_1" in
+case "$DC_ARG_1" in
   # XXX problematic currently - because no-tty
   "new")
     gpg::newKey
   ;;
 
   "save")
-    gpg::savePubKey "$DC_ARGV_EMAIL" "./keys" || exit
+    gpg::savePubKey "$DC_ARG_EMAIL" "./keys" || exit
   ;;
 
   "configure")
-    id="$(gpg --list-keys "$DC_ARGV_EMAIL" | grep "^      ")" || {
-      dc::logger::error "No key found for $DC_ARGV_EMAIL"
-      exit "$DC_ERROR_FAILED"
+    id="$(gpg --list-keys "$DC_ARG_EMAIL" | dc::wrapped::grep "^      ")" || {
+      dc::logger::error "No key found for $DC_ARG_EMAIL"
+      exit "$ERROR_GENERIC_FAILURE"
     }
     id="${id##* }"
 
@@ -79,14 +78,14 @@ case "$DC_PARGV_1" in
 
     dc::output::h1 "Proposed local new git configuration"
     # dc::output::text "Your name: $(git config --local --get user.name)"
-    dc::output::text "Your email: $DC_ARGV_EMAIL"
+    dc::output::text "Your email: $DC_ARG_EMAIL"
     dc::output::break
     dc::output::text "Your signing key: $id"
     dc::output::break
     dc::output::break
     dc::prompt::confirm "Please confirm now by pressing enter"
 
-    git::setConfig "" "$DC_ARGV_EMAIL" "$id"
+    git::setConfig "" "$DC_ARG_EMAIL" "$id"
   ;;
 esac
 

@@ -71,4 +71,5 @@ dc::internal::error::register FILESYSTEM
 # shellcheck disable=SC2034
 dc::internal::error::register LIMIT
 
-
+# Parse command line arguments
+dc::args::parse "$@"

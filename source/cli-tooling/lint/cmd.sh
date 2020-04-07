@@ -1,36 +1,26 @@
 #!/usr/bin/env bash
 
 true
+
 # shellcheck disable=SC2034
 readonly CLI_DESC="script linter based on shellcheck"
 
-# Initialize
 dc::commander::initialize
 dc::commander::declare::arg 1 ".+" "source" "Source file (or directory) to lint"
-# Start commander
 dc::commander::boot
-dc::require shellcheck --version 0.5 || exit
-dc::require hadolint || exit
 
-if [ ! -r "$DC_PARGV_1" ]; then
-  dc::logger::error "Please provide at least one readable file or directory to lint."
-  exit "$ERROR_ARGUMENT_INVALID"
-fi
+dc::require shellcheck 0.5
+dc::require hadolint
+
+dc::fs::isfile "$DC_ARG_1" || dc::fs::isdir "$DC_ARG_1"
 
 for i in "$@"; do
-  if [ ! -r "$i" ]; then
-    dc::logger::error "$i is not readable. Ignoring linting on this."
+  if dc::fs::isdir "$i"; then
+    dc-tooling::sc::dircheck "$i"
     continue
   fi
-  if [ -d "$i" ]; then
-    if ! dc-tooling::sc::dircheck "$i"; then
-      dc::logger::error "Shellcheck failed on directory $DC_PARGV_1."
-      exit "$ERROR_FAILED"
-    fi
-    continue
-  fi
-  if ! dc-tooling::sc::filecheck "$i"; then
-    dc::logger::error "Shellcheck failed on file $DC_PARGV_1."
-    exit "$ERROR_FAILED"
-  fi
+
+  dc::fs::isfile "$i"
+
+  dc-tooling::sc::filecheck "$i"
 done

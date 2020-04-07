@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+. source/headers/crypto.sh
 . source/lib/crypto.sh
 
 testShasumCompute(){

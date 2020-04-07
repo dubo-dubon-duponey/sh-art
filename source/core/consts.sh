@@ -45,6 +45,9 @@ readonly DC_TYPE_VARIABLE="^[a-zA-Z_][a-zA-Z0-9_]{0,}$"
 # shellcheck disable=SC2034
 readonly DC_TYPE_STRING="^.+$"
 
+# shellcheck disable=SC2034
+readonly DC_TYPE_EMAIL="^[a-zA-Z0-9!#$%&'*+/=?^_\`{|}~.-]+@[a-zA-Z0-9!#$%&'*+/=?^_\`{|}~.-]+$"
+
 ##########################################################################
 # Colors
 # ------

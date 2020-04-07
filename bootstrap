@@ -17,10 +17,6 @@ for k in "$_here/source/core/"*.sh; do
   dc-tooling::build::append "$k" "$destination"
 done
 
-for k in "$_here/source/headers/"*.sh; do
-  dc-tooling::build::append "$k" "$destination"
-done
-
 for k in "$_here/source/cli-tooling/build/"*.sh; do
   dc-tooling::build::append "$k" "$destination"
 done
