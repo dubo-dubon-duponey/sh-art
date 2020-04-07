@@ -1,23 +1,25 @@
 #!/usr/bin/env bash
 
 testKingpin(){
+  local exitcode
+
   [ "$(uname)" == Darwin ] || startSkipping
 
-  dc-kingpin -s "BOGUS"
-  exit=$?
-  dc-tools::assert::equal "$exit" "$ERROR_ARGUMENT_INVALID"
+  exitcode=0
+  dc-kingpin -s "BOGUS" || exitcode=$?
+  dc-tools::assert::equal ARGUMENT_INVALID "$(dc::error::lookup $exitcode)"
 
-  dc-kingpin -s "go"
-  exit=$?
-  dc-tools::assert::equal "$exit" "0"
+  exitcode=0
+  dc-kingpin -s "go" || exitcode=$?
+  dc-tools::assert::equal NO_ERROR "$(dc::error::lookup $exitcode)"
 
-  dc-kingpin -s "node"
-  exit=$?
-  dc-tools::assert::equal "$exit" "0"
+  exitcode=0
+  dc-kingpin "node" || exitcode=$?
+  dc-tools::assert::equal NO_ERROR "$(dc::error::lookup $exitcode)"
 
-  dc-kingpin -s "python"
-  exit=$?
-  dc-tools::assert::equal "$exit" "0"
+  exitcode=0
+  dc-kingpin -s "python" || exitcode=$?
+  dc-tools::assert::equal NO_ERROR "$(dc::error::lookup $exitcode)"
 
   [ "$(uname)" == Darwin ] || endSkipping
 }

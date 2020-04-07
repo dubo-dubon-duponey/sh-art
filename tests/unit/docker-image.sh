@@ -104,7 +104,7 @@ testDockerPull(){
   local exitcode
 
   exitcode=0
-  docker::image::pull nonexistent latest || exitcode=$?
+  docker::image::pull nonexistent latest > /dev/null || exitcode=$?
   dc-tools::assert::equal "${FUNCNAME[0]} non existent image name" "DOCKER_NO_SUCH_OBJECT" "$(dc::error::lookup $exitcode)"
 
   exitcode=0
