@@ -25,7 +25,7 @@ dc::error::lookup(){
 
   dc::argument::check code "$DC_TYPE_UNSIGNED" \
     && [ "$code" -le "255" ] \
-    && errname="$(dc::internal::wrap env 2>/dev/null | dc::wrapped::grep "^ERROR_[^=]+=$code$")" \
+    && errname="$(dc::internal::securewrap env 2>/dev/null | dc::wrapped::grep "^ERROR_[^=]+=$code$")" \
     || return "$ERROR_ARGUMENT_INVALID"
 
   errname="${errname%=*}"

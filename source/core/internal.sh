@@ -31,12 +31,15 @@ dc::internal::error::register(){
 }
 
 # Use this for some important binaries (tr, date), that require surviving PATH="" (specially useful for testing)
-dc::internal::wrap(){
+# This serves two purposes: ensure some survavibility in case PATH is foobared, and safeguard against bash 3 macOS which
+# discards file descriptors after an external binary call
+# All binary calls MUST be called through this method instead (builtins do NOT count: printf, echo, read)
+dc::internal::securewrap(){
   local bin="$1"
   shift
+  local exit=0
   local com
 
-  # XXX this does not guarantee it can be executed of course
   com="$(command -v "$bin")" || {
     if [ -f "/bin/$bin" ]; then
       com="/bin/$bin"
@@ -47,8 +50,16 @@ dc::internal::wrap(){
     fi
   }
 
-#  >&2 echo ">>> Wrapping-> $com $@"
-  "$com" "$@"
+  exec 3>&1
+  exec 4>&2
+  _="$($com "$@" 2>&4 1>&3)" || exit=$?
+  if [ "$exit" ]; then
+    exec 3>&-
+    exec 4>&-
+    return "$exit"
+  fi
+  exec 3>&-
+  exec 4>&-
 }
 
 # Gets the version of a certain binary
@@ -57,9 +68,9 @@ dc::internal::version::get(){
   local binary="$1"
   local versionFlag="${2:---version}"
   while read -r line; do
-    if printf "%s" "$line" | dc::internal::wrap grep -q "^[^0-9.]*[0-9][0-9]*[.][0-9][0-9]*.*$"; then
+    if printf "%s" "$line" | dc::internal::securewrap grep -q "^[^0-9.]*[0-9][0-9]*[.][0-9][0-9]*.*$"; then
       # This can survive not having sed around - will fallback to complete line, which of course won't be a float in some cases...
-      dc::internal::wrap sed -E 's/^[^0-9.]*([0-9]+[.][0-9]+).*/\1/' <<<"$line" || printf "%s" "$line"
+      dc::internal::securewrap sed -E 's/^[^0-9.]*([0-9]+[.][0-9]+).*/\1/' <<<"$line" || printf "%s" "$line"
       break
     fi
   # XXX interestingly, some application will output the result on stderr/stdout (jq version 1.3 is such an example)
@@ -70,8 +81,8 @@ dc::internal::version::get(){
 # "Normalize" a string to be usable in a variable name
 # XXX this is kind of fucked-up - might still output stuff that is not var safe
 dc::internal::varnorm(){
-  dc::internal::wrap tr '[:lower:]' '[:upper:]' <<<"$1" | dc::internal::wrap tr "-" "_" || {
-    if ! dc::internal::wrap grep -q "^[a-zA-Z_][a-zA-Z_]*[a-zA-Z0-9_]*$" <<<"$1"; then
+  dc::internal::securewrap tr '[:lower:]' '[:upper:]' <<<"$1" | dc::internal::securewrap tr "-" "_" || {
+    if ! dc::internal::securewrap grep -q "^[a-zA-Z_][a-zA-Z_]*[a-zA-Z0-9_]*$" <<<"$1"; then
       return 144
     fi
     printf "%s" "$1"

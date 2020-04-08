@@ -11,7 +11,7 @@ _dc::private::style(){
   local i
   for i in "${!vName}"; do
     # shellcheck disable=SC2086
-    [ ! "$TERM" ] || [ ! -t 1 ] || >&1 dc::internal::wrap tput $i 2>/dev/null || true
+    [ ! "$TERM" ] || [ ! -t 1 ] || >&1 dc::internal::securewrap tput $i 2>/dev/null || true
   done
 }
 
@@ -22,7 +22,7 @@ dc::output::h1(){
   local even
   local ln
 
-  width=$(dc::internal::wrap tput cols 2>/dev/null || printf 60)
+  width=$(dc::internal::securewrap tput cols 2>/dev/null || printf 60)
   ln=${#i}
   even=$(( (ln + width) & 1 ))
 
@@ -46,7 +46,7 @@ dc::output::h2(){
   local i="$1"
   local width
 
-  width=$(dc::internal::wrap tput cols 2>/dev/null || printf 60)
+  width=$(dc::internal::securewrap tput cols 2>/dev/null || printf 60)
 
   printf "\n"
   printf "  "
@@ -116,7 +116,7 @@ dc::output::text(){
 dc::output::rule(){
   local width
 
-  width=$(dc::internal::wrap tput cols 2>/dev/null || printf 60)
+  width=$(dc::internal::securewrap tput cols 2>/dev/null || printf 60)
 
   _dc::private::style RULE_START
   printf " %.s" $(seq -s" " "$width")

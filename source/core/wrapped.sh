@@ -11,24 +11,38 @@
 # Finally, we of course do not try to validate arguments since that would introduce a circular dep
 dc::wrapped::grep(){
   local extended="-E"
-  local res
+  local exitcode=0
 
   # If gnu grep, use -P for extended
   [ "${_DC_PRIVATE_IS_GNUGREP+x}" ] || {
     _DC_PRIVATE_IS_GNUGREP=""
-    # XXX if using named pipes, and if this is the first call, we need to wrap this below to avoid fucking-up the fd
-    _="$(dc::internal::wrap grep --version 2>/dev/null | dc::internal::wrap grep -q "gnu")" && _DC_PRIVATE_IS_GNUGREP=1
-#    (dc::internal::wrap grep --version 2>/dev/null | dc::internal::wrap grep -q "gnu") && _DC_PRIVATE_IS_GNUGREP=1
+    # shellcheck disable=SC2015
+    dc::internal::securewrap grep -q "gnu" <(dc::internal::securewrap grep --version 2>/dev/null) && _DC_PRIVATE_IS_GNUGREP=1 || true
     export _DC_PRIVATE_IS_GNUGREP
   }
 
   [ "$_DC_PRIVATE_IS_GNUGREP" ] && extended="-P"
 
-  # XXX not clear if we can unwrap
-  res="$(dc::internal::wrap grep "$extended" "$@" 2>/dev/null)"
-  case $? in
+  # Guess if we need to pass stdin along or not
+  local args=("$extended")
+  local count=0
+  while [ "$#" -gt 0 ]; do
+    arg="$1"
+    if [ "${arg:0:1}" != "-" ]; then
+      count=$((count + $#))
+      break
+    fi
+    shift
+    args+=("$arg")
+  done
+  args+=("$@")
+  if [ "$count" == 1 ]; then
+    args+=("/dev/stdin")
+  fi
+
+  dc::internal::securewrap grep "${args[@]}" 2>/dev/null || exitcode=$?
+  case "$exitcode" in
     0)
-      printf "%s" "$res"
       return 0
     ;;
     1)
@@ -45,10 +59,10 @@ dc::wrapped::base64d(){
 
   case "$(uname)" in
     Darwin)
-      base64 -D
+      dc::internal::securewrap base64 -D
     ;;
     *)
-      base64 -d
+      dc::internal::securewrap base64 -d
     ;;
   esac
 }

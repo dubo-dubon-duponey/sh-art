@@ -67,8 +67,8 @@ dc::prompt::confirm(){
   local _
 
   # Flash it
-  >&2 dc::internal::wrap tput bel 2>/dev/null
-  >&2 dc::internal::wrap tput flash 2>/dev/null
+  >&2 dc::internal::securewrap tput bel 2>/dev/null
+  >&2 dc::internal::securewrap tput flash 2>/dev/null
 
   # Don't care about the return value
   dc::prompt::input _ "$message"

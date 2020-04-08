@@ -12,12 +12,21 @@ dc::error::handler(){
   dc::logger::error "[CONSOLE HANDLER]      command:    $command"
   dc::logger::error "[CONSOLE HANDLER]      line:       $lineno"
 
-  cat -n "$0" |  grep -E "^\s+$((lineno - 2))\s"
-  cat -n "$0" |  grep -E "^\s+$((lineno - 1))\s"
-  # Coloring
-  cat -n "$0" |  grep -E "^\s+$((lineno))\s"
-  cat -n "$0" |  grep -E "^\s+$((lineno + 1))\s"
-  cat -n "$0" |  grep -E "^\s+$((lineno + 2))\s"
+  if ! dc::logger::ismute; then
+    cat -n "$0" |  >&2 dc::wrapped::grep "^\s+$((lineno - 2))\s" || true
+    >&2 printf "\n"
+    cat -n "$0" |  >&2 dc::wrapped::grep "^\s+$((lineno - 1))\s" || true
+    >&2 printf "\n"
+    # Coloring
+    [ ! "$TERM" ] || [ ! -t 2 ] || >&2 dc::internal::securewrap tput setaf "$DC_COLOR_RED" 2>/dev/null || true
+    cat -n "$0" |  >&2 dc::wrapped::grep "^\s+$((lineno))\s" || true
+    >&2 printf "\n"
+    [ ! "$TERM" ] || [ ! -t 2 ] || >&2 dc::internal::securewrap tput op 2>/dev/null || true
+    cat -n "$0" |  >&2 dc::wrapped::grep "^\s+$((lineno + 1))\s" || true
+    >&2 printf "\n"
+    cat -n "$0" |  >&2 dc::wrapped::grep "^\s+$((lineno + 2))\s" || true
+    >&2 printf "\n"
+  fi
 
   case "$exit" in
     # https://www.tldp.org/LDP/abs/html/exitcodes.html

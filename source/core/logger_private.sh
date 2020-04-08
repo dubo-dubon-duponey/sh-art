@@ -17,10 +17,13 @@ _dc::private::logger::log(){
 
   [ "$_DC_PRIVATE_LOGGER_LEVEL" -lt "${!level}" ] && return
 
-  [ ! "$TERM" ] || [ ! -t 2 ] || >&2 dc::internal::wrap tput "${!style}" 2>/dev/null || true
+  # If you wonder about why that crazy shit: https://stackoverflow.com/questions/12674783/bash-double-process-substitution-gives-bad-file-descriptor
+  exec 3>&2
+  [ ! "$TERM" ] || [ ! -t 2 ] || >&2 dc::internal::securewrap tput "${!style}" 2>/dev/null || true
   for i in "$@"; do
-    >&2 printf "[%s] [%s] %s\n" "$(dc::internal::wrap date 2>/dev/null || true)" "$prefix" "$i"
+    >&2 printf "[%s] [%s] %s\n" "$(date 2>/dev/null || true)" "$prefix" "$i"
   done
-  [ ! "$TERM" ] || [ ! -t 2 ] || >&2 dc::internal::wrap tput op 2>/dev/null || true
+  [ ! "$TERM" ] || [ ! -t 2 ] || >&2 dc::internal::securewrap tput op 2>/dev/null || true
+  exec 3>&-
 }
 

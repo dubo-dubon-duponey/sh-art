@@ -4,11 +4,11 @@ testInternalWrap(){
   local exitcode
 
   exitcode=0
-  dc::internal::wrap ls >/dev/null || exitcode=$?
+  dc::internal::securewrap ls >/dev/null || exitcode=$?
   dc-tools::assert::equal "normal ls" "0" "$exitcode"
 
   exitcode=0
-  PATH="" dc::internal::wrap ls >/dev/null || exitcode=$?
+  PATH="" dc::internal::securewrap ls >/dev/null || exitcode=$?
   dc-tools::assert::equal "no path ls" "0" "$exitcode"
 }
 
