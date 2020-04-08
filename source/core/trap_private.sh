@@ -45,13 +45,15 @@ _DC_PRIVATE_SIGNALS=("" "SIGHUP" "SIGINT" "SIGQUIT" "" "" "SIGABRT" "" "" "SIGKI
 
 _dc::private::trap::signal() {
   # Drop the line number, it's always 1 with signals
-  local _="$1"
-  local ex="${2}"
+  local _="${1:-}"
+  local ex="${2:-1}" # In case all turns to shit, fallback to exit 1
   local idx
 
   idx=$(( ex - 128 ))
-  dc::logger::error "Interrupted by signal $idx (${_DC_PRIVATE_SIGNALS[idx]}). Last command was: $3"
-
+  dc::logger::debug "[SIGNAL TRAPPING] Error at line ${1:-}"
+  dc::logger::debug "[SIGNAL TRAPPING] Exit: ${2:-}"
+  dc::logger::debug "[SIGNAL TRAPPING] Command was: ${3:-}"
+  dc::logger::debug "[SIGNAL TRAPPING] Signal $idx (${_DC_PRIVATE_SIGNALS[idx]})" || true
   exit "$ex"
 }
 
@@ -88,38 +90,40 @@ _dc::private::trap::signal::TERM(){
 
 # Trap exit for the actual cleanup
 _dc::private::trap::exit() {
-  local lineno="$1"
-  local ex="$2"
+  local lineno="${1:-}"
+  local ex="${2:-}"
+  local com="${3:-}"
   local i
 
   if [ "$ex" == 0 ]; then
-    dc::logger::debug "Exiting normally"
+    dc::logger::debug "[EXIT TRAPPING] Exiting normally"
     return
   fi
 
-  dc::logger::debug "Error!"
+  # dc::logger::debug "Error!"
   # XXX should kill possible subprocesses hanging around
   # This would SIGTERM the process group (unfortunately means we would catch it again
   # Prevent re-entrancy with SIGTERM
   #sleep 10 &
   # _DC_PRIVATE_TRAP_NO_TERM=true
   # kill -TERM -$$
+  dc::logger::debug "[EXIT TRAPPING] Error at line ${1:-}"
+  dc::logger::debug "[EXIT TRAPPING] Exit: ${2:-}"
+  dc::logger::debug "[EXIT TRAPPING] Command was: ${3:-}"
 
   for i in "${_DC_PRIVATE_TRAP_CLEAN[@]}"; do
-    dc::logger::debug "Cleaning-up: $i"
-    "$i" "$ex" "$(dc::error::detail::get)" "$3" "$lineno"
+    dc::logger::debug "[EXIT TRAPPING] Calling clean-up routine: $i"
+    "$i" "$ex" "$(dc::error::detail::get)" "$com" "$lineno"
   done
 
   exit "$ex"
 }
 
 _dc::private::trap::err() {
-  local lineno="$1"
-  dc::logger::debug "[ERROR TRAPPING] Error at line $lineno"
-  dc::logger::debug "[ERROR TRAPPING] Command was: $3"
-  dc::logger::debug "[ERROR TRAPPING] Exception: $(dc::error::lookup "$2")"
-  dc::logger::debug "[ERROR TRAPPING] Exit: $2"
-  exit "$2"
+  dc::logger::debug "[ERROR TRAPPING] Error at line ${1:-}"
+  dc::logger::debug "[ERROR TRAPPING] Exit: ${2:-}"
+  dc::logger::debug "[ERROR TRAPPING] Command was: ${3:-}"
+  exit "${2:-}"
 }
 
 # experimenting with: code="$(cat -n "$0" |  grep -E "^\s+$lineno\s")" || true

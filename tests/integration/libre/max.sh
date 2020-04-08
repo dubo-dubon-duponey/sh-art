@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
 testLibre(){
-  result=$(dc-libre dc::output::json "{}")
-  exit=$?
-  dc-tools::assert::equal "libre successful exit" "$exit" 0
+  local exitcode
+  exitcode=0
+  result=$(dc-libre dc::output::json "{}") || exitcode=$?
+  dc-tools::assert::equal "libre successful exit" "$exitcode" 0
   dc-tools::assert::equal "$result" "{}"
 }
 
@@ -22,12 +23,13 @@ testLibre(){
 
 commandWrapper(){
   local pid
+  local exitcode
 
   "$@" 1>/dev/null 2>&1 &
   pid=$!
   printf "%s\n" "$pid"
-  wait "$pid"
-  printf "%s\n" "$?"
+  wait "$pid" || exitcode=$?
+  printf "%s\n" "$exitcode"
 }
 
 testSignals(){
@@ -55,24 +57,50 @@ testSignals(){
   done
 }
 
-# XXX Need to instrument dc-libre for that when this gets moved to sh-art
-# 1 - caught by ERR
-# let "var1 = 1/0"
-# ls -lA /goo
+helperTestErr(){
+  local expected="$1"
+  local set="$2"
+  shift
+  shift
+  local pid
+  local ex
+  local args=()
+  [ ! "$set" ] || args+=("--set=$set")
+  args+=("$@")
 
-# 2 - NOT caught by ERR
-# empty_function() {}
+  while read -r line; do
+    if [ ! "$pid" ]; then
+      pid="$line"
+      continue
+    fi
+    ex="$line"
+  done < <(commandWrapper "./bin/dc-libre" "${args[@]}" 2>/dev/null)
+  dc-tools::assert::equal "exit code for $*" "$expected" "$(dc::error::lookup "$ex")"
+}
 
-# 126 - caught by err
-# /dev/null
+testVariousConditions(){
+  helperTestErr SYSTEM_GENERIC_ERROR "" let "var1 = 1/0"
+  helperTestErr SYSTEM_SHELL_BUILTIN_MISUSE "" printf
+  helperTestErr SYSTEM_COMMAND_NOT_EXECUTABLE "+e" /dev/null
+  helperTestErr SYSTEM_COMMAND_NOT_FOUND "" thisfails
+#  helperTestErr SYSTEM_INVALID_EXIT_ARGUMENT <- no way to do this with bash?
+  helperTestErr SYSTEM_EXIT_OUT_OF_RANGE "" exit 3.14
+  helperTestErr SYSTEM_EXIT_OUT_OF_RANGE "" exit 511
+}
 
-# 127 - caught by err
-# thisfails
 
-# 128
-# XXX not sure how to do this
-# exit "3.14"
+# 1
+# ./bin/dc-libre let "var1 = 1/0"
+
+# 2
+# ./bin/dc-libre printf
+
+# 126
+# ./bin/dc-libre --set="+e" /dev/null
+
+# 127
+# ./bin/dc-libre thisfails
 
 # 255
-# apparently, bash does $ex % 255 so out of range never triggers...
-# exit 257
+# ./bin/dc-libre exit 3.14
+

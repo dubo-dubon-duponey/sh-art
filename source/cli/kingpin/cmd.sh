@@ -87,8 +87,8 @@ _setit(){
 get::node(){
   dc::logger::info "Installing node development environment"
   # nvm is an alias - as such, it's lost if we don't source
-  # shellcheck source=/dev/null
   set +u
+  # shellcheck source=/dev/null
   . "$HOME/.profile"
   set -u
   if command -v nvm >/dev/null; then
