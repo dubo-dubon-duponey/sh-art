@@ -81,11 +81,17 @@ helperTestErr(){
 testVariousConditions(){
   helperTestErr SYSTEM_GENERIC_ERROR "" let "var1 = 1/0"
   # Only works with bash3 - bash4 gives exit 1
-  helperTestErr SYSTEM_SHELL_BUILTIN_MISUSE "" printf -f || true
+  helperTestErr SYSTEM_SHELL_BUILTIN_MISUSE "" printf -f
   helperTestErr SYSTEM_COMMAND_NOT_EXECUTABLE "+e" /dev/null
   helperTestErr SYSTEM_COMMAND_NOT_FOUND "" thisfails
 #  helperTestErr SYSTEM_INVALID_EXIT_ARGUMENT <- no way to do this with bash?
-  helperTestErr SYSTEM_EXIT_OUT_OF_RANGE "" exit 3.14
+  # Bash4 gives SYSTEM_SHELL_BUILTIN_MISUSE instead
+  bv="$(dc::internal::version::get bash)"
+  if [ "${bv%.*}" == 4 ]; then
+    helperTestErr SYSTEM_SHELL_BUILTIN_MISUSE "" exit a3.14
+  else
+    helperTestErr SYSTEM_EXIT_OUT_OF_RANGE "" exit a3.14
+  fi
   helperTestErr SYSTEM_EXIT_OUT_OF_RANGE "" exit 511
 }
 
