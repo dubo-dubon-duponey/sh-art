@@ -5,7 +5,7 @@ dc-tooling::build::append(){
   local destination="$2"
   local i
 
-  local start
+  local start=""
   while IFS=$'\n' read -r i || [ "$i" ]
   do
     # Ignore file headers

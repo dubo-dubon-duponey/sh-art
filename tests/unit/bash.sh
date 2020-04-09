@@ -21,7 +21,7 @@ testBasicValidationNoPSNoBash(){
   dc-tools::assert::equal "exit code" 144 "$exitcode"
 
   dc-tools::assert::contains "response contained lacks ps" "$result" "Your system lacks ps"
-  dc-tools::assert::contains "response contained no bash" "$result" "This only works with bash (BASH: /bin/sh"
+  dc-tools::assert::contains "response contained no bash" "$result" "This only works with bash (BASH:"
 }
 
 testBasicValidationNoPS(){

@@ -7,6 +7,8 @@
 testDockerCommand() {
   local exitcode
 
+  [ "$HOME" != /home/dckr ] || startSkipping
+
   exitcode=0
   dc::wrapped::docker bogus_command || exitcode=$?
   dc-tools::assert::equal "${FUNCNAME[0]} bogus command error" "DOCKER_WRONG_COMMAND" "$(dc::error::lookup $exitcode)"
@@ -22,10 +24,14 @@ testDockerCommand() {
   exitcode=0
   dc::wrapped::docker network ls >/dev/null || exitcode=$?
   dc-tools::assert::equal "${FUNCNAME[0]} no error" "NO_ERROR" "$(dc::error::lookup $exitcode)"
+
+  [ "$HOME" != /home/dckr ] || endSkipping
 }
 
 testDockerInfo() {
   local exitcode
+
+  [ "$HOME" != /home/dckr ] || startSkipping
 
   exitcode=0
   docker::info > /dev/null || exitcode=$?
@@ -35,5 +41,7 @@ testDockerInfo() {
   docker::host dmp localhost 22
   docker::info > /dev/null || exitcode=$?
   dc-tools::assert::equal "${FUNCNAME[0]} docker info no error" "BINARY_UNKNOWN_ERROR" "$(dc::error::lookup $exitcode)"
+
+  [ "$HOME" != /home/dckr ] || endSkipping
 }
 

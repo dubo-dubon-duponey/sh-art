@@ -62,7 +62,7 @@ helperTestErr(){
   local set="$2"
   shift
   shift
-  local pid
+  local pid=""
   local ex
   local args=()
   [ ! "$set" ] || args+=("--set=$set")
@@ -80,7 +80,8 @@ helperTestErr(){
 
 testVariousConditions(){
   helperTestErr SYSTEM_GENERIC_ERROR "" let "var1 = 1/0"
-  helperTestErr SYSTEM_SHELL_BUILTIN_MISUSE "" printf
+  # Only works with bash3 - bash4 gives exit 1
+  helperTestErr SYSTEM_SHELL_BUILTIN_MISUSE "" printf -f || true
   helperTestErr SYSTEM_COMMAND_NOT_EXECUTABLE "+e" /dev/null
   helperTestErr SYSTEM_COMMAND_NOT_FOUND "" thisfails
 #  helperTestErr SYSTEM_INVALID_EXIT_ARGUMENT <- no way to do this with bash?

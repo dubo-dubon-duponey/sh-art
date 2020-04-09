@@ -8,6 +8,8 @@ testDockerNetworkLookup() {
   local result
   local exitcode
 
+  [ "$HOME" != /home/dckr ] || startSkipping
+
   exitcode=0
   docker::network::lookup >/dev/null || exitcode=$?
   dc-tools::assert::equal "${FUNCNAME[0]} must provide network name" "ARGUMENT_INVALID" "$(dc::error::lookup $exitcode)"
@@ -20,11 +22,15 @@ testDockerNetworkLookup() {
   result="$(docker::network::lookup "bridge")" || exitcode=$?
   dc-tools::assert::equal "${FUNCNAME[0]} bridge network exist" "NO_ERROR" "$(dc::error::lookup $exitcode)"
   dc-tools::assert::notnull "${FUNCNAME[0]} bridge network id not null" "$result"
+
+  [ "$HOME" != /home/dckr ] || endSkipping
 }
 
 testDockerNetworkInspect() {
   local result
   local exitcode
+
+  [ "$HOME" != /home/dckr ] || startSkipping
 
   exitcode=0
   docker::network::inspect >/dev/null || exitcode=$?
@@ -38,10 +44,14 @@ testDockerNetworkInspect() {
   result="$(docker::network::inspect "bridge" | jq -rc .[0].Name)" || exitcode=$?
   dc-tools::assert::equal "${FUNCNAME[0]} bridge network has data" "NO_ERROR" "$(dc::error::lookup $exitcode)"
   dc-tools::assert::equal "${FUNCNAME[0]} bridge name is bridge" "bridge" "$result"
+
+  [ "$HOME" != /home/dckr ] || endSkipping
 }
 
 testDockerNetworkCreateFail() {
   local exitcode
+
+  [ "$HOME" != /home/dckr ] || startSkipping
 
   exitcode=0
   docker::network::create <(
@@ -236,10 +246,14 @@ EOF
 EOF
   ) || exitcode=$?
   dc-tools::assert::equal "${FUNCNAME[0]} wrong ip range" "ARGUMENT_INVALID" "$(dc::error::lookup $exitcode)"
+
+  [ "$HOME" != /home/dckr ] || endSkipping
 }
 
 testDockerNetworkRm() {
   local exitcode
+
+  [ "$HOME" != /home/dckr ] || startSkipping
 
   exitcode=0
   docker::network::remove || exitcode=$?
@@ -248,14 +262,18 @@ testDockerNetworkRm() {
   exitcode=0
   docker::network::remove nonexistentbs || exitcode=$?
   dc-tools::assert::equal "${FUNCNAME[0]} non existent" "DOCKER_NO_SUCH_OBJECT" "$(dc::error::lookup $exitcode)"
+
+  [ "$HOME" != /home/dckr ] || endSkipping
 }
 
 testDockerNetworkCreateSuccess() {
   local result
   local exitcode
 
+  [ "$HOME" != /home/dckr ] || startSkipping
+
   exitcode=0
-  docker network rm success-network 2>/dev/null || echo -n
+  docker network rm success-network 2>/dev/null || true
 
   exitcode=0
   result=$(docker::network::create <(
@@ -279,7 +297,7 @@ EOF
 
   # Now, inspect
   local output
-  output="$(docker inspect "$result")"
+  output="$(docker inspect "$result")" || true
 
   dc-tools::assert::equal "${FUNCNAME[0]} created network name matches" "success-network" "$(printf "%s" "$output" | jq -rc '.[0].Name')"
   dc-tools::assert::equal "${FUNCNAME[0]} created network attachable" "false" "$(printf "%s" "$output" | jq -rc '.[0].Attachable')"
@@ -287,21 +305,23 @@ EOF
   dc-tools::assert::equal "${FUNCNAME[0]} created network ipv6" "false" "$(printf "%s" "$output" | jq -rc '.[0].EnableIPv6')"
   dc-tools::assert::equal "${FUNCNAME[0]} created network labels" "I'm bar" "$(printf "%s" "$output" | jq -rc '.[0].Labels.bar')"
 
-  output="$(docker::network::inspect::label "$result" bar)"
+  output="$(docker::network::inspect::label "$result" bar)" || true
   dc-tools::assert::equal "${FUNCNAME[0]} created network labels with helper" "I'm bar" "$output"
 
-  output="$(docker::network::inspect::containers "$result")"
+  output="$(docker::network::inspect::containers "$result")" || true
   dc-tools::assert::equal "${FUNCNAME[0]} created network containers list" "" "$output"
 
   local id
-  id="$(docker run -d --net success-network --name testing-network-attach busybox)"
+  id="$(docker run -d --net success-network --name testing-network-attach busybox)" || true
 
-  output="$(docker::network::inspect::containers "$result")"
+  output="$(docker::network::inspect::containers "$result")" || true
   dc-tools::assert::equal "${FUNCNAME[0]} created network attached containers" "$id" "$output"
 
-  docker rm -f "$id" > /dev/null
+  docker rm -f "$id" > /dev/null || true
 
   exitcode=0
   docker::network::remove "$result" > /dev/null || exitcode=$?
   dc-tools::assert::equal "${FUNCNAME[0]} succesfully removed network by id" "NO_ERROR" "$(dc::error::lookup $exitcode)"
+
+  [ "$HOME" != /home/dckr ] || endSkipping
 }
