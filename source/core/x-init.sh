@@ -71,5 +71,9 @@ dc::internal::error::register FILESYSTEM
 # shellcheck disable=SC2034
 dc::internal::error::register LIMIT
 
+# HTTP
+dc::internal::error::register CURL_CONNECTION_FAILED
+dc::internal::error::register CURL_DNS_FAILED
+
 # Parse command line arguments
 dc::args::parse "$@"

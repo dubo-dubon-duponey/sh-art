@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-. source/headers/http.sh
-. source/lib/http.sh
-
 # Integration tests for dc-http cover enough already and more exhaustively
 testSimpleHttp(){
   local exitcode
