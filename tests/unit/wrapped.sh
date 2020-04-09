@@ -37,10 +37,8 @@ testGrep(){
 
   exitcode=0
   dc::wrapped::grep "-q" "^foo" <(printf "foo foo bar foo\n") || exitcode="$?"
-
   dc-tools::assert::equal "grep start match" "0" "$exitcode"
 
-  return
   exitcode=0
   dc::wrapped::grep "-q" "bar foo$" <(printf "foo foo bar foo") || exitcode="$?"
   dc-tools::assert::equal "grep end match" "0" "$exitcode"

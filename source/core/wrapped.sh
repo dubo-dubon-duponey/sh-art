@@ -12,12 +12,17 @@
 dc::wrapped::grep(){
   local extended="-E"
   local exitcode=0
+  local v
 
   # If gnu grep, use -P for extended
   [ "${_DC_PRIVATE_IS_GNUGREP+x}" ] || {
     _DC_PRIVATE_IS_GNUGREP=""
-    # shellcheck disable=SC2015
-    dc::internal::securewrap grep -q "gnu" <(dc::internal::securewrap grep --version 2>/dev/null) && _DC_PRIVATE_IS_GNUGREP=1 || true
+    # XXX this will fuck up the file descriptor with recent versions of bash... DAMNYOU BASH DAMNYOU!
+    # dc::internal::securewrap grep -q "gnu" <(dc::internal::securewrap grep --version 2>/dev/null) && _DC_PRIVATE_IS_GNUGREP=1 || true
+    v=$(dc::internal::securewrap grep --version 2>/dev/null)
+    if dc::internal::securewrap grep -q "gnu" <<<"$v"; then
+      _DC_PRIVATE_IS_GNUGREP=1
+    fi
     export _DC_PRIVATE_IS_GNUGREP
   }
 
