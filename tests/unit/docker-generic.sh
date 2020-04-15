@@ -7,6 +7,10 @@
 testDockerCommand() {
   local exitcode
 
+  if ! command -v docker > /dev/null; then
+    return
+  fi
+
   [ "$HOME" != /home/dckr ] || startSkipping
 
   exitcode=0
@@ -30,6 +34,10 @@ testDockerCommand() {
 
 testDockerInfo() {
   local exitcode
+
+  if ! command -v docker > /dev/null; then
+    return
+  fi
 
   [ "$HOME" != /home/dckr ] || startSkipping
 

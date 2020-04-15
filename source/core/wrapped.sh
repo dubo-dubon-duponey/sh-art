@@ -9,41 +9,51 @@
 # XXX this will freeze if there is no stdin and only one argument for example
 # Also, we do not do any effort to have fine-grained erroring here (everything wonky ends-up with BINARY_UNKNOWN_ERROR)
 # Finally, we of course do not try to validate arguments since that would introduce a circular dep
+
 dc::wrapped::grep(){
   local extended="-E"
   local exitcode=0
-  local v
 
   # If gnu grep, use -P for extended
-  [ "${_DC_PRIVATE_IS_GNUGREP+x}" ] || {
+  if ! [ "${_DC_PRIVATE_IS_GNUGREP+x}" ]; then
     _DC_PRIVATE_IS_GNUGREP=""
-    # XXX this will fuck up the file descriptor with recent versions of bash... DAMNYOU BASH DAMNYOU!
-    # dc::internal::securewrap grep -q "gnu" <(dc::internal::securewrap grep --version 2>/dev/null) && _DC_PRIVATE_IS_GNUGREP=1 || true
-    v=$(dc::internal::securewrap grep --version 2>/dev/null)
-    if dc::internal::securewrap grep -q "gnu" <<<"$v"; then
-      _DC_PRIVATE_IS_GNUGREP=1
-    fi
+    # XXX this will fuck up the file descriptor with bash 5.0.16...
+#    dc::internal::securewrap grep -q "gnu" <(dc::internal::securewrap grep --version 2>/dev/null) && _DC_PRIVATE_IS_GNUGREP=1 || true
+    _=$(dc::internal::securewrap grep -q "gnu" <(dc::internal::securewrap grep --version 2>/dev/null)) && _DC_PRIVATE_IS_GNUGREP=1 || true
     export _DC_PRIVATE_IS_GNUGREP
-  }
+  fi
 
   [ "$_DC_PRIVATE_IS_GNUGREP" ] && extended="-P"
 
   # Guess if we need to pass stdin along or not
   local args=("$extended")
-  local count=0
-  while [ "$#" -gt 0 ]; do
-    arg="$1"
-    if [ "${arg:0:1}" != "-" ]; then
-      count=$((count + $#))
-      break
-    fi
-    shift
-    args+=("$arg")
-  done
   args+=("$@")
-  if [ "$count" == 1 ]; then
+
+  local last
+  local prev=""
+  last="${!#}"
+  if [ "$#" -gt 1 ] && [ "${last:0:1}" != "-" ]; then
+    prev=$(($# - 1))
+    prev="${!prev}"
+  fi
+  if [ "$#" == 1 ] || [ "${prev:0:1}" == "-" ]; then
     args+=("/dev/stdin")
   fi
+
+  # XXX bash 5.0.16 will fuck up the fd with a while / for loop as well
+#  while [ "$#" -gt 0 ]; do
+#    arg="$1"
+#    if [ "${arg:0:1}" != "-" ]; then
+#      count="$#"
+#      break
+#    fi
+#    shift
+#    args+=("$arg")
+#  done
+#  args+=("$@")
+#  if [ "$count" == 1 ]; then
+#    args+=("/dev/stdin")
+#  fi
 
   dc::internal::securewrap grep "${args[@]}" 2>/dev/null || exitcode=$?
   case "$exitcode" in

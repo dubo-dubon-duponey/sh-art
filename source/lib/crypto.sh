@@ -2,7 +2,10 @@
 
 
 dc::wrapped::shasum(){
-  dc::require shasum || return
+  # XXX bash5 makes this fail
+  local _
+  _="$(dc::require shasum)" || return
+  # dc::require shasum || return
 
   local err
 
@@ -31,12 +34,17 @@ dc::wrapped::shasum(){
 
 # Key manipulation
 dc::wrapped::openssl(){
-  dc::require openssl 1.0 version || return
-
+  local com=openssl
   local err
+  local _
+
+  command -v openssl > /dev/null || com=libressl
+  # XXX bash5 makes this fail by consuming the fd - wtf
+  _="$(dc::require $com 1.0 version)" || return
+  # dc::require $com 1.0 version || return
 
   exec 3>&1
-  if ! err="$(openssl "$@" 2>&1 1>&3)"; then
+  if ! err="$($com "$@" 2>&1 1>&3)"; then
     exec 3>&-
 
     # Known error conditions
@@ -67,7 +75,7 @@ dc::crypto::shasum::compute(){
   local digest
 
   # For some versions, hashing a directory does not error out like it should
-  [ -d "$fd" ] && return "$ERROR_BINARY_UNKNOWN_ERROR"
+  [ ! -d "$fd" ] || return "$ERROR_BINARY_UNKNOWN_ERROR"
 
   digest="$(dc::wrapped::shasum -a "$type" "$fd")" || return
   [ ! "$prefixed" ] || printf "sha%s:" "$type"
@@ -80,11 +88,12 @@ dc::crypto::shasum::verify(){
   local type="${3:-$DC_CRYPTO_SHASUM_512256}"
 
   # For some versions, hashing a directory does not error out like it should
-  [ -d "$fd" ] && return "$ERROR_BINARY_UNKNOWN_ERROR"
+  [ ! -d "$fd" ] || return "$ERROR_BINARY_UNKNOWN_ERROR"
 
   # Get the type from the expectation string if it's there, or default to arg 3 if provided, fallback to 512256
-  #if dc::wrapped::grep -q "^sha[0-9]+:" <(printf "%s" "$expected"); then
-  if dc::wrapped::grep -q "^sha[0-9]+:" <<<"$expected"; then
+  # if dc::wrapped::grep -q "^sha[0-9]+:" <(printf "%s" "$expected"); then
+  # if dc::wrapped::grep -q "^sha[0-9]+:" <<<"$expected"; then
+  if dc::internal::securewrap grep -Eq "^sha[0-9]+:" <<<"$expected"; then
     type="${expected%:*}"
     type="${type#*sha}"
   fi

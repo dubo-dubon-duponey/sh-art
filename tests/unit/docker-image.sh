@@ -8,6 +8,10 @@ testDockerImageLookup() {
   local result
   local exitcode
 
+  if ! command -v docker > /dev/null; then
+    return
+  fi
+
   [ "$HOME" != /home/dckr ] || startSkipping
 
   docker pull debian:buster-slim > /dev/null || true
@@ -42,6 +46,10 @@ testDockerImageInspect() {
   local result
   local exitcode
 
+  if ! command -v docker > /dev/null; then
+    return
+  fi
+
   [ "$HOME" != /home/dckr ] || startSkipping
 
   docker pull debian:buster-slim > /dev/null || true
@@ -75,6 +83,10 @@ testDockerImageInspect() {
 testDockerImageRemove() {
   local result
   local exitcode
+
+  if ! command -v docker > /dev/null; then
+    return
+  fi
 
   [ "$HOME" != /home/dckr ] || startSkipping
 
@@ -114,6 +126,10 @@ testDockerImageRemove() {
 testDockerPull(){
   local result
   local exitcode
+
+  if ! command -v docker > /dev/null; then
+    return
+  fi
 
   [ "$HOME" != /home/dckr ] || startSkipping
 

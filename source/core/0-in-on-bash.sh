@@ -37,10 +37,10 @@ _dc_private_hasBash(){
   # None of this is robust
 
   # See something
-  >&2 printf "[%s] WARNING: %s\n" "$(date 2>/dev/null || true)" "Your system lacks ps"
+  # >&2 printf "[%s] WARNING: %s\n" "$(date 2>/dev/null || true)" "Your system lacks ps"
 
   # Say something
-  if ! command -v bash; then
+  if ! command -v bash > /dev/null; then
     >&2 printf "[%s] WARNING: %s\n" "$(date 2>/dev/null || true)" "Cannot find bash in your path"
   fi
 

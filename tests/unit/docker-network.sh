@@ -8,6 +8,10 @@ testDockerNetworkLookup() {
   local result
   local exitcode
 
+  if ! command -v docker > /dev/null; then
+    return
+  fi
+
   [ "$HOME" != /home/dckr ] || startSkipping
 
   exitcode=0
@@ -30,6 +34,10 @@ testDockerNetworkInspect() {
   local result
   local exitcode
 
+  if ! command -v docker > /dev/null; then
+    return
+  fi
+
   [ "$HOME" != /home/dckr ] || startSkipping
 
   exitcode=0
@@ -50,6 +58,10 @@ testDockerNetworkInspect() {
 
 testDockerNetworkCreateFail() {
   local exitcode
+
+  if ! command -v docker > /dev/null; then
+    return
+  fi
 
   [ "$HOME" != /home/dckr ] || startSkipping
 
@@ -253,6 +265,10 @@ EOF
 testDockerNetworkRm() {
   local exitcode
 
+  if ! command -v docker > /dev/null; then
+    return
+  fi
+
   [ "$HOME" != /home/dckr ] || startSkipping
 
   exitcode=0
@@ -269,6 +285,10 @@ testDockerNetworkRm() {
 testDockerNetworkCreateSuccess() {
   local result
   local exitcode
+
+  if ! command -v docker > /dev/null; then
+    return
+  fi
 
   [ "$HOME" != /home/dckr ] || startSkipping
 

@@ -38,6 +38,7 @@ dc::require(){
 
   local varname
 
+  # XXX this is a victim of the named pipe bash fuckerism - bash5 will mangle fd with argument checking
   dc::argument::check binary "$DC_TYPE_STRING" || return
 
   varname="$(dc::internal::varnorm "_DC_DEPENDENCIES_B_$binary")"
