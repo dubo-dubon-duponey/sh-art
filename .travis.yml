@@ -1,8 +1,7 @@
 language: bash
 
 env:
-#  - SHUNIT_COLOR=always DCKR_VERSION=1.2.0 CACHE_DIR=$HOME/cache
-  - SHUNIT_COLOR=always DCKR_VERSION=work CACHE_DIR=$HOME/cache
+  - SHUNIT_COLOR=always DCKR_VERSION=2.0.0 CACHE_DIR=$HOME/cache
 
 addons:
   homebrew:
