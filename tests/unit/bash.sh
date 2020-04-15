@@ -42,13 +42,18 @@ testBasicValidationBrokenPS(){
   local result
   local exitcode=0
 
+  echo "----------------"
+  touch "xxx-travis-test-this"
+  pwd
+  ls -lA .
+  echo "----------------"
   echo 'if [ "$*" == "-o ppid,comm" ]; then /bin/ps $*; else exit 1; fi' > "ps"
-  chmod u+x ps
+  chmod a+x "ps"
 
   # shellcheck disable=SC2030,SC2031
   result="$(PATH="$(pwd):$PATH"; /bin/bash source/core/0-in-on-bash.sh 2>&1)" || exitcode="$?"
 
-  rm ps
+  rm "ps"
 
   if command -v ps > /dev/null; then
     dc-tools::assert::equal "exit code" 0 "$exitcode"

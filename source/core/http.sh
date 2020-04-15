@@ -155,9 +155,9 @@ dc::http::request(){
   local payloadFile="${3:-}"
   local outputFile="${4:-/dev/stdout}"
   shift
-  shift
-  shift
-  shift
+  [ "$#" == 0 ] || shift
+  [ "$#" == 0 ] || shift
+  [ "$#" == 0 ] || shift
 
   # Build the curl request
   local curlOpts=( "$url" "-v" "-L" "-s" )
