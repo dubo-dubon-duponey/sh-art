@@ -75,5 +75,8 @@ dc::internal::error::register LIMIT
 dc::internal::error::register CURL_CONNECTION_FAILED
 dc::internal::error::register CURL_DNS_FAILED
 
+# XXX get rid of this
+dc::internal::error::register NETWORK
+
 # Parse command line arguments
 dc::args::parse "$@"
