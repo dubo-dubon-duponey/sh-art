@@ -19,6 +19,8 @@ matrix:
   include:
     - os: osx
       script:
+      - cat "$HOME/.profile"
+      - exit 1
       - make build
       - make lint
       - make test-unit
