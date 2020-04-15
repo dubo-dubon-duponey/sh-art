@@ -1,30 +1,32 @@
 #!/usr/bin/env bash
 
 a(){
+  # shellcheck disable=SC2216
   echo | echo
-  cat $1
+  cat "$1"
 }
 
 b(){
   echo
-  cat $1
+  cat "$1"
 }
 
 c(){
   tput op
-  cat $1
+  cat "$1"
 }
 
 d(){
   local _
+  # shellcheck disable=SC2216
   _=$(echo | echo)
-  cat $1
+  cat "$1"
 }
 
 e(){
   local _
   _=$(tput op)
-  cat $1
+  cat "$1"
 }
 
 _f(){
@@ -34,7 +36,7 @@ _f(){
 
 f(){
   _f
-  cat $1
+  cat "$1"
 }
 
 _g(){
@@ -44,7 +46,7 @@ _g(){
 
 g(){
   _g
-  cat $1
+  cat "$1"
 }
 
 _h(){
@@ -54,7 +56,7 @@ _h(){
 
 h(){
   _h
-  cat $1
+  cat "$1"
 }
 
 _i(){
@@ -65,7 +67,7 @@ _i(){
 i(){
   local _
   _=$(_i)
-  cat $1
+  cat "$1"
 }
 
 _j(){
@@ -74,7 +76,7 @@ _j(){
 
 j(){
   _j
-  cat $1
+  cat "$1"
 }
 
 k(){
@@ -85,7 +87,7 @@ k(){
     x=$((x - 1))
   done
 
-  cat $1
+  cat "$1"
 }
 
 # 3.2.57 macOS fails on two occasions
