@@ -42,13 +42,13 @@ testBasicValidationBrokenPS(){
   local result
   local exitcode=0
 
-  echo 'if [ "$*" == "-o ppid,comm" ]; then /bin/ps $*; else exit 1; fi' > "/tmp/ps"
-  chmod u+x "/tmp/ps"
+  echo 'if [ "$*" == "-o ppid,comm" ]; then /bin/ps $*; else exit 1; fi' > "${TMPDIR:-/tmp}/ps"
+  chmod u+x "${TMPDIR:-/tmp}/ps"
 
   # shellcheck disable=SC2030,SC2031
-  result="$(PATH="/tmp:$PATH"; /bin/bash source/core/0-in-on-bash.sh 2>&1)" || exitcode="$?"
+  result="$(PATH="${TMPDIR:-/tmp}:$PATH"; /bin/bash source/core/0-in-on-bash.sh 2>&1)" || exitcode="$?"
 
-  rm "/tmp/ps"
+  rm "${TMPDIR:-/tmp}/ps"
 
   if command -v ps > /dev/null; then
     dc-tools::assert::equal "exit code" 0 "$exitcode"
@@ -60,13 +60,13 @@ testBasicValidationBrokenPSNoBash(){
   local result
   local exitcode=0
 
-  echo 'if [ "$*" == "-o ppid,comm" ]; then /bin/ps $*; else exit 1; fi' > "/tmp/ps"
-  chmod u+x "/tmp/ps"
+  echo 'if [ "$*" == "-o ppid,comm" ]; then /bin/ps $*; else exit 1; fi' > "${TMPDIR:-/tmp}/ps"
+  chmod u+x "${TMPDIR:-/tmp}/ps"
 
   # shellcheck disable=SC2030,SC2031
-  result="$(PATH="/tmp:$PATH"; /bin/sh source/core/0-in-on-bash.sh 2>&1)" || exitcode="$?"
+  result="$(PATH="${TMPDIR:-/tmp}:$PATH"; /bin/sh source/core/0-in-on-bash.sh 2>&1)" || exitcode="$?"
 
-  rm "/tmp/ps"
+  rm "${TMPDIR:-/tmp}/ps"
 
   dc-tools::assert::equal "exit code" 144 "$exitcode"
 

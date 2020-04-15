@@ -4,7 +4,8 @@ testDirExisting() {
   local exitcode
   local path
 
-  path="$(dirname "${BASH_SOURCE[0]}")"
+  # XXX travis
+  path="${TMPDIR:-/tmp}" # $(dirname "${BASH_SOURCE[0]}")"
 
   exitcode=0
   dc::fs::isdir "$path" || exitcode=$?

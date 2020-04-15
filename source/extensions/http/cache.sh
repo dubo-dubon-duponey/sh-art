@@ -43,9 +43,3 @@ _dc_internal_ext::simplerequest(){
   dc::http::request "$@" | base64 || return
   [ "$DC_HTTP_STATUS" == 200 ] || return "$ERROR_NETWORK"
 }
-
-dc-ext::hc::test(){
-  dc-ext::sqlite::init "yourdbsomewhere.db" /tmp/foo.db
-  dc-ext::http-cache::init
-  "$@"
-}
