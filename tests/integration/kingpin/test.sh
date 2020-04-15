@@ -10,7 +10,7 @@ testKingpin(){
   dc-tools::assert::equal ARGUMENT_INVALID "$(dc::error::lookup $exitcode)"
 
   exitcode=0
-  dc-kingpin -s "go" || exitcode=$?
+  dc-kingpin "go" || exitcode=$?
   dc-tools::assert::equal NO_ERROR "$(dc::error::lookup $exitcode)"
 
   exitcode=0
@@ -18,7 +18,7 @@ testKingpin(){
   dc-tools::assert::equal NO_ERROR "$(dc::error::lookup $exitcode)"
 
   exitcode=0
-  dc-kingpin -s "python" || exitcode=$?
+  dc-kingpin "python" || exitcode=$?
   dc-tools::assert::equal NO_ERROR "$(dc::error::lookup $exitcode)"
 
   [ "$(uname)" == Darwin ] || endSkipping

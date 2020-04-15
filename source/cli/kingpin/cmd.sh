@@ -66,8 +66,10 @@ EOF
 # XXX ^ gvm will force add the last line to .profile regardless
 
   _profile_link .posh_go
+  set +u
   # shellcheck source=/dev/null
   . "$HOME/.profile"
+  set -u
 
   gvm install go1.12 --prefer-binary
   gvm install go1.13rc1 --prefer-binary
