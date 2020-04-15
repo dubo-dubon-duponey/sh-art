@@ -71,9 +71,9 @@ EOF
   . "$HOME/.profile"
   set -u
 
-  gvm install go1.12 --prefer-binary
-  gvm install go1.13rc1 --prefer-binary
-  gvm use go1.12 --default
+  gvm install go1.13 --prefer-binary
+  gvm install go1.14 --prefer-binary
+  gvm use go1.14 --default
 
   dc::logger::info "Done with golang"
 }
