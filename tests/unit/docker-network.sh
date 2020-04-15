@@ -49,7 +49,7 @@ testDockerNetworkInspect() {
   dc-tools::assert::equal "${FUNCNAME[0]} non existent network" "DOCKER_NO_SUCH_OBJECT" "$(dc::error::lookup $exitcode)"
 
   exitcode=0
-  result="$(docker::network::inspect "bridge" | jq -rc .[0].Name)" || exitcode=$?
+  result="$(docker::network::inspect "bridge" | jq -r .[0].Name)" || exitcode=$?
   dc-tools::assert::equal "${FUNCNAME[0]} bridge network has data" "NO_ERROR" "$(dc::error::lookup $exitcode)"
   dc-tools::assert::equal "${FUNCNAME[0]} bridge name is bridge" "bridge" "$result"
 
@@ -319,11 +319,11 @@ EOF
   local output
   output="$(docker inspect "$result")" || true
 
-  dc-tools::assert::equal "${FUNCNAME[0]} created network name matches" "success-network" "$(printf "%s" "$output" | jq -rc '.[0].Name')"
-  dc-tools::assert::equal "${FUNCNAME[0]} created network attachable" "false" "$(printf "%s" "$output" | jq -rc '.[0].Attachable')"
-  dc-tools::assert::equal "${FUNCNAME[0]} created network internal" "true" "$(printf "%s" "$output" | jq -rc '.[0].Internal')"
-  dc-tools::assert::equal "${FUNCNAME[0]} created network ipv6" "false" "$(printf "%s" "$output" | jq -rc '.[0].EnableIPv6')"
-  dc-tools::assert::equal "${FUNCNAME[0]} created network labels" "I'm bar" "$(printf "%s" "$output" | jq -rc '.[0].Labels.bar')"
+  dc-tools::assert::equal "${FUNCNAME[0]} created network name matches" "success-network" "$(printf "%s" "$output" | jq -r '.[0].Name')"
+  dc-tools::assert::equal "${FUNCNAME[0]} created network attachable" "false" "$(printf "%s" "$output" | jq -r '.[0].Attachable')"
+  dc-tools::assert::equal "${FUNCNAME[0]} created network internal" "true" "$(printf "%s" "$output" | jq -r '.[0].Internal')"
+  dc-tools::assert::equal "${FUNCNAME[0]} created network ipv6" "false" "$(printf "%s" "$output" | jq -r '.[0].EnableIPv6')"
+  dc-tools::assert::equal "${FUNCNAME[0]} created network labels" "I'm bar" "$(printf "%s" "$output" | jq -r '.[0].Labels.bar')"
 
   output="$(docker::network::inspect::label "$result" bar)" || true
   dc-tools::assert::equal "${FUNCNAME[0]} created network labels with helper" "I'm bar" "$output"

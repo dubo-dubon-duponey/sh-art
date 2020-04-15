@@ -68,12 +68,12 @@ testDockerImageInspect() {
   dc-tools::assert::equal "${FUNCNAME[0]} non existent digest" "DOCKER_NO_SUCH_OBJECT" "$(dc::error::lookup $exitcode)"
 
   exitcode=0
-  result="$(docker::image::inspect debian buster-slim | jq -rc ".[0].Architecture")" || exitcode=$?
+  result="$(docker::image::inspect debian buster-slim | jq -r ".[0].Architecture")" || exitcode=$?
   dc-tools::assert::equal "${FUNCNAME[0]} valid image" "NO_ERROR" "$(dc::error::lookup $exitcode)"
   dc-tools::assert::equal "${FUNCNAME[0]} image inspection 1" "amd64" "$result"
 
   exitcode=0
-  result="$(docker::image::inspect busybox "" sha256:afe605d272837ce1732f390966166c2afff5391208ddd57de10942748694049d | jq -rc ".[0].Architecture")" || exitcode=$?
+  result="$(docker::image::inspect busybox "" sha256:afe605d272837ce1732f390966166c2afff5391208ddd57de10942748694049d | jq -r ".[0].Architecture")" || exitcode=$?
   dc-tools::assert::equal "${FUNCNAME[0]} valid image by digest" "NO_ERROR" "$(dc::error::lookup $exitcode)"
   dc-tools::assert::equal "${FUNCNAME[0]} image inspection 2" "amd64" "$result"
 

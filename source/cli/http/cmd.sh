@@ -9,7 +9,7 @@ readonly CLI_EXAMPLES="Simple get request, get the Date reponse header
 > dc-http -s localhost:5000 | jq -r .headers.DATE
 
 Echo the body of the response of a complex PUT request
-> echo 'something' | dc-http -s --method=PUT --file=/dev/stdin http://localhost:5000 'User-Agent: pouic-pouic/alpha-omega' | jq -rc .body | base64 -D
+> echo 'something' | dc-http -s --method=PUT --file=/dev/stdin http://localhost:5000 'User-Agent: pouic-pouic/alpha-omega' | jq -r .body | base64 -D
 
 To submit a file:
 > dc-http -s --method=PUT --file=some_file_somewhere http://server

@@ -114,20 +114,20 @@ docker::network::create() {
   net="$(cat "$config")"
 
   # Ensure we avoid nasty side effects ("null" being a valid string)
-  name="$(printf "%s" "$net" | jq -rc 'select(.name != null).name')"
-  driver="$(printf "%s" "$net" | jq -rc 'select(.driver != null).driver')"
+  name="$(printf "%s" "$net" | jq -r 'select(.name != null).name')"
+  driver="$(printf "%s" "$net" | jq -r 'select(.driver != null).driver')"
 
   # It doesn't really matter if we get a null or an empty value here, it will fail validating as a boolean
-  attachable=$(printf "%s" "$net" | jq -rc .attachable)
-  internal=$(printf "%s" "$net" | jq -rc .internal)
-  ipv6=$(printf "%s" "$net" | jq -rc .ipv6)
+  attachable=$(printf "%s" "$net" | jq -r .attachable)
+  internal=$(printf "%s" "$net" | jq -r .internal)
+  ipv6=$(printf "%s" "$net" | jq -r .ipv6)
 
   # All these are optional, so, avoid catching "null"s
-  subnet="$(printf "%s" "$net" | jq -rc 'select(.subnet != null).subnet')"
-  gateway="$(printf "%s" "$net" | jq -rc 'select(.gateway != null).gateway')"
-  ip_range="$(printf "%s" "$net" | jq -rc 'select(.ip_range != null).ip_range')"
-  parent="$(printf "%s" "$net" | jq -rc 'select(.parent != null).parent')"
-  ipvlan_mode="$(printf "%s" "$net" | jq -rc 'select(.ipvlan_mode != null).ipvlan_mode')"
+  subnet="$(printf "%s" "$net" | jq -r 'select(.subnet != null).subnet')"
+  gateway="$(printf "%s" "$net" | jq -r 'select(.gateway != null).gateway')"
+  ip_range="$(printf "%s" "$net" | jq -r 'select(.ip_range != null).ip_range')"
+  parent="$(printf "%s" "$net" | jq -r 'select(.parent != null).parent')"
+  ipvlan_mode="$(printf "%s" "$net" | jq -r 'select(.ipvlan_mode != null).ipvlan_mode')"
 
   dc::argument::check name "$DC_TYPE_STRING" || return
   dc::argument::check driver "$DC_TYPE_STRING" || return
@@ -159,8 +159,8 @@ docker::network::create() {
 
   while read -r label; do
     args+=(--label "$label")
-  done < <(printf "%s" "$net" | jq -rc 'select(.labels != null).labels | . as $in| keys[] | [. + "=" + $in[.]] | add')
-#  done < <(jq -rc 'select(.labels != null).labels | . as $in| keys[] | [., $in[.]] | map(tostring+"=") | add')
+  done < <(printf "%s" "$net" | jq -r 'select(.labels != null).labels | . as $in| keys[] | [. + "=" + $in[.]] | add')
+#  done < <(jq -r 'select(.labels != null).labels | . as $in| keys[] | [., $in[.]] | map(tostring+"=") | add')
 
   dc::wrapped::docker network create "${args[@]}" "$name"
 }
@@ -172,7 +172,7 @@ docker::network::inspect::label() {
   dc::argument::check id "$DC_TYPE_STRING" || return
   dc::argument::check label "$DC_TYPE_STRING" || return
 
-  docker::network::inspect "$id" | jq -rc ".[0].Labels | select(.\"$label\" != null).\"$label\""
+  docker::network::inspect "$id" | jq -r ".[0].Labels | select(.\"$label\" != null).\"$label\""
 }
 
 docker::network::inspect::containers() {
@@ -180,7 +180,7 @@ docker::network::inspect::containers() {
 
   dc::argument::check id "$DC_TYPE_STRING" || return
 
-  docker::network::inspect "$id" | jq -rc ".[0].Containers | keys[]"
+  docker::network::inspect "$id" | jq -r ".[0].Containers | keys[]"
 }
 
 ###############################################################################
@@ -281,7 +281,7 @@ docker::image::digest() {
 
   name="$name:$tag"
 
-  result="$(dc::wrapped::docker inspect "$name" | jq -rc ".[].RepoDigests[0]")" || {
+  result="$(dc::wrapped::docker inspect "$name" | jq -r ".[].RepoDigests[0]")" || {
     dc::error::detail::set "Image $name does not exist"
     return "$ERROR_DOCKER_NO_SUCH_OBJECT"
   }
@@ -304,7 +304,7 @@ docker::image::id() {
     name="$name:$tag"
   fi
 
-  dc::wrapped::docker inspect "$name" | jq -rc ".[].Id" || {
+  dc::wrapped::docker inspect "$name" | jq -r ".[].Id" || {
     dc::error::detail::set "Image $name does not exist"
     return "$ERROR_DOCKER_NO_SUCH_OBJECT"
   }
@@ -313,5 +313,5 @@ docker::image::id() {
 #docker::registry::digest() {
 #  local name="$1"
 #  local tag="${2:-}"
-#  printf "" | module::run regander -s manifest HEAD "$name" "$tag" | jq -rc ".digest"
+#  printf "" | module::run regander -s manifest HEAD "$name" "$tag" | jq -r ".digest"
 #}
