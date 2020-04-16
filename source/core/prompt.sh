@@ -63,7 +63,7 @@ dc::prompt::credentials() {
 }
 
 dc::prompt::confirm(){
-  local message="$1"
+  local message="${1:-}"
   local _
 
   # Flash it

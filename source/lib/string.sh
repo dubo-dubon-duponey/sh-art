@@ -84,6 +84,7 @@ dc::string::toUpper(){
 
 # ***************** OK
 # shellcheck disable=SC2120
+# XXX this is broken and swallows trailing "n"s
 dc::string::trimSpace(){
   local fd="${1:-/dev/stdin}"
 
