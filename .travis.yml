@@ -20,6 +20,7 @@ matrix:
     - os: osx
       script:
       - cat "$HOME/.profile"
+      - cat "$HOME/.bashrc"
       - exit 1
       - make build
       - make lint
