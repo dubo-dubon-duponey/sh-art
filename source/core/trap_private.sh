@@ -110,11 +110,13 @@ _dc::private::trap::exit() {
   dc::logger::debug "[EXIT TRAPPING] Exit: ${2:-}"
   dc::logger::debug "[EXIT TRAPPING] Command was: ${3:-}"
 
-  for i in "${_DC_PRIVATE_TRAP_CLEAN[@]}"; do
-    dc::logger::debug "[EXIT TRAPPING] Calling clean-up routine: $i"
-    "$i" "$ex" "$(dc::error::detail::get)" "$com" "$lineno"
-  done
-
+  if [ "${#_DC_PRIVATE_TRAP_CLEAN[@]}" -gt 0 ]; then
+    for i in "${_DC_PRIVATE_TRAP_CLEAN[@]}"; do
+      dc::logger::debug "[EXIT TRAPPING] Calling clean-up routine: $i"
+      # Check what happens if cleanup fails
+      "$i" "$ex" "$(dc::error::detail::get)" "$com" "$lineno"
+    done
+  fi
   exit "$ex"
 }
 

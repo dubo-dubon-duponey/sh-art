@@ -4,23 +4,25 @@
 # ------
 # Platforms, binaries, versions
 ##########################################################################
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 dc::require::platform(){
   local required="${1:-}"
 
   dc::argument::check required "$DC_TYPE_STRING" || return
 
-  [[ "$required" == *"$(uname)"* ]] || return "$ERROR_REQUIREMENT_MISSING"
+  [[ "$required" == *"$(dc::internal::securewrap uname)"* ]] || {
+    dc::error::detail::set "$required [$(dc::internal::securewrap uname)]"
+    return "$ERROR_REQUIREMENT_MISSING"
+  }
 }
 
 dc::require::platform::mac(){
-  dc::error::detail::set "macOS"
-  dc::require::platform "$DC_PLATFORM_MAC"
+  dc::require::platform "$DC_PLATFORM_MAC" || return
 }
 
 dc::require::platform::linux(){
-  dc::error::detail::set "linux"
-  dc::require::platform "$DC_PLATFORM_LINUX"
+  dc::require::platform "$DC_PLATFORM_LINUX" || return
 }
 
 # @argument string binary

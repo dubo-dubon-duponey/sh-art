@@ -39,14 +39,14 @@ dc::prompt::question() {
   local message="$1"
   local varname="$2"
 
-  dc::prompt::input "$varname" "$message"
+  dc::prompt::input "$varname" "$message" || return
 }
 
 dc::prompt::password() {
   local message="$1"
   local varname="$2"
 
-  dc::prompt::input "$varname" "$message" silent
+  dc::prompt::input "$varname" "$message" silent || return
 }
 
 dc::prompt::credentials() {
@@ -55,13 +55,13 @@ dc::prompt::credentials() {
   local pmessage="$1"
   local pvarname="$2"
 
-  dc::prompt::question "$message" "$varname"
+  dc::prompt::question "$message" "$varname" || return
 
   # No answer? Stay anonymous
   [ "${!varname}" ] || return 0
 
   # Otherwise, ask for password
-  dc::prompt::password "$pmessage" "$pvarname"
+  dc::prompt::password "$pmessage" "$pvarname" || return
 }
 
 dc::prompt::confirm(){
@@ -73,5 +73,5 @@ dc::prompt::confirm(){
   >&2 dc::internal::securewrap tput flash 2>/dev/null
 
   # Don't care about the return value
-  dc::prompt::input _ "$message"
+  dc::prompt::input _ "$message" || return
 }

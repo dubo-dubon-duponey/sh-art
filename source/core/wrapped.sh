@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
+
 ##########################################################################
 # Wrapped
 # ------
 # "Wrapped" binaries, to manage exit code, portability issues and error output in a sensible / uniform way.
-# Do NOT call binaries directly if they are wrapped.
+# If there is a wrapped version, USE IT
+# If there is no wrapped version, still call dc::internal::securewrap mybinary
 ##########################################################################
 
 # XXX this will freeze if there is no stdin and only one argument for example
@@ -20,7 +23,9 @@ dc::wrapped::grep(){
     # XXX this will fuck up the file descriptor with bash 5.0.16...
 #    dc::internal::securewrap grep -q "gnu" <(dc::internal::securewrap grep --version 2>/dev/null) && _DC_PRIVATE_IS_GNUGREP=1 || true
     # shellcheck disable=SC2015
-    _=$(dc::internal::securewrap grep -q "gnu" <(dc::internal::securewrap grep --version 2>/dev/null)) && _DC_PRIVATE_IS_GNUGREP=1 || true
+    # XXX Did this ever work?
+    # _=$(dc::internal::securewrap grep -q "gnu" <(dc::internal::securewrap grep --version 2>/dev/null)) && _DC_PRIVATE_IS_GNUGREP=1 || true
+    _DC_PRIVATE_IS_GNUGREP=$(dc::internal::securewrap grep -q "gnu" <(dc::internal::securewrap grep --version 2>/dev/null) && printf 1 || true)
     export _DC_PRIVATE_IS_GNUGREP
   fi
 
@@ -70,15 +75,16 @@ dc::wrapped::grep(){
   esac
 }
 
+# Looks like recent versions on macOS support both syntaxes - may be safe to remove this at some point
 dc::wrapped::base64d(){
   dc::require base64 || return
 
   case "$(uname)" in
     Darwin)
-      dc::internal::securewrap base64 -D
+      dc::internal::securewrap base64 -D || return
     ;;
     *)
-      dc::internal::securewrap base64 -d
+      dc::internal::securewrap base64 -d || return
     ;;
   esac
 }

@@ -26,4 +26,3 @@ _dc::private::logger::log(){
   [ ! "$TERM" ] || [ ! -t 2 ] || >&2 dc::internal::securewrap tput op 2>/dev/null || true
   exec 3>&-
 }
-
