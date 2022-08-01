@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
-readonly _here
 _here=$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)
+readonly _here
 
 # shellcheck source=source/cli-tooling/build/base-build.sh
 . "$_here/source/cli-tooling/build/base-build.sh"

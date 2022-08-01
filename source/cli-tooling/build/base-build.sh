@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 dc-tooling::build::append(){
   local source="$1"
@@ -9,7 +10,9 @@ dc-tooling::build::append(){
   while IFS=$'\n' read -r i || [ "$i" ]
   do
     # Ignore file headers
-    if [ "$start" ] || ! printf "%s" "$i" | grep -q "^[ ]*#"; then
+    if [ "$start" ] || {
+      ! printf "%s" "$i" | grep -q "^[ ]*#" && ! printf "%s" "$i" | grep -q "set -o errexit -o errtrace -o functrace -o nounset -o pipefail"
+    }; then
       printf "%s\n" "$i"
       start="done"
     fi
@@ -27,6 +30,8 @@ dc-tooling::build::header(){
 
   cat <<-EOF > "$destination"
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
+
 ##########################################################################
 # $name, $shortdesc
 # Released under $license
