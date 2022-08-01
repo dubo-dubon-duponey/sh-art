@@ -235,3 +235,40 @@ testStdin(){
   i /dev/stdin <<<"9\n" || exitcode=10
   dc-tools::assert::equal "Wrapped function with builtin" 0 "$exitcode"
 }
+
+testBashNeedsToBeShot(){
+  local exitcode
+  local never
+  g(){
+    return 42
+  }
+
+  f1() {
+    g || return
+    never=never_f1
+  }
+
+  f2() {
+    g
+    never=never_f2
+  }
+
+  exitcode=0
+  never=
+  f2 || {
+    exitcode=$?
+  }
+
+  dc-tools::assert::equal "This is fucked up but bash will execute past the failure" never_f2 "$never"
+  dc-tools::assert::equal "This is not right either" 0 "$exitcode"
+
+  exitcode=0
+  never=
+  f1 || {
+    exitcode=$?
+  }
+
+  dc-tools::assert::equal "This is right" "" "$never"
+  dc-tools::assert::equal "This is right" 42 "$exitcode"
+
+}

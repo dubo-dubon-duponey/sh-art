@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 testArgumentCheckHalfBogusConditions() {
-  set +eu
   local exitcode
   local argument
   local regexp
