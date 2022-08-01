@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eu -o pipefail
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 # Integration tests for dc-http cover enough already and more exhaustively
 testSimpleHttp(){
