@@ -84,8 +84,7 @@ _dc::private::trap::signal::ALRM(){
 }
 
 _dc::private::trap::signal::TERM(){
-  [ "$_DC_PRIVATE_TRAP_NO_TERM" ] && return
-  _dc::private::trap::signal "$1" 143 "$3"
+  [ "$_DC_PRIVATE_TRAP_NO_TERM" ] || _dc::private::trap::signal "$1" 143 "$3"
 }
 
 # Trap exit for the actual cleanup
@@ -101,7 +100,7 @@ _dc::private::trap::exit() {
   fi
 
   # dc::logger::debug "Error!"
-  # XXX should kill possible subprocesses hanging around
+  # XXX should kill possible subprocesses hanging around
   # This would SIGTERM the process group (unfortunately means we would catch it again
   # Prevent re-entrancy with SIGTERM
   #sleep 10 &

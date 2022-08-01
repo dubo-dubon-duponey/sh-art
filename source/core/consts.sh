@@ -15,7 +15,7 @@ readonly DC_REVISION=${DC_REVISION:-unknown}
 readonly DC_BUILD_DATE=${DC_BUILD_DATE:-unknown}
 readonly DC_BUILD_PLATFORM=${DC_BUILD_PLATFORM:-unknown}
 
-# shellcheck disable=SC2034
+# shellcheck disable=SC2155,SC2034
 readonly DC_DEFAULT_CLI_NAME=$(basename "$0")
 # shellcheck disable=SC2034
 readonly DC_DEFAULT_CLI_VERSION="$DC_VERSION (dc: $DC_LIB_VERSION)"

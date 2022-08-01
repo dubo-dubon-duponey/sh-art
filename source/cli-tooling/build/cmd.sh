@@ -21,7 +21,7 @@ dc::commander::boot
 # If we have an explicit destination, use that, otherwise, fallback to cwd/bin
 destination="${DC_ARG_DESTINATION:-./bin}"
 
-# By all means, destination must be a writable directory - create if needed
+# By all means, destination must be a writable directory - create if needed
 dc::fs::isdir "$destination" writable create
 
 # Set the final destination

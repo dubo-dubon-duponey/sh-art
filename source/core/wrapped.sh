@@ -24,7 +24,7 @@ dc::wrapped::grep(){
     export _DC_PRIVATE_IS_GNUGREP
   fi
 
-  [ "$_DC_PRIVATE_IS_GNUGREP" ] && extended="-P"
+  [ ! "$_DC_PRIVATE_IS_GNUGREP" ] || extended="-P"
 
   # Guess if we need to pass stdin along or not
   local args=("$extended")

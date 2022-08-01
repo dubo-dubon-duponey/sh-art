@@ -37,8 +37,8 @@ dc::args::parse(){
     value=""
     # Remove a possible second char -
     [ "${name:0:1}" != "-" ] || name=${name:1}
-    # Get the value, if we have an equal sign
-    [[ $name == *"="* ]] && value=${name#*=}
+    # Get the value, if we have an equal sign
+    [[ $name == *"="* ]] && value=${name#*=} || true
     # Now, Get the name
     name="${name%=*}"
     # Clean up the name: replace dash by underscore and uppercase everything
@@ -72,13 +72,13 @@ dc::args::validate(){
   [ ! "$caseInsensitive" ] || args+=(-i)
 
   if [ ! "${!var+x}" ]; then
-    [ "$optional" ] && return
+    [ ! "$optional" ] || return 0
     dc::error::detail::set "$slug"
     return "$ERROR_ARGUMENT_MISSING"
   fi
 
   if [ "$regexp" ]; then
-    [ "$regexp" == "^$" ] && [ ! "${!var}" ] && return
+    [ "$regexp" == "^$" ] && [ ! "${!var}" ] && return || true
     dc::wrapped::grep "${args[@]}" "$regexp" <<<"${!var}" || {
       dc::error::detail::set "$slug (${!var} vs. $regexp)"
       return "$ERROR_ARGUMENT_INVALID"

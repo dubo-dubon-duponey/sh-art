@@ -30,7 +30,7 @@ dc-tooling::build::header(){
 ##########################################################################
 # $name, $shortdesc
 # Released under $license
-# Copyright (c) $(date +"%Y") $owner
+# Copyright (c) $(date +"%Y") $owner
 ##########################################################################
 EOF
 }

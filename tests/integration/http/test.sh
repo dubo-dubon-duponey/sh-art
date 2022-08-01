@@ -29,7 +29,7 @@ testHTTPUnexpectedTLS(){
   local exitcode
 
   exitcode=0
-  # HTTP on HTTPS
+  # HTTP on HTTPS
   result=$(dc-http -s -m=HEAD https://www.google.com:80) || exitcode=$?
   dc-tools::assert::equal "${FUNCNAME[0]} exit code" "NETWORK" "$(dc::error::lookup $exitcode)"
   dc-tools::assert::equal "${FUNCNAME[0]} result" "$result" ""
@@ -39,7 +39,7 @@ testHTTPUnexpectedNoTLS(){
   local exitcode
 
   exitcode=0
-  # HTTPS on HTTP
+  # HTTPS on HTTP
   result=$(dc-http -s -m=HEAD http://www.google.com:443) || exitcode=$?
   dc-tools::assert::equal "${FUNCNAME[0]} exit code" "NETWORK" "$(dc::error::lookup $exitcode)"
   dc-tools::assert::equal "${FUNCNAME[0]} result" "$result" ""

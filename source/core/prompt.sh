@@ -56,7 +56,7 @@ dc::prompt::credentials() {
   dc::prompt::question "$message" "$varname"
 
   # No answer? Stay anonymous
-  [ ! "${!varname}" ] && return
+  [ "${!varname}" ] || return 0
 
   # Otherwise, ask for password
   dc::prompt::password "$pmessage" "$pvarname"

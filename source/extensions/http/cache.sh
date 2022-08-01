@@ -33,11 +33,12 @@ dc-ext::http-cache::request(){
     export DC_HTTP_CACHE=miss
     body="$(_dc_internal_ext::simplerequest "$url" "$method" "" /dev/stdout "$@")"
     # Insert in the database
-    dc-ext::sqlite::insert "dchttp" "url, method, content" "'$url', '$method', '$body'"
+    if [ "$DC_HTTP_STATUS" == 200 ]; then
+      dc-ext::sqlite::insert "dchttp" "url, method, content" "'$url', '$method', '$body'"
+    fi
   fi
   printf "%s" "$body"
 }
-
 
 _dc_internal_ext::simplerequest(){
   dc::http::request "$@" | base64 || return

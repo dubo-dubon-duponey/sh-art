@@ -74,7 +74,7 @@ dc::internal::version::get(){
       break
     fi
   # XXX interestingly, some application will output the result on stderr/stdout (jq version 1.3 is such an example)
-  # We do not try to workaround here and drop stderr altogether
+  # We do not try to workaround here and drop stderr altogether
   done <<< "$("$binary" "$versionFlag" 2>/dev/null)"
 }
 

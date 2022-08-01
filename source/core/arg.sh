@@ -18,7 +18,7 @@ dc::argument::check(){
       [ "$grepreturn" == 145 ] && {
         dc::error::detail::set "$1 ($value - $regexp)"
         return "$ERROR_ARGUMENT_INVALID"
-      }
+      } || true
       return "$grepreturn"
     }
 }

@@ -15,7 +15,7 @@ _dc::private::logger::log(){
   local style="DC_LOGGER_STYLE_${prefix}[@]"
   local i
 
-  [ "$_DC_PRIVATE_LOGGER_LEVEL" -lt "${!level}" ] && return
+  [ "$_DC_PRIVATE_LOGGER_LEVEL" -ge "${!level}" ] || return 0
 
   # If you wonder about why that crazy shit: https://stackoverflow.com/questions/12674783/bash-double-process-substitution-gives-bad-file-descriptor
   exec 3>&2

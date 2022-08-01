@@ -46,4 +46,4 @@ dc::error::register(){
   readonly "ERROR_${name?}"
 }
 
-# TODO: introduce a reverse lookup method and have all return statements use it instead (guarantee no typo and no unintenional return 0
+# TODO: introduce a reverse lookup method and have all return statements use it instead (guarantee no typo and no unintentional return 0

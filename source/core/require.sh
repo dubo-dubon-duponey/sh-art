@@ -57,7 +57,7 @@ dc::require(){
     # declare -g "${varname?}"=true
   fi
 
-  [ ! "$version" ] && return
+  [ "$version" ] || return 0
 
   dc::argument::check version "$DC_TYPE_FLOAT" || return
   [ ! "$versionFlag" ] || dc::argument::check versionFlag "$DC_TYPE_STRING" || return

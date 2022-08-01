@@ -38,7 +38,7 @@ DC_LICENSE := MIT License
 #######################################################
 all: build lint test test-all
 
-# Make happy
+# Make happy
 .PHONY: build-tooling build-library build-binaries lint-signed lint-code test-unit test-integration test-all build lint test clean
 
 #######################################################

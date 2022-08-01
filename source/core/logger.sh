@@ -20,7 +20,7 @@ dc::logger::level::set() {
     _dc::private::logger::log "WARNING" "[Logger] YOU ARE LOGGING AT THE DEBUG LEVEL. This is NOT recommended for production use, and WILL LIKELY LEAK sensitive information to stderr."
 }
 
-# Sugar
+# Sugar
 dc::logger::level::set::debug(){
   dc::logger::level::set "$DC_LOGGER_DEBUG"
 }
