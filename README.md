@@ -22,7 +22,8 @@ Or start your own `foobar` script:
 
 ```bash
 #!/usr/bin/env bash
-set -eu -o pipefail
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
+
 
 . "$(brew --prefix)/lib/dc-sh-art"
 

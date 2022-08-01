@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 testGnuGrep(){
   local exitcode
@@ -20,7 +21,7 @@ testGnuGrep(){
 
   # A bit tricky, but since grep itself is used to match grep output, this always match, hence will say "yes we have gnu grep"
   grep(){
-    return 0
+    true
   }
 
   exitcode=0
@@ -54,4 +55,13 @@ testGrep(){
   exitcode=0
   dc::wrapped::grep || exitcode="$?"
   dc-tools::assert::equal "grep not match" "BINARY_UNKNOWN_ERROR" "$(dc::error::lookup $exitcode)"
+}
+
+testbase64(){
+  local exitcode=0
+  local result
+
+  result="$(dc::wrapped::base64d <<<"bG9sCg==" || exitcode="$?")"
+  dc-tools::assert::equal "base64" "0" "$exitcode"
+  dc-tools::assert::equal "base64 res" "lol" "$result"
 }

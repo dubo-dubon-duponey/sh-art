@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
+
 ##########################################################################
-# Private helpers
-# ------
-# Do NOT use them unless you know what you do
-# Will change without notification
+# Entrypoint: grep
 ##########################################################################
 
 _dc::private::has::grep(){
@@ -13,5 +12,4 @@ _dc::private::has::grep(){
   fi
 }
 
-# XXX move this elsewhere? Or fail here?
 _dc::private::has::grep || exit
