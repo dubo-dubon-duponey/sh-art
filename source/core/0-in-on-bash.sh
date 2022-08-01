@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
+
 ##########################################################################
 # Entrypoint: bash
 # ------
@@ -6,10 +8,9 @@
 # The purpose of this is ONLY to ensure we are running with bash.
 # The "date" binary is being called on, though it will fail gracefully if not here.
 # This works better with ps, though we can survive without.
+# Trying very hard here to have this run on all shells (so, no fancy function name, etc)
 ##########################################################################
 
-# Ensure we are running with bash
-# Trying very hard here to have this run on all shells (so, no fancy function name, etc)
 _dc_private_hasBash(){
   local psout
 
@@ -18,7 +19,7 @@ _dc_private_hasBash(){
     # And this is good, but... busybox will fail on -p...
     if ! psout="$(ps -p $$ -c -o command= 2>/dev/null)"; then
       >&2 printf "[%s] WARNING: %s\n" "$(date 2>/dev/null || true)" "Your ps does not support -p (busybox?)"
-      # This is dangerously not robust - extra care has to be taken to avoid collisions on the pid (escpecially in a docker build context where pid=1)
+      # This is dangerously not robust - extra care has to be taken to avoid collisions on the pid (especially in a docker build context where pid=1)
       # shellcheck disable=SC2009
       psout="$(ps -o ppid,comm | grep "^\s*$$ ")"
       psout="${psout##* }"
@@ -54,5 +55,3 @@ _dc_private_hasBash(){
 }
 
 _dc_private_hasBash || exit
-
-set -eu -o pipefail
