@@ -19,7 +19,10 @@ dc::require::platform::mac
 directory=${DC_ARG_SOURCE:-$(pwd)}
 dc::fs::isdir "$directory"
 
-iname="${DC_ARG_FILE%.iso$*:-$(basename "$directory")}"
+# XXX did this ever work?
+#iname="${DC_ARG_FILE%.iso$*:-$(basename "$directory")}"
+iname="${DC_ARG_FILE%.iso}"
+iname="${iname:-$(basename "$directory")}"
 vname="${DC_ARG_NAME:-$iname}"
 
 case "$DC_ARG_1" in

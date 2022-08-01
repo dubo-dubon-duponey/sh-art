@@ -61,7 +61,7 @@ testbase64(){
   local exitcode=0
   local result
 
-  result="$(dc::wrapped::base64d <<<"bG9sCg==" || exitcode="$?")"
+  result="$(dc::wrapped::base64d <<<"bG9sCg==")" || exitcode="$?"
   dc-tools::assert::equal "base64" "0" "$exitcode"
   dc-tools::assert::equal "base64 res" "lol" "$result"
 }

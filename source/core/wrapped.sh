@@ -23,9 +23,8 @@ dc::wrapped::grep(){
     # XXX this will fuck up the file descriptor with bash 5.0.16...
 #    dc::internal::securewrap grep -q "gnu" <(dc::internal::securewrap grep --version 2>/dev/null) && _DC_PRIVATE_IS_GNUGREP=1 || true
     # shellcheck disable=SC2015
-    # XXX Did this ever work?
-    # _=$(dc::internal::securewrap grep -q "gnu" <(dc::internal::securewrap grep --version 2>/dev/null)) && _DC_PRIVATE_IS_GNUGREP=1 || true
-    _DC_PRIVATE_IS_GNUGREP=$(dc::internal::securewrap grep -q "gnu" <(dc::internal::securewrap grep --version 2>/dev/null) && printf 1 || true)
+    _=$(dc::internal::securewrap grep -q "gnu" <(dc::internal::securewrap grep --version 2>/dev/null)) && _DC_PRIVATE_IS_GNUGREP=1 || true
+    #_DC_PRIVATE_IS_GNUGREP=$(dc::internal::securewrap grep -q "gnu" <(dc::internal::securewrap grep --version 2>/dev/null) && printf 1 || true)
     export _DC_PRIVATE_IS_GNUGREP
   fi
 

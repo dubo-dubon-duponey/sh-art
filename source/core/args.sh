@@ -40,6 +40,7 @@ dc::args::parse(){
     # Remove a possible second char -
     [ "${name:0:1}" != "-" ] || name=${name:1}
     # Get the value, if we have an equal sign
+    # shellcheck disable=SC2015
     [[ $name == *"="* ]] && value=${name#*=} || true
     # Now, Get the name
     name="${name%=*}"
@@ -80,6 +81,7 @@ dc::args::validate(){
   fi
 
   if [ "$regexp" ]; then
+    # shellcheck disable=SC2015
     [ "$regexp" == "^$" ] && [ ! "${!var}" ] && return || true
     dc::wrapped::grep "${args[@]}" "$regexp" <<<"${!var}" || {
       dc::error::detail::set "$slug (${!var} vs. $regexp)"

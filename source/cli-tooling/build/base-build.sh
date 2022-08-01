@@ -30,8 +30,6 @@ dc-tooling::build::header(){
 
   cat <<-EOF > "$destination"
 #!/usr/bin/env bash
-set -o errexit -o errtrace -o functrace -o nounset -o pipefail
-
 ##########################################################################
 # $name, $shortdesc
 # Released under $license
@@ -43,6 +41,10 @@ EOF
 dc-tooling::build::disable(){
   local destination="$1"
   printf "# shellcheck disable=%s\n" "$2" >> "$destination"
+}
+
+dc-tooling::build::set(){
+  set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 }
 
 dc-tooling::build::version(){

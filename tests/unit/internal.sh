@@ -152,27 +152,27 @@ testInternalVersionGetOkBinary(){
   }
 
   exitcode=0
-  result="$(PATH= dc::internal::version::get bin1)" || exitcode=$?
+  result="$(PATH="" dc::internal::version::get bin1)" || exitcode=$?
   dc-tools::assert::equal "vget" "0" "$exitcode"
   dc-tools::assert::equal "vget" "42.42" "$result"
 
   exitcode=0
-  result="$(PATH= dc::internal::version::get bin2)" || exitcode=$?
+  result="$(PATH="" dc::internal::version::get bin2)" || exitcode=$?
   dc-tools::assert::equal "vget" "0" "$exitcode"
   dc-tools::assert::equal "vget" "42" "$result"
 
   exitcode=0
-  result="$(PATH= dc::internal::version::get bin3)" || exitcode=$?
+  result="$(PATH="" dc::internal::version::get bin3)" || exitcode=$?
   dc-tools::assert::equal "vget" "0" "$exitcode"
   dc-tools::assert::equal "vget" "4" "$result"
 
   exitcode=0
-  result="$(PATH= dc::internal::version::get bin4)" || exitcode=$?
+  result="$(PATH="" dc::internal::version::get bin4)" || exitcode=$?
   dc-tools::assert::equal "vget" "0" "$exitcode"
   dc-tools::assert::equal "vget" "4.4" "$result"
 
   exitcode=0
-  result="$(PATH= dc::internal::version::get bin5)" || exitcode=$?
+  result="$(PATH="" dc::internal::version::get bin5)" || exitcode=$?
   dc-tools::assert::equal "vget" "0" "$exitcode"
   dc-tools::assert::equal "vget" "42.42" "$result"
 
@@ -190,12 +190,12 @@ testInternalVersionCustomOkBinary(){
   }
 
   exitcode=0
-  result="$(PATH= dc::internal::version::get bin --give-it-to-me)" || exitcode=$?
+  result="$(PATH="" dc::internal::version::get bin --give-it-to-me)" || exitcode=$?
   dc-tools::assert::equal "vget" "0" "$exitcode"
   dc-tools::assert::equal "vget" "42" "$result"
 
   exitcode=0
-  result="$(PATH= dc::internal::version::get bin)" || exitcode=$?
+  result="$(PATH="" dc::internal::version::get bin)" || exitcode=$?
   dc-tools::assert::equal "vget" "0" "$exitcode"
   dc-tools::assert::equal "vget" "" "$result"
 
@@ -211,7 +211,7 @@ testInternalVersionCustomOkBinary(){
   }
 
   exitcode=0
-  result="$(PATH= dc::internal::version::get bin --give-it-to-me)" || exitcode=$?
+  result="$(PATH="" dc::internal::version::get bin --give-it-to-me)" || exitcode=$?
   dc-tools::assert::equal "vget" "0" "$exitcode"
   dc-tools::assert::equal "vget" "42.32" "$result"
 }

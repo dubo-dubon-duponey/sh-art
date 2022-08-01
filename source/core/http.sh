@@ -80,6 +80,7 @@ dc::wrapped::curl(){
     value="${line#*: }"
 
     # Expunge what we log
+    # shellcheck disable=SC2015
     [ "$_DC_PRIVATE_HTTP_REDACT" ] && [[ "${_DC_PRIVATE_HTTP_PROTECTED_HEADERS[*]}" == *"$key"* ]] && value=REDACTED || true
     dc::logger::debug "[dc-http] $key | $value"
 
@@ -143,6 +144,7 @@ dc::http::dump::headers() {
 
   for i in "${DC_HTTP_HEADERS[@]}"; do
     value=DC_HTTP_HEADER_$i
+    # shellcheck disable=SC2015
     [ "$_DC_PRIVATE_HTTP_REDACT" ] && [[ "${_DC_PRIVATE_HTTP_PROTECTED_HEADERS[*]}" == *"$i"* ]] && value=redacted || true
     dc::logger::warning "[dc-http] $i: ${!value}"
   done
@@ -180,10 +182,12 @@ dc::http::request(){
   # Log the command
   for i in "${curlOpts[@]}"; do
     # -args are logged as-is
+    # shellcheck disable=SC2015
     [ "${i:0:1}" == "-" ] && output="$output $i" && continue || true
 
     # If we redact, filter out sensitive headers
     # XXX this is overly aggressive, and will match any header that is a substring of one of the protected headers
+    # shellcheck disable=SC2015
     [ "$_DC_PRIVATE_HTTP_REDACT" ] && [[ "${_DC_PRIVATE_HTTP_PROTECTED_HEADERS[*]}" == *$(printf "%s" "${i%%:*}" | tr '[:upper:]' '[:lower:]')* ]] \
       && output="$output \"${i%%:*}: REDACTED\"" \
       && continue || true

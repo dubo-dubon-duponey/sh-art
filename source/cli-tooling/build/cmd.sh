@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-
-true
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 # shellcheck disable=SC2034
 readonly CLI_DESC="a lightweight script builder"
@@ -33,6 +32,7 @@ dc-tooling::build::header "$destination" "${DC_ARG_DESCRIPTION:-another fancy pi
 # Add git information
 # Always use the last argument as git information source (first arg may be a library out of the tree)
 ! dc::args::exist shellcheck-disable || dc-tooling::build::disable "$destination" "$DC_ARG_SHELLCHECK_DISABLE"
+dc-tooling::build::set
 ! dc::args::exist with-git-info || dc-tooling::build::version "$destination" "${@: -1}" "$DC_ARG_WITH_GIT_INFO"
 
 # XXX somewhat cavalier

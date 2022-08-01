@@ -17,6 +17,7 @@ dc::argument::check(){
   dc::wrapped::grep -q "$regexp" <<< "$value" \
     || {
       grepreturn="$?"
+      # shellcheck disable=SC2015
       [ "$grepreturn" == 145 ] && {
         dc::error::detail::set "$1 ($value - $regexp)"
         return "$ERROR_ARGUMENT_INVALID"
