@@ -13,7 +13,8 @@ export _DC_INTERNAL_CLI_OPTS=()
 
 dc::commander::requirements(){
   # Can't really do anything without this
-  dc::require printf || return
+  # Note: we would have failed before if it was not there
+  # dc::require printf || return
 
   # We have to use this in a number of occasions (bash 3), and of course for prompting, etc
   dc::require read || return
@@ -27,7 +28,7 @@ dc::commander::requirements(){
   }
 
   dc::require date || {
-    dc::logger::warning "You are missing the date binary. No date in lgos for you."
+    dc::logger::warning "You are missing the date binary. No date in logs for you."
   }
 
   dc::require sed || {
@@ -152,7 +153,7 @@ dc::commander::declare::arg(){
   fi
 
   # Otherwise, validate
-  dc::args::validate "$number" "$validator" "$optional" || exit
+  dc::args::validate "$number" "$validator" "$optional" || return
 }
 
 dc::commander::declare::flag(){
@@ -200,10 +201,10 @@ dc::commander::declare::flag(){
       return "$ERROR_ARGUMENT_INVALID"
     fi
     # Ok? Validate the alias
-    dc::args::validate "$alias" "$validator" "$optional" || exit
+    dc::args::validate "$alias" "$validator" "$optional" || return
   else
     # Otherwise, the main arg
-    dc::args::validate "$name" "$validator" "$optional" || exit
+    dc::args::validate "$name" "$validator" "$optional" || return
   fi
 }
 
@@ -284,5 +285,4 @@ dc::commander::boot(){
     dc::commander::version "${CLI_NAME:-${DC_DEFAULT_CLI_NAME}}" "${CLI_VERSION:-${DC_DEFAULT_CLI_VERSION}}"
     exit
   fi
-
 }

@@ -129,8 +129,8 @@ dc::error::handler(){
 
   dc::logger::debug "Runtime information" \
     "uname: $(uname -a || true)" \
-    "bash: $(command -v bash || true) $(dc::internal::version::get bash || true)" \
-    "grep: $(command -v grep || true) $(dc::internal::version::get grep || true)" \
+    "bash: $(command -v bash || true) $(dc::internal::version::get bash)" \
+    "grep: $(command -v grep || true) $(dc::internal::version::get grep)" \
     "ps: $(command -v ps || true)" \
     "[: $(command -v \[ || true)" \
     "tput: $(command -v tput || true)" \
@@ -142,16 +142,16 @@ dc::error::handler(){
     "rm: $(command -v rm || true)" \
     "mkdir: $(command -v mkdir || true)" \
     "mktemp: $(command -v mktemp || true)" \
-    "curl: $(command -v curl || true) $(dc::internal::version::get curl || true)" \
-    "jq: $(command -v jq || true) $(dc::internal::version::get jq || true)" \
-    "openssl: $(command -v openssl || true) $(dc::internal::version::get openssl version || true)" \
-    "shasum: $(command -v shasum || true) $(dc::internal::version::get shasum || true)" \
-    "sqlite3: $(command -v sqlite3 || true) $(dc::internal::version::get sqlite3 || true)" \
-    "uchardet: $(command -v uchardet || true) $(dc::internal::version::get uchardet || true)" \
-    "iconv: $(command -v iconv || true) $(dc::internal::version::get iconv || true)" \
-    "make: $(command -v make || true) $(dc::internal::version::get make || true)" \
-    "git: $(command -v git || true) $(dc::internal::version::get git || true)" \
-    "gcc: $(command -v gcc || true) $(dc::internal::version::get gcc || true)" \
+    "curl: $(command -v curl || true) $(dc::internal::version::get curl)" \
+    "jq: $(command -v jq || true) $(dc::internal::version::get jq)" \
+    "openssl: $(command -v openssl || true) $(dc::internal::version::get openssl version)" \
+    "shasum: $(command -v shasum || true) $(dc::internal::version::get shasum)" \
+    "sqlite3: $(command -v sqlite3 || true) $(dc::internal::version::get sqlite3)" \
+    "uchardet: $(command -v uchardet || true) $(dc::internal::version::get uchardet)" \
+    "iconv: $(command -v iconv || true) $(dc::internal::version::get iconv)" \
+    "make: $(command -v make || true) $(dc::internal::version::get make)" \
+    "git: $(command -v git || true) $(dc::internal::version::get git)" \
+    "gcc: $(command -v gcc || true) $(dc::internal::version::get gcc)" \
     "PATH: $PATH" \
     "ENV: $(env)"
 }
