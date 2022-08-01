@@ -33,6 +33,7 @@ dc::require::platform::linux(){
 # @argument [string provider]
 # @returns REQUIREMENT_MISSING
 # @returns ARGUMENT_INVALID
+# XXX this is likely breaking shit on bash5 - just wrap everything (eg: command -v at least)
 dc::require(){
   local binary="${1:-}"
   local version="${2:-}"

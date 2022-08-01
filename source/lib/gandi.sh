@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 export DC_PRIVATE_APIKEY="you need to set this to your gandi API key by calling gandi::requestor::init"
 

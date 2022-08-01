@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-
-true
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 # shellcheck disable=SC2034
 readonly CLI_DESC="direct access to the dc core library methods"

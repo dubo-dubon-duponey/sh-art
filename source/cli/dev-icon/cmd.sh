@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
-true
 # shellcheck disable=SC2034
 readonly CLI_DESC="makes macos and windows icons out of a png file"
 

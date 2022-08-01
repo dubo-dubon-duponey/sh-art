@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 # XXX this is a POC implementation
 # Input is NOT sanitized, and very likely to be prone to injections if left unchecked
 # Do NOT rely on this for anything sensitive
+# Actually, just do NOT rely on this
 
 _DC_EXT_SQLITE_DB=
 

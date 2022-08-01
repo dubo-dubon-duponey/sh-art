@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
-true
 # shellcheck disable=SC2034
 readonly CLI_DESC="creates or mount/unmount iso files from a folder (because I never remember makehybrid syntax)"
 

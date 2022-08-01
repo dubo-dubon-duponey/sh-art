@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 dc::wrapped::shasum(){
   # XXX bash5 makes this fail

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 # Crypto
 dc::internal::error::register CRYPTO_SHASUM_WRONG_ALGORITHM
