@@ -263,8 +263,9 @@ dc::commander::initialize(){
 }
 
 dc::commander::boot(){
+  local forcehelp="${1:-}"
   # If we have been asked for --help or -h, show help
-  if dc::args::exist help || dc::args::exist h; then
+  if dc::args::exist help || dc::args::exist h || [ "$forcehelp" ]; then
 
     local opts=
     local i
