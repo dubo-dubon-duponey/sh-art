@@ -41,7 +41,13 @@ testInternalWrapBash3(){
 
   exitcode=0
   a <(printf "1\n") >/dev/null 2>&1 || exitcode="$?"
-  dc-tools::assert::equal "bash3 shitting itself" "1" "$exitcode"
+
+  bv="$(dc::internal::version::get bash)"
+  if [ "${bv%.*}" == 3 ]; then
+    dc-tools::assert::equal "bash3 shitting itself" "1" "$exitcode"
+  else
+    dc-tools::assert::equal "bash other work fine" "0" "$exitcode"
+  fi
 
   exitcode=0
   b <(printf "1\n") >/dev/null || exitcode="$?"
