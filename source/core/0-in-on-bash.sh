@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-set -o errexit -o errtrace -o functrace -o nounset -o pipefail
-
 ##########################################################################
 # Entrypoint: bash
 # ------
@@ -26,6 +24,7 @@ _dc_private_hasBash(){
       psout="${psout##*-}"
       psout="${psout##*/}"
     fi
+
     # So, not bash? Fail and exit
     if [ "$psout" != "bash" ]; then
       >&2 printf "[%s] ERROR: %s\n" "$(date 2>/dev/null || true)" "This only works with bash."
