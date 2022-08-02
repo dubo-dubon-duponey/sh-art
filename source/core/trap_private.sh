@@ -45,11 +45,15 @@ _DC_PRIVATE_TRAP_CLEAN=()
 
 _DC_PRIVATE_SIGNALS=("" "SIGHUP" "SIGINT" "SIGQUIT" "" "" "SIGABRT" "" "" "SIGKILL" "" "" "" "" "SIGALRM" "SIGTERM")
 
+_DC_PRIVATE_LASTLNO=
+
 _dc::private::trap::signal() {
   # Drop the line number, it's always 1 with signals
   local _="${1:-}"
   local ex="${2:-1}" # In case all turns to shit, fallback to exit 1
   local idx
+
+  _DC_PRIVATE_LASTLNO="${1:-}"
 
   idx=$(( ex - 128 ))
   dc::logger::debug "[SIGNAL TRAPPING] Error at line ${1:-}"
@@ -101,6 +105,9 @@ _dc::private::trap::exit() {
     return
   fi
 
+  # Bash5
+  [ "$lineno" != "1" ] || lineno="$_DC_PRIVATE_LASTLNO"
+
   # dc::logger::debug "Error!"
   # XXX should kill possible subprocesses hanging around
   # This would SIGTERM the process group (unfortunately means we would catch it again
@@ -108,7 +115,7 @@ _dc::private::trap::exit() {
   #sleep 10 &
   # _DC_PRIVATE_TRAP_NO_TERM=true
   # kill -TERM -$$
-  dc::logger::debug "[EXIT TRAPPING] Error at line ${1:-}"
+  dc::logger::debug "[EXIT TRAPPING] Error at line $lineno"
   dc::logger::debug "[EXIT TRAPPING] Exit: ${2:-}"
   dc::logger::debug "[EXIT TRAPPING] Command was: ${3:-}"
 
@@ -123,6 +130,7 @@ _dc::private::trap::exit() {
 }
 
 _dc::private::trap::err() {
+  _DC_PRIVATE_LASTLNO="${1:-}"
   dc::logger::debug "[ERROR TRAPPING] Error at line ${1:-}"
   dc::logger::debug "[ERROR TRAPPING] Exit: ${2:-}"
   dc::logger::debug "[ERROR TRAPPING] Command was: ${3:-}"
