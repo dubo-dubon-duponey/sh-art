@@ -1,4 +1,5 @@
 #! /bin/sh
+# shellcheck disable=SC2086
 # vim:et:ft=sh:sts=2:sw=2
 #
 # shUnit2 -- Unit testing framework for Unix shell scripts.

@@ -176,13 +176,13 @@ testNamedPipes(){
   return
 
   # XXX somehow, the while in wrapped grep was breaking, but this is not reproducing for some reason...
-  exitcode=0
-  k <(printf "11\n") || exitcode=10
-  if [ "${bv%.*}" == 3 ] || [ "$is5016" ]; then
-    dc-tools::assert::equal "Function with external binary" 10 "$exitcode"
-  else
-    dc-tools::assert::equal "Function with external binary" 0 "$exitcode"
-  fi
+  #exitcode=0
+  #k <(printf "11\n") || exitcode=10
+  #if [ "${bv%.*}" == 3 ] || [ "$is5016" ]; then
+  #  dc-tools::assert::equal "Function with external binary" 10 "$exitcode"
+  #else
+  #  dc-tools::assert::equal "Function with external binary" 0 "$exitcode"
+  #fi
 
 }
 

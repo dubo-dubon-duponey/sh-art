@@ -2,9 +2,6 @@
 
 > just a piece of shcript
 
-[![Build Status](https://travis-ci.org/dubo-dubon-duponey/sh-art.svg?branch=master)](https://travis-ci.org/dubo-dubon-duponey/sh-art)
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fdubo-dubon-duponey%2Fsh-art.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fdubo-dubon-duponey%2Fsh-art?ref=badge_shield)
-
 A robust bash library (bash 3 to 5) meant to ease the development of complex command line shell script utilities.
 
 Specifically, it takes care of argument parsing and validation, exception handling, logging, http, string manipulation, 
@@ -90,7 +87,3 @@ Specific binaries (the `dc-tooling-*`) may also require additional binaries like
 
  * it's a portementeau: "sh" (short for "shell") + "art" (short for "I like it"), which somewhat makes sense
  * if it was powershell instead of bash, it would probably have been named `phart`, which doesn't really sound right
-
-## License
-
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fdubo-dubon-duponey%2Fsh-art.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fdubo-dubon-duponey%2Fsh-art?ref=badge_large)

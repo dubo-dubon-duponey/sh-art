@@ -33,7 +33,11 @@ dc::internal::securewrap(){
 
   exec 3>&1
   exec 4>&2
-  _="$($com "$@" 2>&4 1>&3)" || exit=$?
+  # XXX validate this is right
+  # This will avoid triggering trap ERR at this line, which is just noise
+  # Question though: are we missing up output here?
+  #_="$($com "$@" 2>&4 1>&3)" || exit=$?
+  exit="$($com "$@" 2>&4 1>&3 || printf "%s" "$?")"
   if [ "$exit" ]; then
     exec 3>&-
     exec 4>&-

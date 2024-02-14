@@ -23,7 +23,7 @@ dc-tooling::sc::filecheck(){
 }
 
 dc-tooling::sc::dircheck(){
-  local error
+  local error=
 # XXX neither approach are satisfying...
 #  git ls-tree -r HEAD | dc::wrapped::grep -E '^1007|.*\..*sh$' | awk '{print $4}' | dc::wrapped::grep -v tests
   while read -r script; do

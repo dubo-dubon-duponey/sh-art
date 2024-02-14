@@ -70,6 +70,7 @@ testInternalVarNormTransform(){
   dc-tools::assert::equal "varnorm" "FOOBAR_BAZ" "$result"
 }
 
+# shellcheck disable=SC2317
 testInternalVarNormMissingTR(){
   local exitcode
   local result
@@ -89,6 +90,7 @@ testInternalVarNormMissingTR(){
   dc-tools::assert::equal "varnorm" "foobar_baz" "$result"
 }
 
+# shellcheck disable=SC2317
 testInternalVarNormBarfingTR(){
   local exitcode
   local result
@@ -119,6 +121,7 @@ testInternalVersionGetMissingBinary(){
   dc-tools::assert::equal "vget" "" "$result"
 }
 
+# shellcheck disable=SC2317
 testInternalVersionGetBorkedBinary(){
   local exitcode
   local result
@@ -133,6 +136,7 @@ testInternalVersionGetBorkedBinary(){
   dc-tools::assert::equal "vget" "" "$result"
 }
 
+# shellcheck disable=SC2317
 testInternalVersionGetOkBinary(){
   local exitcode
   local result
@@ -185,6 +189,7 @@ testInternalVersionGetOkBinary(){
 
 }
 
+# shellcheck disable=SC2317
 testInternalVersionCustomOkBinary(){
   local exitcode
   local result
@@ -207,6 +212,7 @@ testInternalVersionCustomOkBinary(){
 
 }
 
+# shellcheck disable=SC2317
 testInternalVersionCustomOkBinary(){
   local exitcode
   local result

@@ -262,10 +262,11 @@ dc::commander::initialize(){
   ! dc::args::exist insecure || dc::http::insecure::set
 }
 
+# shellcheck disable=SC2120
 dc::commander::boot(){
-  local forcehelp="${1:-}"
+  local forceHelp="${1:-}"
   # If we have been asked for --help or -h, show help
-  if dc::args::exist help || dc::args::exist h || [ "$forcehelp" ]; then
+  if dc::args::exist help || dc::args::exist h || [ "$forceHelp" ]; then
 
     local opts=
     local i
