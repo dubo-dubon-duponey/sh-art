@@ -87,7 +87,7 @@ testHTTPValidGET(){
 
   exitcode=0
   # Valid GET request
-  result=$(dc-http -s -m=GET https://registry-1.docker.io/v2) || exitcode=$?
+  result=$(dc-http -s -m=GET https://registry-1.docker.io/v2/) || exitcode=$?
   dc-tools::assert::equal "${FUNCNAME[0]} exit code" "0" "$exitcode"
 
   status="$(printf "%s" "$result" | jq -r -c .status)"
@@ -95,6 +95,6 @@ testHTTPValidGET(){
   body="$(printf "%s" "$result" | jq -r -c .body | dc::wrapped::base64d)"
   headers="$(printf "%s" "$result" | jq -r -c .headers)"
   dc-tools::assert::equal "${FUNCNAME[0]} status" "$status" "401"
-  dc-tools::assert::equal "${FUNCNAME[0]} redirected" "$redirected" "/v2/"
+  dc-tools::assert::equal "${FUNCNAME[0]} redirected" "$redirected" ""
   dc-tools::assert::equal "${FUNCNAME[0]} body" '{"errors":[{"code":"UNAUTHORIZED","message":"authentication required","detail":null}]}' "$body"
 }

@@ -19,9 +19,9 @@ dc::require::platform::mac
 directory=${DC_ARG_SOURCE:-$(pwd)}
 dc::fs::isdir "$directory"
 
-# XXX did this ever work?
-#iname="${DC_ARG_FILE%.iso$*:-$(basename "$directory")}"
-iname="${DC_ARG_FILE%.iso}"
+# This: iname="${DC_ARG_FILE%.iso$*:-$(basename "$directory")}"
+# BASHBUG Works with bash3, but not bash5...
+[ -z "${DC_ARG_FILE+x}" ] || iname="${DC_ARG_FILE%.iso$*}"
 iname="${iname:-$(basename "$directory")}"
 vname="${DC_ARG_NAME:-$iname}"
 

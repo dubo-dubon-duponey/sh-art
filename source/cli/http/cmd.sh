@@ -61,7 +61,7 @@ for i in "${DC_HTTP_HEADERS[@]}"; do
   heads="$heads\"$i\": \"$value\""
 done
 
-output=$( printf "%s" "{$heads}" | jq --arg body "$(dc::wrapped::base64d -i "$tmpfile")" --arg status "$DC_HTTP_STATUS" --arg location "${DC_HTTP_REDIRECTED}" -r '{
+output=$( printf "%s" "{$heads}" | jq --arg body "$(base64 -i "$tmpfile")" --arg status "$DC_HTTP_STATUS" --arg location "${DC_HTTP_REDIRECTED}" -r '{
   status: $status,
   redirected: $location,
   headers: .,

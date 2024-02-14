@@ -75,15 +75,17 @@ dc::wrapped::grep(){
 }
 
 # Looks like recent versions on macOS support both syntaxes - may be safe to remove this at some point
+# XXX we are not capturing stderr on this properly, like we should (error::set and throw)
+# Also wtf - we cant encode anymore?
 dc::wrapped::base64d(){
   dc::require base64 || return
 
   case "$(uname)" in
     Darwin)
-      dc::internal::securewrap base64 -D || return
+      dc::internal::securewrap base64 -D "$@" || return
     ;;
     *)
-      dc::internal::securewrap base64 -d || return
+      dc::internal::securewrap base64 -d "$@" || return
     ;;
   esac
 }
