@@ -5,6 +5,7 @@ RUN apk add --no-cache make git ncurses gnupg
 RUN apk add --no-cache bash grep curl perl-utils libressl jq sqlite # docker-cli
 ENV DC_PREFIX=/tmp
 USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
 
 ##################################################################
 FROM com.dbdbdp.dckr:alpine-317 as alpine-317
@@ -13,6 +14,7 @@ RUN apk add --no-cache make git ncurses gnupg
 RUN apk add --no-cache bash grep curl perl-utils libressl jq sqlite # docker-cli
 ENV DC_PREFIX=/tmp
 USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
 
 ##################################################################
 FROM com.dbdbdp.dckr:alpine-318 as alpine-318
@@ -21,6 +23,7 @@ RUN apk add --no-cache make git ncurses gnupg
 RUN apk add --no-cache bash grep curl perl-utils libressl jq sqlite # docker-cli
 ENV DC_PREFIX=/tmp
 USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
 
 ##################################################################
 FROM com.dbdbdp.dckr:alpine-319 as alpine-319
@@ -29,6 +32,7 @@ RUN apk add --no-cache make git ncurses gnupg
 RUN apk add --no-cache bash grep curl perl-utils libressl jq sqlite # docker-cli
 ENV DC_PREFIX=/tmp
 USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
 
 ##################################################################
 FROM com.dbdbdp.dckr:alpine-next as alpine-next
@@ -37,6 +41,7 @@ RUN apk add --no-cache make git ncurses gnupg
 RUN apk add --no-cache bash grep curl perl-utils libressl jq sqlite # docker-cli
 ENV DC_PREFIX=/tmp
 USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
 
 ##################################################################
 FROM com.dbdbdp.dckr:ubuntu-2004 as ubuntu-2004
@@ -45,6 +50,7 @@ RUN apt-get install -y --no-install-recommends make git shellcheck gpg-agent gpg
 RUN apt-get install -y --no-install-recommends curl jq sqlite3
 ENV DC_PREFIX=/tmp
 USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
 
 ##################################################################
 FROM com.dbdbdp.dckr:ubuntu-2204 as ubuntu-2204
@@ -53,6 +59,7 @@ RUN apt-get install -y --no-install-recommends make git shellcheck gpg-agent gpg
 RUN apt-get install -y --no-install-recommends curl jq sqlite3
 ENV DC_PREFIX=/tmp
 USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
 
 ##################################################################
 FROM com.dbdbdp.dckr:ubuntu-2204 as ubuntu-2404
@@ -61,6 +68,7 @@ RUN apt-get install -y --no-install-recommends make git shellcheck gpg-agent gpg
 RUN apt-get install -y --no-install-recommends curl jq sqlite3
 ENV DC_PREFIX=/tmp
 USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
 
 ##################################################################
 FROM com.dbdbdp.dckr:ubuntu-current as ubuntu-current
@@ -69,6 +77,7 @@ RUN apt-get install -y --no-install-recommends make git shellcheck gpg-agent gpg
 RUN apt-get install -y --no-install-recommends curl jq sqlite3
 ENV DC_PREFIX=/tmp
 USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
 
 ##################################################################
 FROM com.dbdbdp.dckr:ubuntu-next as ubuntu-next
@@ -77,6 +86,7 @@ RUN apt-get install -y --no-install-recommends make git shellcheck gpg-agent gpg
 RUN apt-get install -y --no-install-recommends curl jq sqlite3
 ENV DC_PREFIX=/tmp
 USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
 
 # NOTE: debian typically comes WITHOUT procps - albeit we do not need it formally
 ##################################################################
@@ -86,6 +96,7 @@ RUN apt-get install -y --no-install-recommends make git shellcheck gpg ca-certif
 RUN apt-get install -y --no-install-recommends curl jq sqlite3
 ENV DC_PREFIX=/tmp
 USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
 
 ##################################################################
 FROM com.dbdbdp.dckr:debian-11 as debian-11
@@ -94,6 +105,7 @@ RUN apt-get install -y --no-install-recommends make git shellcheck gpg ca-certif
 RUN apt-get install -y --no-install-recommends curl jq sqlite3
 ENV DC_PREFIX=/tmp
 USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
 
 ##################################################################
 FROM com.dbdbdp.dckr:debian-12 as debian-12
@@ -111,6 +123,7 @@ RUN apt-get install -y --no-install-recommends make git shellcheck gpg-agent gpg
 RUN apt-get install -y --no-install-recommends curl jq sqlite3
 ENV DC_PREFIX=/tmp
 USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
 
 ##################################################################
 FROM com.dbdbdp.dckr:debian-next as debian-next
@@ -119,3 +132,4 @@ RUN apt-get install -y --no-install-recommends make git shellcheck gpg-agent gpg
 RUN apt-get install -y --no-install-recommends curl jq sqlite3
 ENV DC_PREFIX=/tmp
 USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
