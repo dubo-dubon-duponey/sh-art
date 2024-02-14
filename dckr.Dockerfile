@@ -44,6 +44,33 @@ USER dckr
 RUN git config --global --add safe.directory /dckr-project-mount
 
 ##################################################################
+FROM com.dbdbdp.dckr:ubuntu-1404 as ubuntu-1404
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends make git shellcheck gnupg-agent gnupg ca-certificates # docker.io
+RUN apt-get install -y --no-install-recommends curl jq sqlite3
+ENV DC_PREFIX=/tmp
+USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
+
+##################################################################
+FROM com.dbdbdp.dckr:ubuntu-1604 as ubuntu-1604
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends make git shellcheck gnupg-agent gnupg ca-certificates # docker.io
+RUN apt-get install -y --no-install-recommends curl jq sqlite3
+ENV DC_PREFIX=/tmp
+USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
+
+##################################################################
+FROM com.dbdbdp.dckr:ubuntu-2004 as ubuntu-1804
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends make git shellcheck gpg-agent gpg ca-certificates # docker.io
+RUN apt-get install -y --no-install-recommends curl jq sqlite3
+ENV DC_PREFIX=/tmp
+USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
+
+##################################################################
 FROM com.dbdbdp.dckr:ubuntu-2004 as ubuntu-2004
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends make git shellcheck gpg-agent gpg ca-certificates # docker.io
