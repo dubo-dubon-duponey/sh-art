@@ -22,7 +22,7 @@ testRequire() {
   local version
   local exitcode
 
-  version="$(grep --version | grep -E "[0-9]+([.][0-9]+)+" | sed -E 's/^[^0-9.]*([0-9]+[.][0-9]+).*/\1/')"
+  version="$(grep --version | grep -E "[0-9]+([.][0-9]+)+" | sed -E 's/^[^0-9.]*([0-9]+[.][0-9]+).*/\1/' | head -n 1)"
   local major="${version%%.*}"
   local minor="${version#*.}"
 
