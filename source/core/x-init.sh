@@ -37,7 +37,7 @@ dc::internal::error::register SYSTEM_EXIT_OUT_OF_RANGE 255
 # Core registered errors, starting with 144
 ##########################################################################
 
-### These two are refered to statically, so, they must not EVER change location
+### These first two are refered to statically, so, they must not EVER change location
 # System requirements: typically bash, grep - or anything else that was declared through the require helper
 dc::internal::error::register REQUIREMENT_MISSING
 
@@ -47,6 +47,9 @@ dc::internal::error::register GREP_NO_MATCH
 ####
 # Generic error to denote that the operation has failed. More specific errors may be provided instead
 dc::internal::error::register GENERIC_FAILURE
+
+# A non existent error has been thrown...
+dc::internal::error::register ERROR_UNKNOWN
 
 # Should be used to convey that a certain operation is not supported
 dc::internal::error::register UNSUPPORTED

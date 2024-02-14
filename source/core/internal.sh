@@ -5,7 +5,6 @@ set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 # Internal API
 # ------
 # Meant to be used (widely) by the core library, but not outside.
-# API is stable.
 # None of these methods depend on anything in the lib.
 # Also, none of them are trying to protect against invalid arguments / etc.
 # Use only in a very controlled, safe way.
@@ -38,13 +37,9 @@ dc::internal::securewrap(){
   # Question though: are we missing up output here?
   #_="$($com "$@" 2>&4 1>&3)" || exit=$?
   exit="$($com "$@" 2>&4 1>&3 || printf "%s" "$?")"
-  if [ "$exit" ]; then
-    exec 3>&-
-    exec 4>&-
-    return "$exit"
-  fi
   exec 3>&-
   exec 4>&-
+  [ ! "$exit" ] || return "$exit"
 }
 
 # "Normalize" a string to be usable in a variable name

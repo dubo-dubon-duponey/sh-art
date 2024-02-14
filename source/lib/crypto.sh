@@ -48,12 +48,12 @@ dc::wrapped::openssl(){
     exec 3>&-
 
     # Known error conditions
-    printf "%s" "$err" | dc::wrapped::grep -q ":no start line:" \
-      && return "$ERROR_CRYPTO_SSL_INVALID_KEY"
     printf "%s" "$err" | dc::wrapped::grep -q "(Error reading password from BIO|routines:(PEM_do_header|CRYPTO_internal):bad decrypt)" \
       && return "$ERROR_CRYPTO_SSL_WRONG_PASSWORD"
     printf "%s" "$err" | dc::wrapped::grep -q "(:string too short:|end of string encountered while processing type of subject)" \
       && return "$ERROR_CRYPTO_SSL_WRONG_ARGUMENTS"
+    printf "%s" "$err" | dc::wrapped::grep -q "(:no start line:|Could not find private key)" \
+      && return "$ERROR_CRYPTO_SSL_INVALID_KEY"
 
     # Generic unspecified error
     dc::error::detail::set "$err"

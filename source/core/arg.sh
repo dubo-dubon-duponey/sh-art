@@ -11,17 +11,27 @@ set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 dc::argument::check(){
   # Referenced argument could be non-existent
   local value="${!1:-}"
+  # Regexp to match the value against
   local regexp="$2"
-  local grepreturn
+  # Exit code
+  local ex
 
+  # Grep it
   dc::wrapped::grep -q "$regexp" <<< "$value" \
     || {
-      grepreturn="$?"
+      # Failed matching - get the exit code
+      ex="$?"
+
+      # If exit code is 145, the value does not match the regexp, we should report it
       # shellcheck disable=SC2015
-      [ "$grepreturn" == 145 ] && {
-        dc::error::detail::set "$1 ($value - $regexp)"
+      [ "$ex" != 145 ] || {
+        # Set the error detail explaining what is going on
+        dc::error::detail::set "$1 (=$value) [$regexp]"
+        # Return argument invalid
         return "$ERROR_ARGUMENT_INVALID"
-      } || true
-      return "$grepreturn"
+      }
+
+      # Otherwise, return the exit code as-is
+      return "$ex"
     }
 }

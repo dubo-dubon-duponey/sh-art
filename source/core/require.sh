@@ -6,7 +6,6 @@ set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 # ------
 # Platforms, binaries, versions
 ##########################################################################
-set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 dc::require::platform(){
   local required="${1:-}"

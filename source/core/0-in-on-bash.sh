@@ -9,7 +9,7 @@
 # Trying very hard here to have this run on all shells (so, no fancy function name, etc)
 ##########################################################################
 
-_dc_private_hasBash(){
+_dc_private_has_bash(){
   local psout
 
   # The best approach requires procps to be installed
@@ -17,7 +17,8 @@ _dc_private_hasBash(){
     # And this is good, but... busybox will fail on -p...
     if ! psout="$(ps -p $$ -c -o command= 2>/dev/null)"; then
       >&2 printf "[%s] WARNING: %s\n" "$(date 2>/dev/null || true)" "Your ps does not support -p (busybox?)"
-      # This is dangerously not robust - extra care has to be taken to avoid collisions on the pid (especially in a docker build context where pid=1)
+      # This is dangerously not robust - extra care has to be taken to avoid collisions on the pid
+      # (especially in a docker build context where pid=1)
       # shellcheck disable=SC2009
       psout="$(ps -o ppid,comm | grep "^\s*$$ ")"
       psout="${psout##* }"
@@ -53,4 +54,4 @@ _dc_private_hasBash(){
   return 0
 }
 
-_dc_private_hasBash || exit
+_dc_private_has_bash || exit

@@ -43,6 +43,7 @@ readonly DC_TYPE_ALPHANUM="^[a-zA-Z0-9]{0,}$"
 # Not really compliant with https://en.wikipedia.org/wiki/Portable_character_set minus "=" and NUL, but then good enough
 # shellcheck disable=SC2034
 readonly DC_TYPE_VARIABLE="^[a-zA-Z_][a-zA-Z0-9_]{0,}$"
+# XXX why can this be zero length? ^
 
 # shellcheck disable=SC2034
 readonly DC_TYPE_STRING="^.+$"

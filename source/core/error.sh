@@ -7,10 +7,29 @@ set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 # - register to declare new error codes
 # - detail:set and get to provide context for errors when they happen
 # - lookup to get a readable constant out of an error code
+# - throw anytime you need to return non zero
 ##########################################################################
 
+# IMPORTANT
+# This is mind bending: https://stackoverflow.com/questions/44080974/if-errexit-is-on-how-do-i-run-a-command-that-might-fail-and-get-its-exit-code
+# And this has nothing to do with -e
+# fun(){
+#	throw || return
+#	echo " > should never see me"
+#}
+#
+#notfun(){
+#	throw
+#	echo " > should never see me"
+#}
+#
+# fun || echo $?
+#
+# notfun || echo $?
+
+readonly _DC_PRIVATE_ERROR_APPMAX=125
 _DC_PRIVATE_ERROR_APPCODEPOINT=2
-_DC_PRIVATE_ERROR_APPMAX=125
+# Maybe turn this into an array?
 _DC_PRIVATE_ERROR_DETAIL=
 
 dc::error::detail::set(){
@@ -23,12 +42,12 @@ dc::error::detail::get(){
 
 dc::error::lookup(){
   local code="${1:-}"
-  local errname
+  local errname=
 
   dc::argument::check code "$DC_TYPE_UNSIGNED" \
     && [ "$code" -le "255" ] \
     && errname="$(dc::internal::securewrap env 2>/dev/null | dc::wrapped::grep "^ERROR_[^=]+=$code$")" \
-    || return "$ERROR_ARGUMENT_INVALID"
+    || dc::error::throw ARGUMENT_INVALID || return
 
   errname="${errname%=*}"
   printf "%s" "${errname#*ERROR_}"
@@ -41,11 +60,27 @@ dc::error::register(){
 
   _DC_PRIVATE_ERROR_APPCODEPOINT=$(( _DC_PRIVATE_ERROR_APPCODEPOINT + 1 ))
 
-  [ $_DC_PRIVATE_ERROR_APPCODEPOINT -le $_DC_PRIVATE_ERROR_APPMAX ] || return "$ERROR_LIMIT"
+  [ $_DC_PRIVATE_ERROR_APPCODEPOINT -le $_DC_PRIVATE_ERROR_APPMAX ] || dc::error::throw LIMIT || return
 
   read -r "ERROR_${name?}" <<<"$_DC_PRIVATE_ERROR_APPCODEPOINT"
   export "ERROR_${name?}"
   readonly "ERROR_${name?}"
 }
 
-# TODO: introduce a reverse lookup method and have all return statements use it instead (guarantee no typo and no unintentional return 0
+dc::error::throw(){
+  local name="${1:-}"
+  local err_detail="${2:-}"
+
+  dc::argument::check name "$DC_TYPE_VARIABLE" || return
+
+  name="ERROR_${name?}"
+
+  # If not set
+  [ -z ${!name+x} ] && {
+    dc::error::detail::set "$name"
+    return "$ERROR_ERROR_UNKNOWN"
+  } || {
+    dc::error::detail::set "$err_detail"
+    return "${!name}"
+  }
+}
