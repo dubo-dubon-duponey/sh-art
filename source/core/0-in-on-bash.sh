@@ -46,8 +46,8 @@ _dc_private_has_bash(){
   fi
 
   # Relying on the value of $BASH sucks but at that point, it's all we have
-  if [ "$BASH" != "/bin/bash" ]; then
-    >&2 printf "[%s] %s\n" "$(date 2>/dev/null || true)" "This only works with bash (BASH: $BASH - command -v bash: $(command -v bash))"
+  if [ "$BASH" != "/bin/bash" ] && [ "$BASH" != "/usr/bin/bash" ]; then
+    >&2 printf "[%s] %s\n" "$(date 2>/dev/null || true)" "This only works with bash (BASH: $BASH - command -v bash: $(command -v bash || true))"
     return 144
   fi
 

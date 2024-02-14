@@ -9,9 +9,9 @@ testLibre(){
   dc-tools::assert::equal "$result" "{}"
 }
 
-#. $_here/../../../bin/dc-libre --
+#. $_here/../../.dc-libre --
 
-#$_here/../../../bin/dc-libre dc::http::request https://registry-1.docker.io/v2 GET
+#$_here/../../.dc-libre dc::http::request https://registry-1.docker.io/v2 GET
 #dc-tools::assert::equal ARGV_TEST1 foo
 #dc-tools::assert::equal ARGV_TEST2 bar
 #dc-tools::assert::equal ARGV_TEST3_TEST baz
@@ -75,7 +75,7 @@ helperTestErr(){
       continue
     fi
     ex="$line"
-  done < <(commandWrapper "./bin/dc-libre" "${args[@]}" 2>/dev/null)
+  done < <(commandWrapper "dc-libre" "${args[@]}" 2>/dev/null)
   dc-tools::assert::equal "exit code for $*" "$expected" "$(dc::error::lookup "$ex")"
 }
 
@@ -98,17 +98,17 @@ testVariousConditions(){
 
 
 # 1
-# ./bin/dc-libre let "var1 = 1/0"
+# dc-libre let "var1 = 1/0"
 
 # 2
-# ./bin/dc-libre printf
+# dc-libre printf
 
 # 126
-# ./bin/dc-libre --set="+e" /dev/null
+# dc-libre --set="+e" /dev/null
 
 # 127
-# ./bin/dc-libre thisfails
+# dc-libre thisfails
 
 # 255
-# ./bin/dc-libre exit 3.14
+# dc-libre exit 3.14
 

@@ -102,6 +102,7 @@ RUN apt-get install -y --no-install-recommends make git shellcheck gpg ca-certif
 RUN apt-get install -y --no-install-recommends curl jq sqlite3
 ENV DC_PREFIX=/tmp
 USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
 
 ##################################################################
 FROM com.dbdbdp.dckr:debian-current as debian-current

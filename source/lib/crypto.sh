@@ -52,7 +52,7 @@ dc::wrapped::openssl(){
       && return "$ERROR_CRYPTO_SSL_WRONG_PASSWORD"
     printf "%s" "$err" | dc::wrapped::grep -q "(:string too short:|end of string encountered while processing type of subject)" \
       && return "$ERROR_CRYPTO_SSL_WRONG_ARGUMENTS"
-    printf "%s" "$err" | dc::wrapped::grep -q "(:no start line:|Could not find private key)" \
+    printf "%s" "$err" | dc::wrapped::grep -q "(:no start line:|Could not find private key|Could not read private key|Could not read key from)" \
       && return "$ERROR_CRYPTO_SSL_INVALID_KEY"
 
     # Generic unspecified error
