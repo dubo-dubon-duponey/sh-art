@@ -30,6 +30,8 @@ dc-tooling::build::header(){
 
   cat <<-EOF > "$destination"
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
+
 ##########################################################################
 # $name, $shortdesc
 # Released under $license
