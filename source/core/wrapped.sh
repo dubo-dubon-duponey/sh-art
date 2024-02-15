@@ -66,10 +66,12 @@ dc::wrapped::grep(){
       return 0
     ;;
     1)
-      return "$ERROR_GREP_NO_MATCH"
+      dc::error::throw GREP_NO_MATCH
+      return
     ;;
     *)
-      return "$ERROR_BINARY_UNKNOWN_ERROR"
+      dc::error::throw BINARY_UNKNOWN_ERROR
+      return
     ;;
   esac
 }

@@ -13,8 +13,7 @@ dc::logger::level::set() {
   # Level is an int between ERROR and DEBUG, or fallback to INFO
   # shellcheck disable=SC2015
   dc::argument::check level "$DC_TYPE_INTEGER" && [ "$level" -ge "$DC_LOGGER_ERROR" ] && [ "$level" -le "$DC_LOGGER_DEBUG" ] || {
-    dc::error::detail::set "level ($level - $DC_TYPE_INTEGER - > $DC_LOGGER_ERROR and < $DC_LOGGER_DEBUG"
-    return "$ERROR_ARGUMENT_INVALID"
+    dc::error::throw ARGUMENT_INVALID "level ($level - $DC_TYPE_INTEGER - > $DC_LOGGER_ERROR and < $DC_LOGGER_DEBUG" || return
   }
 
   _DC_PRIVATE_LOGGER_LEVEL="$level"
@@ -46,7 +45,7 @@ dc::logger::mute() {
 
 dc::logger::ismute() {
   # shellcheck disable=SC2034
-  [ "$_DC_PRIVATE_LOGGER_LEVEL" == 0 ] || return "$ERROR_GENERIC_FAILURE"
+  [ "$_DC_PRIVATE_LOGGER_LEVEL" == 0 ] || dc::error::throw GENERIC_FAILURE || return
 }
 
 #####################################

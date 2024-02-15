@@ -16,7 +16,7 @@ testBasicValidationBash(){
   local result
   local exitcode=0
 
-  result="$(bash source/core/0-in-on-bash.sh 2>&1)" || exitcode="$?"
+  result="$(bash source/core/0-in-on-bash.sh 2>/dev/null)" || exitcode="$?"
 
   dc-tools::assert::equal "exit code" 0 "$exitcode"
 

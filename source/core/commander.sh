@@ -200,7 +200,7 @@ dc::commander::declare::flag(){
     # First make sure we do not have a double dip
     if [ "$(dc::args::exist "$name")" ]; then
       dc::logger::error "You cannot specify $name and $alias at the same time"
-      return "$ERROR_ARGUMENT_INVALID"
+      dc::error::throw ARGUMENT_INVALID || return
     fi
     # Ok? Validate the alias
     dc::args::validate "$alias" "$validator" "$optional" || return

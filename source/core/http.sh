@@ -42,10 +42,9 @@ dc::wrapped::curl(){
   ex="$?"
   if [ "$ex" != 0 ]; then
     exec 3>&-
-    [ "$ex" != 7 ] || return "$ERROR_CURL_CONNECTION_FAILED"
-    [ "$ex" != 6 ] || return "$ERROR_CURL_DNS_FAILED"
-    dc::error::detail::set "$err"
-    return "$ERROR_BINARY_UNKNOWN_ERROR"
+    [ "$ex" != 7 ] || dc::error::throw CURL_CONNECTION_FAILED || return
+    [ "$ex" != 6 ] || dc::error::throw CURL_DNS_FAILED || return
+    dc::error::throw BINARY_UNKNOWN_ERROR || return
   fi
 
   while read -r line; do

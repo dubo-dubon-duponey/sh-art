@@ -13,8 +13,7 @@ dc::require::platform(){
   dc::argument::check required "$DC_TYPE_STRING" || return
 
   [[ "$required" == *"$(dc::internal::securewrap uname)"* ]] || {
-    dc::error::detail::set "$required [$(dc::internal::securewrap uname)]"
-    return "$ERROR_REQUIREMENT_MISSING"
+    dc::error::throw REQUIREMENT_MISSING "$required [$(dc::internal::securewrap uname)]" || return
   }
 }
 
@@ -48,10 +47,8 @@ dc::require(){
   varname="$(dc::internal::varnorm "_DC_DEPENDENCIES_B_$binary")"
   if [ ! ${!varname+x} ]; then
     command -v "$binary" >/dev/null \
-      || {
-        dc::error::detail::set "$binary${provider}"
-        return "$ERROR_REQUIREMENT_MISSING"
-      }
+      || dc::error::throw REQUIREMENT_MISSING "$binary${provider}" \
+      || return
     read -r "${varname?}" <<<"true"
     # XXX this makes it hard to test/mock, disabling
     # readonly "${varname?}"
@@ -72,10 +69,10 @@ dc::require(){
   if [ ! ${!varname+x} ]; then
     read -r cVersion <<<"$(dc::internal::version::get "$binary" "$versionFlag")"
     # The returned version could be empty, which means the passed version flag is invalid
-    [ "${cVersion%.*}" ] || {
-      dc::error::detail::set "$binary$provider: $cVersion"
-      return "$ERROR_ARGUMENT_INVALID"
-    }
+    [ "${cVersion%.*}" ] \
+      || dc::error::throw ARGUMENT_INVALID "$binary${provider}: $cVersion" \
+      || return
+
     # Otherwise, cache it, lock it, export it
     read -r "${varname?}" <<<"$cVersion"
     readonly "${varname?}"
@@ -86,8 +83,6 @@ dc::require(){
   # If not empty, we have a guarantee that it's an int (see implem)
   [ "${cVersion%.*}" -gt "${version%.*}" ] \
     || { [ "${cVersion%.*}" == "${version%.*}" ] && [ "${cVersion#*.}" -ge "${version#*.}" ]; } \
-    || {
-      dc::error::detail::set "$binary$provider version $version (now: ${!varname})"
-      return "$ERROR_REQUIREMENT_MISSING"
-    }
+    || dc::error::throw REQUIREMENT_MISSING "$binary$provider version $version (now: ${!varname})" \
+    || return
 }

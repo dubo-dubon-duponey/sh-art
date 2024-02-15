@@ -28,10 +28,10 @@ dc::argument::check(){
         # Set the error detail explaining what is going on
         dc::error::detail::set "$1 (=$value) [$regexp]"
         # Return argument invalid
-        return "$ERROR_ARGUMENT_INVALID"
+        dc::error::throw ARGUMENT_INVALID || return
       }
 
       # Otherwise, return the exit code as-is
-      return "$ex"
+      dc::error::throw "$ex" "" passthrough || return
     }
 }

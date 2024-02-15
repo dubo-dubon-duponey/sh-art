@@ -8,7 +8,7 @@ dc-tooling::sc::filecheck(){
   # Hadolint
   if [[ "$1" = *"Dockerfile"* ]]; then
     if ! hadolint "$1"; then
-      return "$ERROR_LINT_FAIL"
+      dc::error::throw LINT_FAIL || return
     fi
     return
   fi
@@ -19,7 +19,7 @@ dc-tooling::sc::filecheck(){
       return
     }
 
-  shellcheck -a -x "$1" || return "$ERROR_LINT_FAIL"
+  shellcheck -a -x "$1" || dc::error::throw LINT_FAIL || return
 }
 
 dc-tooling::sc::dircheck(){
@@ -34,5 +34,5 @@ dc-tooling::sc::dircheck(){
       find "$1" -type f \( -perm +111 -o -iname "*.sh" \) -not -iname ".*" -not -path "*/.git/*" -not -path "*/xxx*" 2>/dev/null
     fi
   )
-  [ ! "$error" ] || return "$ERROR_LINT_FAIL"
+  [ ! "$error" ] || dc::error::throw LINT_FAIL || return
 }

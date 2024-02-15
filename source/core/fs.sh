@@ -14,8 +14,7 @@ dc::fs::rm(){
 
   rm -f "$path" 2>/dev/null \
     || {
-      dc::error::detail::set "$path"
-      return "$ERROR_FILESYSTEM"
+      dc::error::throw FILESYSTEM "$path" || return
     }
 }
 
@@ -24,7 +23,7 @@ dc::fs::mktemp(){
 
   dc::argument::check prefix "$DC_TYPE_STRING" || return
 
-  mktemp -q "${TMPDIR:-/tmp}/$prefix.XXXXXX" 2>/dev/null || mktemp -q || return "$ERROR_FILESYSTEM"
+  mktemp -q "${TMPDIR:-/tmp}/$prefix.XXXXXX" 2>/dev/null || mktemp -q || dc::error::throw FILESYSTEM "$prefix" || return
 }
 
 dc::fs::isdir(){
@@ -34,10 +33,9 @@ dc::fs::isdir(){
 
   dc::argument::check path "$DC_TYPE_STRING" || return
 
-  [ ! "$createIfMissing" ] || mkdir -p "$path" 2>/dev/null || return "$ERROR_FILESYSTEM"
+  [ ! "$createIfMissing" ] || mkdir -p "$path" 2>/dev/null || dc::error::throw FILESYSTEM || return
   if [ ! -d "$path" ] || [ ! -r "$path" ] || { [ "$writable" ] && [ ! -w "$path" ]; }  ; then
-    dc::error::detail::set "$path"
-    return "$ERROR_FILESYSTEM"
+    dc::error::throw FILESYSTEM "$path" || return
   fi
 }
 
@@ -48,9 +46,8 @@ dc::fs::isfile(){
 
   dc::argument::check path "$DC_TYPE_STRING" || return
 
-  [ ! "$createIfMissing" ] || touch "$path" || return "$ERROR_FILESYSTEM"
+  [ ! "$createIfMissing" ] || touch "$path" || dc::error::throw FILESYSTEM || return
   if [ ! -f "$path" ] || [ ! -r "$path" ] || { [ "$writable" ] && [ ! -w "$path" ]; }  ; then
-    dc::error::detail::set "$path"
-    return "$ERROR_FILESYSTEM"
+    dc::error::throw FILESYSTEM "$path" || return
   fi
 }

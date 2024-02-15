@@ -27,8 +27,7 @@ dc::prompt::input(){
   [ ! -t 2 ] || >&2 printf "%s" "$message"
   # shellcheck disable=SC2162
   if ! read "${args[@]}" "${varname?}"; then
-    dc::error::detail::set "$timeout"
-    return "$ERROR_ARGUMENT_TIMEOUT"
+    dc::error::throw ARGUMENT_TIMEOUT "$timeout" || return
   fi
 
   # XXX should this really be avoided in silent mode?

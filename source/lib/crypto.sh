@@ -13,13 +13,13 @@ dc::wrapped::shasum(){
   if ! err="$(shasum "$@" 2>&1 1>&3)"; then
     exec 3>&-
     if printf "%s" "$err" | dc::wrapped::grep -q "(invalid for option a|Unrecognized algorithm)"; then
-      return "$ERROR_CRYPTO_SHASUM_WRONG_ALGORITHM"
+      dc::error::throw CRYPTO_SHASUM_WRONG_ALGORITHM || return
     fi
     if [ ! "$err" ]; then
-      return "$ERROR_CRYPTO_SHASUM_FILE_ERROR"
+      dc::error::throw CRYPTO_SHASUM_FILE_ERROR || return
     fi
     dc::error::detail::set "$err"
-    return "$ERROR_BINARY_UNKNOWN_ERROR"
+    dc::error::throw BINARY_UNKNOWN_ERROR || return
   fi
   exec 3>&-
 }
@@ -49,20 +49,28 @@ dc::wrapped::openssl(){
 
     # Known error conditions
     printf "%s" "$err" | dc::wrapped::grep -q "(Error reading password from BIO|routines:(PEM_do_header|CRYPTO_internal):bad decrypt)" \
-      && return "$ERROR_CRYPTO_SSL_WRONG_PASSWORD"
+      && {
+        dc::error::throw CRYPTO_SSL_WRONG_PASSWORD || return
+      } || true
     printf "%s" "$err" | dc::wrapped::grep -q "(:string too short:|end of string encountered while processing type of subject)" \
-      && return "$ERROR_CRYPTO_SSL_WRONG_ARGUMENTS"
+      && {
+        dc::error::throw CRYPTO_SSL_WRONG_ARGUMENTS || return
+      } || true
     printf "%s" "$err" | dc::wrapped::grep -q "(:no start line:|Could not find private key|Could not read private key|Could not read key from)" \
-      && return "$ERROR_CRYPTO_SSL_INVALID_KEY"
+      && {
+        dc::error::throw CRYPTO_SSL_INVALID_KEY || return
+      } || true
 
     # Generic unspecified error
-    dc::error::detail::set "$err"
-    return "$ERROR_BINARY_UNKNOWN_ERROR"
+    dc::error::throw BINARY_UNKNOWN_ERROR  "$err" || return
   fi
 
   # With openssl 1.1 you can create a CSR with no data as subject: /C=/ST=/L=/O=/OU=/CN=/emailAddress=
   # This here is just to safe-guard against it - mostly for test consistency...
-  [ "${*: -1}" == "/C=/ST=/L=/O=/OU=/CN=/emailAddress=" ] && return "$ERROR_CRYPTO_SSL_WRONG_ARGUMENTS"
+  [ "${*: -1}" == "/C=/ST=/L=/O=/OU=/CN=/emailAddress=" ] && {
+    dc::error::throw CRYPTO_SSL_WRONG_ARGUMENTS
+    return
+  }
 
   exec 3>&-
   # routines:CRYPTO_internal:bad password read <- errr, not sure how I produced that, but that was the way to prevent openssl from prompting for a password
@@ -75,7 +83,10 @@ dc::crypto::shasum::compute(){
   local digest
 
   # For some versions, hashing a directory does not error out like it should
-  [ ! -d "$fd" ] || return "$ERROR_BINARY_UNKNOWN_ERROR"
+  [ ! -d "$fd" ] || {
+    dc::error::throw BINARY_UNKNOWN_ERROR
+    return
+  }
 
   digest="$(dc::wrapped::shasum -a "$type" "$fd")" || return
   [ ! "$prefixed" ] || printf "sha%s:" "$type"
@@ -88,7 +99,10 @@ dc::crypto::shasum::verify(){
   local type="${3:-$DC_CRYPTO_SHASUM_512256}"
 
   # For some versions, hashing a directory does not error out like it should
-  [ ! -d "$fd" ] || return "$ERROR_BINARY_UNKNOWN_ERROR"
+  [ ! -d "$fd" ] || {
+    dc::error::throw BINARY_UNKNOWN_ERROR
+    return
+  }
 
   # Get the type from the expectation string if it's there, or default to arg 3 if provided, fallback to 512256
   # if dc::wrapped::grep -q "^sha[0-9]+:" <(printf "%s" "$expected"); then
@@ -101,8 +115,8 @@ dc::crypto::shasum::verify(){
   digest="$(dc::wrapped::shasum -a "$type" "$fd")" || return
 
   if [ "${digest%% *}" != "${expected#*:}" ]; then
-    dc::error::detail::set "was ${digest%% *} (expected: ${expected#*:})"
-    return "$ERROR_CRYPTO_SHASUM_VERIFY_ERROR"
+    dc::error::throw CRYPTO_SHASUM_VERIFY_ERROR "was ${digest%% *} (expected: ${expected#*:})"
+    return
   fi
 }
 
@@ -174,7 +188,10 @@ dc::crypto::pem::headers::has(){
   dc::argument::check key "$DC_TYPE_ALPHANUM" || return
 
   dc::wrapped::grep -q "^$key: $value$" "$fd" \
-    || { dc::error::detail::set "$key: $value" && return "$ERROR_CRYPTO_PEM_NO_SUCH_HEADER"; }
+    || {
+      dc::error::throw CRYPTO_PEM_NO_SUCH_HEADER "$key: $value"
+      return
+    }
 }
 
 dc::crypto::pem::headers::get(){

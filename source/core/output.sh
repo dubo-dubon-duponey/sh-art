@@ -138,5 +138,5 @@ dc::output::json() {
 
   # Otherwise, print through jq and return on success
   printf "%s" "$1" | jq "." 2>/dev/null \
-    || { dc::error::detail::set "$1" && return "$ERROR_ARGUMENT_INVALID"; }
+    || { dc::error::throw ARGUMENT_INVALID "$1" || return; }
 }

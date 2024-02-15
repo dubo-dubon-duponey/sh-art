@@ -608,7 +608,7 @@ assertFalse() {
   fi
 
   unset shunit_message_ shunit_condition_
-  return "${shunit_return}"
+  dc::error::throw "${shunit_return}" "" passthrough
 }
 # shellcheck disable=SC2016,SC2034
 _ASSERT_FALSE_='eval assertFalse --lineno "${LINENO:-}"'

@@ -14,13 +14,13 @@ set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 # This is mind bending: https://stackoverflow.com/questions/44080974/if-errexit-is-on-how-do-i-run-a-command-that-might-fail-and-get-its-exit-code
 # And this has nothing to do with -e
 # fun(){
-#	throw || return
-#	echo " > should never see me"
+#	  throw || return
+#	  echo " > should never see me"
 #}
 #
 #notfun(){
-#	throw
-#	echo " > should never see me"
+#	  throw
+#	  echo " > should never see me"
 #}
 #
 # fun || echo $?
@@ -70,11 +70,16 @@ dc::error::register(){
 dc::error::throw(){
   local name="${1:-}"
   local err_detail="${2:-}"
+  local passthrough="${3:-}"
 
   dc::argument::check name "$DC_TYPE_VARIABLE" || return
 
-  name="ERROR_${name?}"
+  if [ "$passthrough" != "" ]; then
+    dc::error::detail::set "$err_detail"
+    return "$name"
+  fi
 
+  name="ERROR_${name?}"
   # If not set
   [ -z ${!name+x} ] && {
     dc::error::detail::set "$name"

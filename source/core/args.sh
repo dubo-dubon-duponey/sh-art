@@ -59,7 +59,7 @@ dc::args::exist(){
   local var="DC_ARG_$slug"
   [ "${!var+x}" ] || {
     dc::error::detail::set "$1"
-    return "$ERROR_ARGUMENT_MISSING"
+    dc::error::throw ARGUMENT_MISSING || return
   }
 }
 
@@ -77,7 +77,7 @@ dc::args::validate(){
   if [ ! "${!var+x}" ]; then
     [ ! "$optional" ] || return 0
     dc::error::detail::set "$slug"
-    return "$ERROR_ARGUMENT_MISSING"
+    dc::error::throw ARGUMENT_MISSING || return
   fi
 
   if [ "$regexp" ]; then
@@ -85,7 +85,7 @@ dc::args::validate(){
     [ "$regexp" == "^$" ] && [ ! "${!var}" ] && return || true
     dc::wrapped::grep "${args[@]}" "$regexp" <<<"${!var}" || {
       dc::error::detail::set "$slug (${!var} vs. $regexp)"
-      return "$ERROR_ARGUMENT_INVALID"
+      dc::error::throw ARGUMENT_INVALID || return
     }
   fi
 }
