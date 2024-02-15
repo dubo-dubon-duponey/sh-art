@@ -43,5 +43,5 @@ dc-ext::http-cache::request(){
 
 _dc_internal_ext::simplerequest(){
   dc::http::request "$@" | base64 || return
-  [ "$DC_HTTP_STATUS" == 200 ] || return "$ERROR_NETWORK"
+  [ "$DC_HTTP_STATUS" == 200 ] || dc::error::throw NETWORK || return
 }

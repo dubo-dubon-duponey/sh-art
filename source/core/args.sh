@@ -76,16 +76,14 @@ dc::args::validate(){
 
   if [ ! "${!var+x}" ]; then
     [ ! "$optional" ] || return 0
-    dc::error::detail::set "$slug"
-    dc::error::throw ARGUMENT_MISSING || return
+    dc::error::throw ARGUMENT_MISSING "$slug" || return
   fi
 
   if [ "$regexp" ]; then
     # shellcheck disable=SC2015
     [ "$regexp" == "^$" ] && [ ! "${!var}" ] && return || true
     dc::wrapped::grep "${args[@]}" "$regexp" <<<"${!var}" || {
-      dc::error::detail::set "$slug (${!var} vs. $regexp)"
-      dc::error::throw ARGUMENT_INVALID || return
+      dc::error::throw ARGUMENT_INVALID "$slug (${!var} vs. $regexp)" || return
     }
   fi
 }

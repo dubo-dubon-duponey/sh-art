@@ -5,7 +5,10 @@ dc::wrapped::xmlstarlet(){
   dc::require xmlstarlet || return
 
   xmlstarlet "$@" 2>/dev/null \
-    || { dc::error::detail::set "xmlstarlet" && return "$ERROR_BINARY_UNKNOWN_ERROR"; }
+    || {
+      dc::error::throw BINARY_UNKNOWN_ERROR "xmlstarlet"
+      return
+    }
 }
 
 dc::xml::get(){

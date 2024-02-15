@@ -49,29 +49,29 @@ gandi::requestor::api(){
   # XXX http has to be redone - not really usable right now because of headers strategy
   dc::http::request "$GANDI_API_SERVICE/$endpoint" "$method" "$fdin" /dev/stdout "Authorization: Apikey $DC_PRIVATE_APIKEY" "Content-type: application/json" "$@" || {
     # XXX error out appropriately here with meaningful and actionnable feedback
-    dc::error::detail::set "Gandi server unreachable. You may have no network connection, or their service is down / unreachable."
     dc::logger::error "No net"
-    return "$ERROR_GANDI_NETWORK"
+    dc::error::throw GANDI_NETWORK "Gandi server unreachable. You may have no network connection, or their service is down / unreachable."
+    return
   }
 
   [ "$DC_HTTP_STATUS" != "404" ] || {
-    dc::error::detail::set 404
-    return "$ERROR_GANDI_BROKEN"
+    dc::error::throw GANDI_BROKEN 404
+    return
   }
 
   [ "$DC_HTTP_STATUS" != "403" ] || {
-    dc::error::detail::set 403
-    return "$ERROR_GANDI_AUTHORIZATION"
+    dc::error::throw GANDI_AUTHORIZATION 403
+    return
   }
 
   [ "$DC_HTTP_STATUS" != "401" ] || {
-    dc::error::detail::set 401
-    return "$ERROR_GANDI_AUTHORIZATION"
+    dc::error::throw GANDI_AUTHORIZATION 401
+    return
   }
 
   [ "$DC_HTTP_STATUS" == "200" ] || [ "$DC_HTTP_STATUS" == "201" ] || {
-    dc::error::detail::set "$DC_HTTP_STATUS"
-    return "$ERROR_GANDI_GENERIC"
+    dc::error::throw GANDI_GENERIC $DC_HTTP_STATUS
+    return
   }
   printf "%s" "$out"
 }

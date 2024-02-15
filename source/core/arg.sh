@@ -26,9 +26,8 @@ dc::argument::check(){
       # shellcheck disable=SC2015
       [ "$ex" != 145 ] || {
         # Set the error detail explaining what is going on
-        dc::error::detail::set "$1 (=$value) [$regexp]"
         # Return argument invalid
-        dc::error::throw ARGUMENT_INVALID || return
+        dc::error::throw ARGUMENT_INVALID "$1 (=$value) [$regexp]" || return
       }
 
       # Otherwise, return the exit code as-is

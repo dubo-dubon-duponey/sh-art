@@ -18,8 +18,7 @@ dc::wrapped::shasum(){
     if [ ! "$err" ]; then
       dc::error::throw CRYPTO_SHASUM_FILE_ERROR || return
     fi
-    dc::error::detail::set "$err"
-    dc::error::throw BINARY_UNKNOWN_ERROR || return
+    dc::error::throw BINARY_UNKNOWN_ERROR "$err" || return
   fi
   exec 3>&-
 }
