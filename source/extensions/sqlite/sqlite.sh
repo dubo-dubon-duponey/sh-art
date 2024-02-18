@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 # XXX this is a POC implementation
 # Input is NOT sanitized, and very likely to be prone to injections if left unchecked
 # Do NOT rely on this for anything sensitive
+# Actually, just do NOT rely on this
 
 _DC_EXT_SQLITE_DB=
 
 dc-ext::sqlite::init(){
-  dc::require sqlite3
-  mkdir -p "$(dirname "$1")"
+  dc::require sqlite3 || return
+  dc::fs::isdir "$(dirname "$1")" || return
   _DC_EXT_SQLITE_DB="$1"
 }
 
@@ -28,6 +30,7 @@ dc-ext::sqlite::select(){
   printf "%s" "select $2 from $table where $3;" | sqlite3 "$_DC_EXT_SQLITE_DB"
 }
 
+# XXX fix this shit so that values are magically escaped (hint: fucking " needs to be turned into "" - yeah, bite me)
 dc-ext::sqlite::insert(){
   local table="$1"
   local fields="$2"

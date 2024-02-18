@@ -1,48 +1,51 @@
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
+
 ##########################################################################
 # Logger
 # ------
-# Logger
+# Logger infrastructure
 ##########################################################################
 
-#####################################
-# Configuration hooks
-#####################################
+dc::logger::level::set() {
+  local level="${1:-}"
 
-readonly DC_LOGGER_DEBUG=4
-readonly DC_LOGGER_INFO=3
-readonly DC_LOGGER_WARNING=2
-readonly DC_LOGGER_ERROR=1
+  # Level is an int between ERROR and DEBUG, or fallback to INFO
+  # shellcheck disable=SC2015
+  dc::argument::check level "$DC_TYPE_INTEGER" && [ "$level" -ge "$DC_LOGGER_ERROR" ] && [ "$level" -le "$DC_LOGGER_DEBUG" ] || {
+    dc::error::throw ARGUMENT_INVALID "level ($level - $DC_TYPE_INTEGER - > $DC_LOGGER_ERROR and < $DC_LOGGER_DEBUG" || return
+  }
 
-dc::configure::logger::setlevel() {
-  local level="$1"
-  [[ "$level" =~ ^-?[0-9]+$ ]] && [ "$level" -ge "$DC_LOGGER_ERROR" ] && [ "$level" -le "$DC_LOGGER_DEBUG" ] || level="$DC_LOGGER_INFO"
-  _DC_PRIVATE_LOGGER_LEVEL=$level
-  if [ "$_DC_PRIVATE_LOGGER_LEVEL" == "$DC_LOGGER_DEBUG" ]; then
-    dc::logger::warning "[Logger] YOU ARE LOGGING AT THE DEBUG LEVEL. This is NOT recommended for production use, and MAY LEAK sensitive information to stderr."
-  fi
+  _DC_PRIVATE_LOGGER_LEVEL="$level"
+  [ "$level" != "$DC_LOGGER_DEBUG" ] ||
+    _dc::private::logger::log "WARNING" "[Logger] YOU ARE LOGGING AT THE DEBUG LEVEL. This is NOT recommended for production use, and WILL LIKELY LEAK sensitive information to stderr."
 }
 
-dc::configure::logger::setlevel::debug(){
-  # XXX test this: set -x
-  # Too noisy, not useful
-  dc::configure::logger::setlevel $DC_LOGGER_DEBUG
+# Sugar
+dc::logger::level::set::debug(){
+  dc::logger::level::set "$DC_LOGGER_DEBUG"
 }
 
-dc::configure::logger::setlevel::info(){
-  dc::configure::logger::setlevel $DC_LOGGER_INFO
+dc::logger::level::set::info(){
+  dc::logger::level::set "$DC_LOGGER_INFO"
 }
 
-dc::configure::logger::setlevel::warning(){
-  dc::configure::logger::setlevel $DC_LOGGER_WARNING
+dc::logger::level::set::warning(){
+  dc::logger::level::set "$DC_LOGGER_WARNING"
 }
 
-dc::configure::logger::setlevel::error(){
-  dc::configure::logger::setlevel $DC_LOGGER_ERROR
+dc::logger::level::set::error(){
+  dc::logger::level::set "$DC_LOGGER_ERROR"
 }
 
-dc::configure::logger::mute() {
+dc::logger::mute() {
+  # shellcheck disable=SC2034
   _DC_PRIVATE_LOGGER_LEVEL=0
+}
+
+dc::logger::ismute() {
+  # shellcheck disable=SC2034
+  [ "$_DC_PRIVATE_LOGGER_LEVEL" == 0 ] || dc::error::throw GENERIC_FAILURE || return
 }
 
 #####################################
@@ -50,57 +53,17 @@ dc::configure::logger::mute() {
 #####################################
 
 dc::logger::debug(){
-  if [ $_DC_PRIVATE_LOGGER_LEVEL -ge $DC_LOGGER_DEBUG ]; then
-    [ "$TERM" ] && [ -t 2 ] && >&2 tput setaf "$DC_COLOR_WHITE"
-    local i
-    for i in "$@"; do
-      _dc_internal::logger::stamp "[DEBUG]" "$i"
-    done
-    [ "$TERM" ] && [ -t 2 ] && >&2 tput op
-  fi
+  _dc::private::logger::log "DEBUG" "$@"
 }
 
 dc::logger::info(){
-  if [ $_DC_PRIVATE_LOGGER_LEVEL -ge $DC_LOGGER_INFO ]; then
-    [ "$TERM" ] && [ -t 2 ] && >&2 tput setaf "$DC_COLOR_GREEN"
-    local i
-    for i in "$@"; do
-      _dc_internal::logger::stamp "[INFO]" "$i"
-    done
-    [ "$TERM" ] && [ -t 2 ] && >&2 tput op
-  fi
+  _dc::private::logger::log "INFO" "$@"
 }
 
 dc::logger::warning(){
-  if [ $_DC_PRIVATE_LOGGER_LEVEL -ge $DC_LOGGER_WARNING ]; then
-    [ "$TERM" ] && [ -t 2 ] && >&2 tput setaf "$DC_COLOR_YELLOW"
-    local i
-    for i in "$@"; do
-      _dc_internal::logger::stamp "[WARNING]" "$i"
-    done
-    [ "$TERM" ] && [ -t 2 ] && >&2 tput op
-  fi
+  _dc::private::logger::log "WARNING" "$@"
 }
 
 dc::logger::error(){
-  if [ $_DC_PRIVATE_LOGGER_LEVEL -ge $DC_LOGGER_ERROR ]; then
-    [ "$TERM" ] && [ -t 2 ] && >&2 tput setaf "$DC_COLOR_RED"
-    local i
-    for i in "$@"; do
-      _dc_internal::logger::stamp "[ERROR]" "$i"
-    done
-    [ "$TERM" ] && [ -t 2 ] && >&2 tput op
-  fi
+  _dc::private::logger::log "ERROR" "$@"
 }
-
-#####################################
-# Private helpers
-#####################################
-
-_DC_PRIVATE_LOGGER_LEVEL=$DC_LOGGER_INFO
-
-# Prefix a date to a log line and output to stderr
-_dc_internal::logger::stamp(){
-  >&2 printf "[%s] %s\\n" "$(date)" "$*"
-}
-

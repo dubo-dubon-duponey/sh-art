@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 DC_HTTP_CACHE_FORCE_REFRESH=
 
@@ -13,6 +14,8 @@ dc-ext::http-cache::request(){
   shift
   shift
 
+  local body
+
   # If not GET or HEAD, ignore caching entirely
   if [ "$method" != "GET" ] && [ "$method" != "HEAD" ]; then
     DC_HTTP_CACHE=miss
@@ -21,27 +24,24 @@ dc-ext::http-cache::request(){
   fi
 
   # Otherwise, look-up the cache first
-  DC_HTTP_BODY=$(dc-ext::sqlite::select "dchttp" "content" "method='$method' AND url='$url'")
+  body=$(dc-ext::sqlite::select "dchttp" "content" "method='$method' AND url='$url'")
   DC_HTTP_STATUS=200
   DC_HTTP_CACHE=hit
 
   # Nothing? Or forced to refresh?
-  if [ ! "$DC_HTTP_BODY" ] || [ "$DC_HTTP_CACHE_FORCE_REFRESH" ]; then
+  if [ ! "$body" ] || [ "$DC_HTTP_CACHE_FORCE_REFRESH" ]; then
     # Request
     export DC_HTTP_CACHE=miss
-    _dc_internal_ext::simplerequest "$url" "$method" "$@"
+    body="$(_dc_internal_ext::simplerequest "$url" "$method" "" /dev/stdout "$@")"
     # Insert in the database
-    dc-ext::sqlite::insert "dchttp" "url, method, content" "'$url', '$method', '$DC_HTTP_BODY'"
+    if [ "$DC_HTTP_STATUS" == 200 ]; then
+      dc-ext::sqlite::insert "dchttp" "url, method, content" "'$url', '$method', '$body'"
+    fi
   fi
+  printf "%s" "$body"
 }
-
 
 _dc_internal_ext::simplerequest(){
-  dc::http::request "$@"
-  if [ "$DC_HTTP_STATUS" != 200 ]; then
-    dc::logger::error "Failed fetching $1 $2"
-    exit "$ERROR_NETWORK"
-  fi
-  DC_HTTP_BODY="$(base64 "$DC_HTTP_BODY")"
+  dc::http::request "$@" | base64 || return
+  [ "$DC_HTTP_STATUS" == 200 ] || dc::error::throw NETWORK || return
 }
-

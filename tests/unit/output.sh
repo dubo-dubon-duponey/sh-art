@@ -1,43 +1,45 @@
 #!/usr/bin/env bash
-
-# Make jq a requirement for these tests
-dc::require jq
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 testOutputJSONInvalid(){
+  local exitcode=0
   local result
-  result="$(dc::output::json "invalid" 2>/dev/null)"
-  local exit=$?
-  dc-tools::assert::equal "$exit" "$ERROR_ARGUMENT_INVALID"
+
+  # Make jq a requirement for these tests
+  dc::require jq || return
+
+  result="$(dc::output::json "invalid" 2>/dev/null)" || exitcode="$?"
+  dc-tools::assert::equal "exit invalid" "ARGUMENT_INVALID" "$(dc::error::lookup "$exitcode")"
   dc-tools::assert::null "$result"
 }
 
 testOutputJSONValid(){
+  local exitcode=0
   local result
-  result="$(dc::output::json '"valid"')"
-  local exit=$?
-  dc-tools::assert::equal "Exit code should be 0" "$exit" "0"
+
+   # Make jq a requirement for these tests
+  dc::require jq || return
+
+  result="$(dc::output::json '"valid"')" || exitcode="$?"
+  dc-tools::assert::equal "exit valid" NO_ERROR "$(dc::error::lookup "$exitcode")"
   dc-tools::assert::equal "$result" '"valid"'
 }
 
 testOutputJSONInvalidNoJQ(){
+  local exitcode=0
   local result
-  local previousJQ="$_DC_DEPENDENCIES_B_JQ"
-  unset _DC_DEPENDENCIES_B_JQ
-  # XXX this will also fuck tput and date
-  result="$(PATH="" dc::output::json "invalid")"
-  local exit=$?
-  _DC_DEPENDENCIES_B_JQ="$previousJQ"
-  dc-tools::assert::equal "Exit code should be 0" "$exit" "0"
-  dc-tools::assert::equal "$result" 'invalid'
+
+  # This will make it so that calls to jq will fail (because jq can't be find)
+  result="$(unset _DC_DEPENDENCIES_B_JQ; PATH="" dc::output::json "invalid")" || exitcode="$?"
+  dc-tools::assert::equal "exit invalid" NO_ERROR "$(dc::error::lookup "$exitcode")"
+  dc-tools::assert::equal "result empty" 'invalid' "$result"
 }
 
 testOutputJSONValidNoJQ(){
+  local exitcode=0
   local result
-  _DC_OUTPUT_JSON_JQ=fakejq
-  unset _DC_DEPENDENCIES_B_JQ
-  result="$(dc::output::json '"valid"')"
-  local exit=$?
-  export _DC_OUTPUT_JSON_JQ=jq
-  dc-tools::assert::equal "Exit code should be 0" "$exit" "0"
+
+  result="$(unset _DC_DEPENDENCIES_B_JQ; PATH="" dc::output::json '"valid"')" || exitcode="$?"
+  dc-tools::assert::equal "exit valid" NO_ERROR "$(dc::error::lookup "$exitcode")"
   dc-tools::assert::equal "$result" '"valid"'
 }

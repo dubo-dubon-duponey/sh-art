@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
+
 ##########################################################################
 # Command-line helpers
 # ------
@@ -8,12 +10,51 @@
 # or even rewrite your own initialization method
 ##########################################################################
 
-readonly DC_CLI_NAME=$(basename "$0")
-readonly DC_CLI_VERSION="$DC_VERSION (core script)"
-readonly DC_CLI_LICENSE="MIT License"
-readonly DC_CLI_DESC="A fancy piece of shcript"
-export DC_CLI_USAGE=""
-export DC_CLI_OPTS=()
+export _DC_INTERNAL_CLI_USAGE=""
+export _DC_INTERNAL_CLI_OPTS=()
+
+dc::commander::requirements(){
+  # Can't really do anything without this
+  # Note: we would have failed before if it was not there
+  # dc::require printf || return
+
+  # We have to use this in a number of occasions (bash 3), and of course for prompting, etc
+  dc::require read || return
+
+  dc::require jq || {
+    dc::logger::warning "You are missing the jq binary. JSON formatting and validation will be non-existent."
+  }
+
+  dc::require tput || {
+    dc::logger::warning "You are missing the tput binary. No fancy formatting for you."
+  }
+
+  dc::require date || {
+    dc::logger::warning "You are missing the date binary. No date in logs for you."
+  }
+
+  dc::require sed || {
+    dc::logger::warning "You are missing the sed binary. At the very least, dependencies version detection will be broken."
+  }
+
+  dc::require tr || {
+    dc::logger::warning "You are missing the tr binary. Some operations involving variable manipulation will fail in subtle and confusing ways."
+  }
+
+  dc::require curl || {
+    dc::logger::warning "You are missing the curl binary. Network operations will not work."
+  }
+
+  # shellcheck disable=SC2015
+  dc::require rm && dc::require mktemp && dc::require mkdir && dc::require touch || {
+    dc::logger::warning "You are missing mktemp or mkdir or touch. FS operations will fail with a lot of drama."
+  }
+}
+
+dc::commander::trap(){
+  # Set up the traps
+  dc::trap::setup
+}
 
 # The method being called when the "help" flag is used (by default --help or -h) is passed to the script
 # Override this method in your script to define your own help
@@ -41,15 +82,15 @@ dc::commander::help(){
   if [ "$long" ]; then
     dc::output::h2 "Arguments"
     local v
-    while read -r v; do
-      dc::output::bullet "$v"
-    done < <(printf "%s" "$long")
+    while IFS= read -r v || [ "$v" ]; do
+      [ ! "$v" ] || dc::output::bullet "$v"
+    done <<< "$long"
     dc::output::break
   fi
 
   dc::output::h2 "Logging control"
-  dc::output::bullet "$(printf "%s" "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_LEVEL=(debug|info|warning|error) will adjust logging level (default to info)"
-  dc::output::bullet "$(printf "%s" "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_AUTH=true will also log sensitive/credentials information (CAREFUL)"
+  dc::output::bullet "$(dc::internal::varnorm "$name")_LOG_LEVEL=(debug|info|warning|error) will adjust logging level (default to info)"
+  dc::output::bullet "$(dc::internal::varnorm "$name")_LOG_AUTH=true will also log sensitive/credentials information (CAREFUL)"
 
 # This is visible through the --version flag anyway...
 #  dc::output::h2 "Version"
@@ -59,15 +100,15 @@ dc::commander::help(){
   if [ "$examples" ]; then
     dc::output::h2 "Examples"
     local v
-    while read -r v; do
+    while IFS= read -r v || [ "$v" ]; do
       if [ "${v:0:1}" == ">" ]; then
-        printf "    %s\\n" "$v"
+        printf "    %s\n" "$v"
       elif [ "$v" ]; then
         dc::output::bullet "$v"
       else
         dc::output::break
       fi
-    done < <(printf "%s" "$examples")
+    done <<< "$examples"
     dc::output::break
   fi
 
@@ -81,7 +122,7 @@ dc::commander::help(){
 # The method being called when the "version" flag is used (by default --version or -v) is passed to the script
 # Override this method in your script to define your own version output
 dc::commander::version(){
-  printf "%s %s\\n" "$1" "$2"
+  printf "%s %s\n" "$1" "$2"
 }
 
 
@@ -90,7 +131,7 @@ dc::commander::declare::arg(){
   local validator="$2"
   local fancy="$3"
   local description="$4"
-  local optional="$5"
+  local optional="${5:-}"
 
   local long="$fancy"
   long=$(printf "%-20s" "$long")
@@ -101,28 +142,28 @@ dc::commander::declare::arg(){
     long="$long           "
   fi
 
-  if [ "${DC_CLI_USAGE}" ]; then
-    fancy=" $fancy"
-  fi
+  #if [ "${_DC_INTERNAL_CLI_USAGE}" ]; then
+  #  fancy=" $fancy"
+  #fi
 
-  DC_CLI_USAGE="${DC_CLI_USAGE}$fancy"
-  DC_CLI_OPTS+=( "$long $description" )
+  _DC_INTERNAL_CLI_USAGE="${_DC_INTERNAL_CLI_USAGE}$fancy "
+  _DC_INTERNAL_CLI_OPTS+=( "$long $description" )
 
   # Asking for help or version, do not validate
-  if [ "${DC_ARGE_HELP}" ] || [ "${DC_ARGE_H}" ] || [ "${DC_ARGE_VERSION}" ]; then
+  if dc::args::exist "help" || dc::args::exist "h" || dc::args::exist "version"; then
     return
   fi
 
   # Otherwise, validate
-  dc::args::arg::validate "$number" "$validator" "$optional"
+  dc::args::validate "$number" "$validator" "$optional" || return
 }
 
 dc::commander::declare::flag(){
   local name="$1"
   local validator="$2"
   local description="$3"
-  local optional="$4"
-  local alias="$5"
+  local optional="${4:-}"
+  local alias="${5:-}"
 
   local display="--$name"
   local long="--$name"
@@ -141,39 +182,32 @@ dc::commander::declare::flag(){
   else
     long="$long           "
   fi
-  if [ "${DC_CLI_USAGE}" ]; then
-    display=" $display"
-  fi
+  # if [ "${_DC_INTERNAL_CLI_USAGE}" ]; then
+  #  display=" $display"
+  # fi
 
-  DC_CLI_USAGE="${DC_CLI_USAGE}$display"
+  _DC_INTERNAL_CLI_USAGE="${_DC_INTERNAL_CLI_USAGE}$display "
   # XXX add padding
-  DC_CLI_OPTS+=( "$long $description" )
+  _DC_INTERNAL_CLI_OPTS+=( "$long $description" )
 
   # Asking for help or version, do not validate
-  if [ "${DC_ARGE_HELP}" ] || [ "${DC_ARGE_H}" ] || [ "${DC_ARGE_VERSION}" ]; then
+  if dc::args::exist "help" || dc::args::exist "h" || dc::args::exist "version"; then
     return
   fi
 
-  local m
-  local s
-
-  # Otherwise, validate
-  m="DC_ARGE_$(printf "%s" "$name" | tr "-" "_" | tr '[:lower:]' '[:upper:]')"
-  s="DC_ARGE_$(printf "%s" "$alias" | tr "-" "_" | tr '[:lower:]' '[:upper:]')"
-
-  # First make sure we do not have a double dip
-  if [ "${!m}" ] && [ "${!s}" ]; then
-    dc::logger::error "You cannot specify $name and $alias at the same time"
-    exit "$ERROR_ARGUMENT_INVALID"
-  fi
-
   # Validate the alias or the main one
-  if [ "${!s}" ]; then
-    dc::args::flag::validate "$alias" "$validator" "$optional"
+  if [ "$(dc::args::exist "$alias")" ]; then
+    # First make sure we do not have a double dip
+    if [ "$(dc::args::exist "$name")" ]; then
+      dc::logger::error "You cannot specify $name and $alias at the same time"
+      dc::error::throw ARGUMENT_INVALID || return
+    fi
+    # Ok? Validate the alias
+    dc::args::validate "$alias" "$validator" "$optional" || return
   else
-    dc::args::flag::validate "$name" "$validator" "$optional"
+    # Otherwise, the main arg
+    dc::args::validate "$name" "$validator" "$optional" || return
   fi
-
 }
 
 # This is the entrypoint you should call in your script
@@ -187,66 +221,72 @@ dc::commander::declare::flag(){
 # If you want a different environment variable to be used, pass its name as the first argument
 # The same goes for the *CLI_NAME*_LOG_AUTH environment variable
 
+# shellcheck disable=SC2120
 dc::commander::initialize(){
-  dc::commander::declare::flag "silent" "^$" "no logging (overrides log level) - equivalent to: ${CLI_NAME:-${DC_CLI_NAME}} 2>/dev/null" optional "s"
-  dc::commander::declare::flag "insecure" "^$" "disable TLS verification for network operations (CAREFUL)" optional
+  # Enfore basic requirements and some
+  dc::commander::requirements
+  # Trap signals
+  dc::commander::trap
+  # Attach the default error handler
+  dc::trap::register dc::error::handler
+
+  dc::commander::declare::flag "silent" "^$" "no logging (overrides log level)" optional "s"
 
   local loglevelvar
   local logauthvar
   local level
-  loglevelvar="$(printf "%s" "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_LEVEL"
-  logauthvar="$(printf "%s" "${CLI_NAME:-${DC_CLI_NAME}}" | tr "-" "_" | tr "[:lower:]" "[:upper:]")_LOG_AUTH"
+  loglevelvar="$(dc::internal::varnorm "${CLI_NAME:-${DC_DEFAULT_CLI_NAME}}")_LOG_LEVEL"
+  logauthvar="$(dc::internal::varnorm "${CLI_NAME:-${DC_DEFAULT_CLI_NAME}}")_LOG_AUTH"
 
-  [ ! "${1}" ] || loglevelvar="$1"
-  [ ! "${2}" ] || logauthvar="$2"
+  [ ! "${1:-}" ] || loglevelvar="$1"
+  [ ! "${2:-}" ] || logauthvar="$2"
 
   # If we have a log level, set it
-  if [ "${!loglevelvar}" ]; then
+  if [ "${!loglevelvar:-}" ]; then
     # Configure the logger from the LOG_LEVEL env variable
     level="$(printf "DC_LOGGER_%s" "${!loglevelvar}" | tr '[:lower:]' '[:upper:]')"
-    dc::configure::logger::setlevel "${!level}"
+    dc::logger::level::set "${!level}"
   fi
 
   # If the LOG_AUTH env variable is set, honor it and leak
-  if [ "${!logauthvar}" ]; then
-    dc::configure::http::leak
+  if [ "${!logauthvar:-}" ]; then
+    dc::http::leak::set
   fi
 
   # If the "-s" flag is passed, mute the logger entirely
-  if [ -n "${DC_ARGV_SILENT+x}" ] || [ -n "${DC_ARGV_S+x}" ]; then
-    dc::configure::logger::mute
+  if dc::args::exist silent || dc::args::exist s; then
+    dc::logger::mute
   fi
 
   # If the --insecure flag is passed, allow insecure TLS connections
-  if [ "${DC_ARGV_INSECURE+x}" ]; then
-    dc::configure::http::insecure
-  fi
+  ! dc::args::exist insecure || dc::http::insecure::set
 }
 
+# shellcheck disable=SC2120
 dc::commander::boot(){
+  local forceHelp="${1:-}"
   # If we have been asked for --help or -h, show help
-  if [ "${DC_ARGE_HELP}" ] || [ "${DC_ARGE_H}" ]; then
+  if dc::args::exist help || dc::args::exist h || [ "$forceHelp" ]; then
 
     local opts=
     local i
-    for i in "${DC_CLI_OPTS[@]}"; do
+    for i in "${_DC_INTERNAL_CLI_OPTS[@]}"; do
       opts="$opts$i"$'\n'
     done
 
     dc::commander::help \
-      "${CLI_NAME:-${DC_CLI_NAME}}" \
-      "${CLI_LICENSE:-${DC_CLI_LICENSE}}" \
-      "${CLI_DESC:-${DC_CLI_DESC}}" \
-      "${CLI_USAGE:-${DC_CLI_USAGE}}" \
+      "${CLI_NAME:-${DC_DEFAULT_CLI_NAME}}" \
+      "${CLI_LICENSE:-${DC_DEFAULT_CLI_LICENSE}}" \
+      "${CLI_DESC:-${DC_DEFAULT_CLI_DESC}}" \
+      "${CLI_USAGE:-${_DC_INTERNAL_CLI_USAGE}}" \
       "${CLI_OPTS:-$opts}" \
-      "${CLI_EXAMPLES}"
+      "${CLI_EXAMPLES:-}"
     exit
   fi
 
   # If we have been asked for --version, show the version
-  if [ "${DC_ARGE_VERSION}" ]; then
-    dc::commander::version "${CLI_NAME:-${DC_CLI_NAME}}" "${CLI_VERSION:-${DC_CLI_VERSION}}"
+  if dc::args::exist version; then
+    dc::commander::version "${CLI_NAME:-${DC_DEFAULT_CLI_NAME}}" "${CLI_VERSION:-${DC_DEFAULT_CLI_VERSION}}"
     exit
   fi
-
 }

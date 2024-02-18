@@ -1,31 +1,53 @@
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
+
 ##########################################################################
 # FS
 # ------
-# Filesystem verification and manipulation helpers
+# Filesystem helpers
 ##########################################################################
 
-dc::fs::isfile(){
-  local writable=$2
-  local createIfMissing=$3
-  if [ "$createIfMissing" ]; then
-    touch "$1"
-  fi
-  if [ ! -f "$1" ] || [ ! -r "$1" ] || { [ "$writable" ] && [ ! -w "$1" ]; }  ; then
-    dc::logger::error "$1 is not a valid file or you do not have the appropriate permissions"
-    exit "$ERROR_FILESYSTEM"
-  fi
+dc::fs::rm(){
+  local path="${1:-}"
+
+  dc::argument::check path "$DC_TYPE_STRING" || return
+
+  rm -f "$path" 2>/dev/null \
+    || {
+      dc::error::throw FILESYSTEM "$path" || return
+    }
+}
+
+dc::fs::mktemp(){
+  local prefix="${1:-dbdbdp}"
+
+  dc::argument::check prefix "$DC_TYPE_STRING" || return
+
+  mktemp -q "${TMPDIR:-/tmp}/$prefix.XXXXXX" 2>/dev/null || mktemp -q || dc::error::throw FILESYSTEM "$prefix" || return
 }
 
 dc::fs::isdir(){
-  local writable=$2
-  local createIfMissing=$3
-  if [ "$createIfMissing" ]; then
-    mkdir -p "$1"
-  fi
-  if [ ! -d "$1" ] || [ ! -r "$1" ] || { [ "$writable" ] && [ ! -w "$1" ]; }  ; then
-    dc::logger::error "$1 is not a valid directory or you do not have the appropriate permissions"
-    exit "$ERROR_FILESYSTEM"
-  fi
+  local path="${1:-}"
+  local writable="${2:-}"
+  local createIfMissing="${3:-}"
 
+  dc::argument::check path "$DC_TYPE_STRING" || return
+
+  [ ! "$createIfMissing" ] || mkdir -p "$path" 2>/dev/null || dc::error::throw FILESYSTEM || return
+  if [ ! -d "$path" ] || [ ! -r "$path" ] || { [ "$writable" ] && [ ! -w "$path" ]; }  ; then
+    dc::error::throw FILESYSTEM "$path" || return
+  fi
+}
+
+dc::fs::isfile(){
+  local path="${1:-}"
+  local writable="${2:-}"
+  local createIfMissing="${3:-}"
+
+  dc::argument::check path "$DC_TYPE_STRING" || return
+
+  [ ! "$createIfMissing" ] || touch "$path" || dc::error::throw FILESYSTEM || return
+  if [ ! -f "$path" ] || [ ! -r "$path" ] || { [ "$writable" ] && [ ! -w "$path" ]; }  ; then
+    dc::error::throw FILESYSTEM "$path" || return
+  fi
 }

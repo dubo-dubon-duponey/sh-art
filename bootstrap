@@ -1,26 +1,26 @@
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
-readonly _here=$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)
+_here=$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)
+readonly _here
 
-# shellcheck source=/dev/null
+# shellcheck source=source/cli-tooling/build/base-build.sh
 . "$_here/source/cli-tooling/build/base-build.sh"
 
 destination="${1:-$_here}/bin/bootstrap"
 
-if [ ! -d "$destination" ]; then
-  mkdir -p "$destination"
-fi
+[ -d "$destination" ] || mkdir -p "$destination"
 
 destination="$destination/builder"
 
-dc-tools::build::header "$destination" "bootstrap builder" "MIT License" "dubo-dubon-duponey"
+dc-tooling::build::header "$destination" "bootstrap builder" "MIT License" "dubo-dubon-duponey"
 
 for k in "$_here/source/core/"*.sh; do
-  dc-tools::build::append "$k" "$destination"
+  dc-tooling::build::append "$k" "$destination"
 done
 
 for k in "$_here/source/cli-tooling/build/"*.sh; do
-  dc-tools::build::append "$k" "$destination"
+  dc-tooling::build::append "$k" "$destination"
 done
 
 chmod u+x "$destination"
