@@ -53,7 +53,7 @@ testSignals(){
         continue
       fi
       ex="$line"
-    done < <(commandWrapper "./bin/bootstrap" "--help" "--$signal" 2>/dev/null)
+    done < <(commandWrapper "dc-libre" "--help" "--$signal" 2>/dev/null)
     dc-tools::assert::equal "signal handling $signal" "$ex" "$x"
   done
 }

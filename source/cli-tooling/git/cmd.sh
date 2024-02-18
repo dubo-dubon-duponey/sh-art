@@ -39,7 +39,7 @@ for i in ./keys/*.pub; do
   gpg --import "$i"
 done
 
-regex="^Signed-off-by: ([^<]+) <([^<>@]+@[^<>]+)>( \\(github: ([a-zA-Z0-9][a-zA-Z0-9-]+)\\))?$"
+#regex="^Signed-off-by: ([^<]+) <([^<>@]+@[^<>]+)>( \\(github: ([a-zA-Z0-9][a-zA-Z0-9-]+)\\))?$"
 badCommits=()
 for commit in $(dc-tooling::git::allCommits "$DC_ARG_1"); do
   dc::logger::debug "Analyzing $commit"
@@ -48,15 +48,16 @@ for commit in $(dc-tooling::git::allCommits "$DC_ARG_1"); do
     dc::logger::warning "Ignoring empty merge commit $commit"
     continue
   fi
-  if ! dc-tooling::git::commitMessage "$DC_ARG_1" "$commit" | dc::wrapped::grep -q "$regex"; then
-    badCommits+=( "$commit" )
-    dc::logger::error "$commit is NOT signed-off appropriately"
-    dc::logger::error "Content was: $(dc-tooling::git::commitContent "$DC_ARG_1" "$commit")"
-    dc::logger::error "Message was: $(dc-tooling::git::commitMessage "$DC_ARG_1" "$commit")"
-    continue
-  fi
+  # Sign-off is useless, honestly, unless it would be defined
+  #if ! dc-tooling::git::commitMessage "$DC_ARG_1" "$commit" | dc::wrapped::grep -q "$regex"; then
+  #  badCommits+=( "$commit" )
+  #  dc::logger::error "$commit is NOT signed-off appropriately"
+  #  dc::logger::error "Content was: $(dc-tooling::git::commitContent "$DC_ARG_1" "$commit")"
+  #  dc::logger::error "Message was: $(dc-tooling::git::commitMessage "$DC_ARG_1" "$commit")"
+  #  continue
+  #fi
 
-  dc::logger::info "Commit $commit is signed-off appropriately"
+  #dc::logger::info "Commit $commit is signed-off appropriately"
 
   if ! dc-tooling::git::gpgVerify "$DC_ARG_1" "$commit" 2>/dev/null; then
     # XXX temporarily disabling this
