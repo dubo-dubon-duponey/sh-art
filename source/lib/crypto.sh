@@ -75,6 +75,7 @@ dc::wrapped::openssl(){
   # routines:CRYPTO_internal:bad password read <- errr, not sure how I produced that, but that was the way to prevent openssl from prompting for a password
 }
 
+# shellcheck disable=SC2120
 dc::crypto::shasum::compute(){
   local fd="${1:-/dev/stdin}"
   local type="${2:-$DC_CRYPTO_SHASUM_512256}"
