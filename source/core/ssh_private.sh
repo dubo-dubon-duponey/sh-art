@@ -4,6 +4,13 @@ set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 dc::internal::wrapped::ssh(){
   local ex=
   local err=
+  local quotedargs=()
+  local arg
+
+  for arg in "$@"; do
+    quotedargs+=("$(printf '%q' "$arg")")
+  done
+
 
   # Requirement
   dc::require ssh
@@ -13,13 +20,11 @@ dc::internal::wrapped::ssh(){
 
   # Capture stderr, let stdout passthrough, and capture exit code
   exec 3>&1
-  args=(ssh)
-  args+=("$@")
 
   # Quote arguments
   # https://stackoverflow.com/questions/40732193/bash-how-to-use-operator-parameter-expansion-parameteroperator#41940626
   # Support in bash is shaky - presumably 4.4 is required for this to actually work, though it will not fail
-  err="$("${args[@]@Q}" 2>&1 1>&3)" || ex=$?
+  err="$(ssh "${quotedargs[@]}" 2>&1 1>&3)" || ex=$?
 
   exec 3>&-
 

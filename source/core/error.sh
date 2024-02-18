@@ -72,13 +72,12 @@ dc::error::throw(){
   local err_detail="${2:-}"
   local passthrough="${3:-}"
 
-  dc::argument::check name "$DC_TYPE_VARIABLE" || return
-
   if [ "$passthrough" != "" ]; then
     dc::error::detail::set "$err_detail"
     return "$name"
   fi
 
+  dc::argument::check name "$DC_TYPE_VARIABLE" || return
   name="ERROR_${name?}"
   # If not set
   [ -z ${!name+x} ] && {

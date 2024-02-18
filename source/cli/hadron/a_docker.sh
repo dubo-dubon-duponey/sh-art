@@ -6,10 +6,9 @@ set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 #######################################################################################################################
 dc::internal::error::register DOCKER_NO_CLIENT
 
-dc::internal::error::register HADRON_DOCKER_WRONG_COMMAND
-dc::internal::error::register HADRON_DOCKER_WRONG_SYNTAX
-dc::internal::error::register HADRON_DOCKER_INVALID_ARGUMENT
-dc::internal::error::register HADRON_NO_SUCH_OBJECT
+dc::internal::error::register DOCKER_WRONG_COMMAND
+dc::internal::error::register DOCKER_WRONG_SYNTAX
+dc::internal::error::register DOCKER_INVALID_ARGUMENT
 
 #######################################################################################################################
 # Public
@@ -65,7 +64,8 @@ _dc::docker::client::execute(){
 
   [ "$_DOCKER_CLIENT" != "" ] || {
     dc::logger::error "No docker client configured. Call docker::client:init to set a working docker client"
-    return "$ERROR_DOCKER_NO_CLIENT"
+    dc::error::throw DOCKER_NO_CLIENT
+    return
   }
 
   # Run it - analyzes further the output if it fails, in order to provide meaningful feedback
@@ -73,12 +73,22 @@ _dc::docker::client::execute(){
     ex=$?
     err="$(dc::error::detail::get)"
     printf "%s" "$err" | dc::wrapped::grep -q "docker: '.*' is not a docker command." \
-      && return "$ERROR_HADRON_DOCKER_WRONG_COMMAND" || true
+      && {
+        dc::error::throw DOCKER_WRONG_COMMAND
+        return
+      } || true
     printf "%s" "$err" | dc::wrapped::grep -q "unknown flag" \
-      && return "$ERROR_HADRON_DOCKER_WRONG_SYNTAX" || true
+      && {
+        dc::error::throw DOCKER_WRONG_SYNTAX
+        return
+      } || true
     printf "%s" "$err" | dc::wrapped::grep -q "invalid argument" \
-      && return "$ERROR_HADRON_DOCKER_INVALID_ARGUMENT" || true
-    dc::error::detail::set "$err"
-    return "$ex"
+      && {
+        dc::error::throw DOCKER_INVALID_ARGUMENT
+        return
+      } || true
+
+    dc::error::throw "$ex" "$err" passthrough
+    return
   }
 }

@@ -136,15 +136,20 @@ dc::docker::client::network::create() {
   driver="$(printf "%s" "$netconfig" | jq -r 'select(.plan.driver != null).plan.driver')"
 
   # It doesn't really matter if we get a null or an empty value here, it will fail validating as a boolean
-  attachable="$(printf "%s" "$netconfig" | jq -r .plan.attachable)"
-  internal="$(printf "%s" "$netconfig" | jq -r .plan.internal)"
-  ipv6="$(printf "%s" "$netconfig" | jq -r .plan.ipv6)"
+  attachable="$(printf "%s" "$netconfig" | jq -r 'select(.plan.attachable != null).plan.attachable')"
+  internal="$(printf "%s" "$netconfig" | jq -r 'select(.plan.internal != null).plan.internal')"
+  ipv6="$(printf "%s" "$netconfig" | jq -r 'select(.plan.ipv6 != null).plan.ipv6')"
 
   dc::argument::check name "$DC_TYPE_STRING" || return
-  dc::argument::check driver "$DC_TYPE_STRING" || return
-  dc::argument::check attachable "$DC_TYPE_BOOLEAN" || return
-  dc::argument::check internal "$DC_TYPE_BOOLEAN" || return
-  dc::argument::check ipv6 "$DC_TYPE_BOOLEAN" || return
+  #dc::argument::check driver "$DC_TYPE_STRING" || return
+  #dc::argument::check attachable "$DC_TYPE_BOOLEAN" || return
+  #dc::argument::check internal "$DC_TYPE_BOOLEAN" || return
+  #dc::argument::check ipv6 "$DC_TYPE_BOOLEAN" || return
+
+  [ "$driver" != "" ] || driver=bridge
+  [ "$internal" != "" ] || internal=false
+  [ "$attachable" != "" ] || attachable=false
+  [ "$ipv6" != "" ] || ipv6=false
 
   com+=("--driver" "$driver")
 
@@ -159,30 +164,37 @@ dc::docker::client::network::create() {
 
   # All these are optional, so, avoid catching "null"s
   subnet="$(printf "%s" "$netconfig" | jq -r 'select(.plan.subnet != null).plan.subnet[]')"
-  gateway="$(printf "%s" "$netconfig" | jq -r 'select(.plan.gateway != null).plan.gateway')"
-  ip_range="$(printf "%s" "$netconfig" | jq -r 'select(.plan.ip_range != null).plan.ip_range')"
-  aux_address="$(printf "%s" "$netconfig" | jq -r 'select(.plan.aux_address != null).plan.ip')"
+  gateway="$(printf "%s" "$netconfig" | jq -r 'select(.plan.gateway != null).plan.gateway[]')"
+  ip_range="$(printf "%s" "$netconfig" | jq -r 'select(.plan.ip_range != null).plan.ip_range[]')"
+  aux_address="$(printf "%s" "$netconfig" | jq -r 'select(.plan.aux_address != null).plan.aux_address[]')"
 
+    local sub
   [ ! "$subnet" ] || {
     # XXX broken for ipv6
     # dc::argument::check subnet "$DC_TYPE_CIDR" || return
-    local sub
     while read -r sub; do
-      echo "lolling $sub"
       com+=(--subnet "$sub")
     done <<<"$subnet"
   }
   [ ! "$gateway" ] || {
     dc::argument::check gateway "$DC_TYPE_IPV4" || return
-    com+=(--gateway "$gateway")
+
+    while read -r sub; do
+      com+=(--gateway "$sub")
+    done <<<"$gateway"
   }
   [ ! "$ip_range" ] || {
     dc::argument::check ip_range "$DC_TYPE_CIDR" || return
-    com+=(--ip-range "$ip_range")
+
+    while read -r sub; do
+      com+=(--ip-range "$sub")
+    done <<<"$ip_range"
   }
   [ ! "$aux_address" ] || {
     dc::argument::check aux_address "$DC_TYPE_IP" || return
-    com+=(--aux-address "$aux_address")
+    while read -r sub; do
+      com+=(--aux-address "$sub")
+    done <<<"$aux_address"
   }
 
 #  -o, --opt map              Set driver specific options (default map[])
