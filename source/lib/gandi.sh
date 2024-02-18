@@ -70,7 +70,7 @@ gandi::requestor::api(){
   }
 
   [ "$DC_HTTP_STATUS" == "200" ] || [ "$DC_HTTP_STATUS" == "201" ] || {
-    dc::error::throw GANDI_GENERIC $DC_HTTP_STATUS
+    dc::error::throw GANDI_GENERIC "$DC_HTTP_STATUS"
     return
   }
   printf "%s" "$out"

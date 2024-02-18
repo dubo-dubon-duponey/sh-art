@@ -22,11 +22,11 @@ dc-ext::jwt::read(){
   #local sig
 
   # XXX WTFFFFF base64
-  if ! DC_JWT_HEADER="$(printf "%s" "${decoded[0]}==" | dc::wrapped::base64d 2>/dev/null)"; then
-    DC_JWT_HEADER="$(printf "%s" "${decoded[0]}" | dc::wrapped::base64d)"
+  if ! DC_JWT_HEADER="$(dc::wrapped::base64d <<<"${decoded[0]}==" 2>/dev/null)"; then
+    DC_JWT_HEADER="$(dc::wrapped::base64d <<<"${decoded[0]}")"
   fi
-  if ! DC_JWT_PAYLOAD="$(printf "%s" "${decoded[1]}==" | dc::wrapped::base64d 2>/dev/null)"; then
-    DC_JWT_PAYLOAD="$(printf "%s" "${decoded[1]}" | dc::wrapped::base64d)"
+  if ! DC_JWT_PAYLOAD="$(dc::wrapped::base64d <<<"${decoded[1]}==" 2>/dev/null)"; then
+    DC_JWT_PAYLOAD="$(dc::wrapped::base64d <<<"${decoded[1]}")"
   fi
   #sig=$(printf "%s" ${decoded[2]}== | dc::wrapped::base64d 2>/dev/null)
   #if [[ $? != 0 ]]; then

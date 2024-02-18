@@ -1,5 +1,4 @@
 #! /bin/sh
-# shellcheck disable=SC2086
 # vim:et:ft=sh:sts=2:sw=2
 #
 # shUnit2 -- Unit testing framework for Unix shell scripts.
@@ -18,6 +17,10 @@
 #   shellcheck disable=SC2003
 # Allow usage of legacy backticked `...` notation instead of $(...).
 #   shellcheck disable=SC2006
+
+# @dubo
+#   shellcheck disable=SC2086
+# @dubo
 
 # Return if shunit2 already loaded.
 if test -n "${SHUNIT_VERSION:-}"; then
@@ -608,7 +611,7 @@ assertFalse() {
   fi
 
   unset shunit_message_ shunit_condition_
-  dc::error::throw "${shunit_return}" "" passthrough
+  return "${shunit_return}"
 }
 # shellcheck disable=SC2016,SC2034
 _ASSERT_FALSE_='eval assertFalse --lineno "${LINENO:-}"'
@@ -884,7 +887,7 @@ suite_addTest() {
   shunit_func_=${1:-}
 
   __shunit_suite="${__shunit_suite:+${__shunit_suite} }${shunit_func_}"
-  __shunit_testsTotal=`expr ${__shunit_testsTotal} + 1`
+  __shunit_testsTotal=`expr "${__shunit_testsTotal}" + 1`
 
   unset shunit_func_
 }
@@ -1123,9 +1126,9 @@ _shunit_execSuite() {
 
     # Update stats.
     if ${__SHUNIT_BUILTIN} [ ${__shunit_testSuccess} -eq ${SHUNIT_TRUE} ]; then
-      __shunit_testsPassed=`expr ${__shunit_testsPassed} + 1`
+      __shunit_testsPassed=`expr "${__shunit_testsPassed}" + 1`
     else
-      __shunit_testsFailed=`expr ${__shunit_testsFailed} + 1`
+      __shunit_testsFailed=`expr "${__shunit_testsFailed}" + 1`
     fi
   done
 
@@ -1197,8 +1200,8 @@ _shunit_shouldSkip() {
 # Args:
 #   None
 _shunit_assertPass() {
-  __shunit_assertsPassed=`expr ${__shunit_assertsPassed} + 1`
-  __shunit_assertsTotal=`expr ${__shunit_assertsTotal} + 1`
+  __shunit_assertsPassed=`expr "${__shunit_assertsPassed}" + 1`
+  __shunit_assertsTotal=`expr "${__shunit_assertsTotal}" + 1`
 }
 
 # Records a test failure.
@@ -1272,8 +1275,7 @@ _shunit_extractTestFunctions() {
   # Extract the lines with test function names, strip of anything besides the
   # function name, and output everything on a single line.
   _shunit_regex_='^\s*((function test[A-Za-z0-9_-]*)|(test[A-Za-z0-9_-]* *\(\)))'
-  # shellcheck disable=SC2196
-  egrep "${_shunit_regex_}" "${_shunit_script_}" \
+  grep -E "${_shunit_regex_}" "${_shunit_script_}" \
   |command sed 's/^[^A-Za-z0-9_-]*//;s/^function //;s/\([A-Za-z0-9_-]*\).*/\1/g' \
   |xargs
 
@@ -1374,5 +1376,5 @@ _shunit_generateReport
 
 # That's it folks.
 if ! ${__SHUNIT_BUILTIN} [ "${__shunit_testsFailed}" -eq 0 ]; then
-  exit ${SHUNIT_FALSE}
+  return ${SHUNIT_FALSE}
 fi

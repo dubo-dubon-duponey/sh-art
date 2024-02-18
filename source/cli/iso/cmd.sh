@@ -21,6 +21,7 @@ dc::fs::isdir "$directory"
 
 # This: iname="${DC_ARG_FILE%.iso$*:-$(basename "$directory")}"
 # BASHBUG Works with bash3, but not bash5...
+# shellcheck disable=SC2295
 [ -z "${DC_ARG_FILE+x}" ] || iname="${DC_ARG_FILE%.iso$*}"
 iname="${iname:-$(basename "$directory")}"
 vname="${DC_ARG_NAME:-$iname}"
