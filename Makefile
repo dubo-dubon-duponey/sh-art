@@ -45,28 +45,24 @@ all: build lint test test-all
 # Base private tasks
 #######################################################
 
-# This builds the bootstrapping builder, and never refreshed unless clean is called
-$(DC_PREFIX)/bin/bootstrap/builder: $(DC_MAKEFILE_DIR)/bootstrap
+# This builds the bootstrapping builder
+$(DC_PREFIX)/bin/bootstrap/builder: $(DC_MAKEFILE_DIR)/bootstrap $(DC_MAKEFILE_DIR)/source/cli-tooling/build/base-build.sh
 	$(call title, $@)
 	$(DC_MAKEFILE_DIR)/bootstrap $(DC_PREFIX)
 	$(call footer, $@)
 
-# Builds the minimal library
-$(DC_PREFIX)/bin/bootstrap/dc-mini: $(DC_MAKEFILE_DIR)/source/core/*.sh
-	$(call title, $@)
-	$(DC_PREFIX)/bin/bootstrap/builder --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="the library version" --with-git-info=DC_LIB $(sort $^)
-	$(call footer, $@)
-
-# Then build the cli builder
-$(DC_PREFIX)/bin/dc-tooling-build: $(DC_PREFIX)/bin/bootstrap/dc-mini $(DC_MAKEFILE_DIR)/source/cli-tooling/build
+# This builds the builder
+$(DC_PREFIX)/bin/dc-tooling-build: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE_DIR)/source/cli-tooling/build
 	$(call title, $@)
 	$(DC_PREFIX)/bin/bootstrap/builder --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="a script builder, part of the dc-tooling set of utilities" --with-git-info $^
 	$(call footer, $@)
 
+# Depend on this to get the builder built
+builder: $(DC_PREFIX)/bin/bootstrap/builder $(DC_PREFIX)/bin/dc-tooling-build
+
 #######################################################
 # Base building tasks
 #######################################################
-
 # Builds the main library
 $(DC_PREFIX)/lib/lib-dc-mini: $(DC_MAKEFILE_DIR)/source/core/*.sh
 	$(call title, $@)
@@ -86,10 +82,10 @@ $(DC_PREFIX)/lib/lib-dc-sh-art-extensions: $(DC_MAKEFILE_DIR)/source/extensions/
 	$(call footer, $@)
 
 # Test is special (embeds shunit2 which requires some shellcheck disabling
-$(DC_PREFIX)/bin/dc-tooling-test: $(DC_PREFIX)/lib/lib-dc-mini $(DC_MAKEFILE_DIR)/source/cli-tooling/test
-	$(call title, $@)
-	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="a script tester, part of the dc-tooling set of utilities" --shellcheck-disable=SC2006,SC2003,SC2001,SC2166 --with-git-info $^
-	$(call footer, $@)
+#$(DC_PREFIX)/bin/dc-tooling-test: $(DC_PREFIX)/lib/lib-dc-mini $(DC_MAKEFILE_DIR)/source/cli-tooling/test
+#	$(call title, $@)
+#	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="a script tester, part of the dc-tooling set of utilities" --shellcheck-disable=SC2006,SC2003,SC2001,SC2166 --with-git-info $^
+#	$(call footer, $@)
 
 # All other dev tools
 $(DC_PREFIX)/bin/dc-tooling-%: $(DC_PREFIX)/lib/lib-dc-mini $(DC_MAKEFILE_DIR)/source/cli-tooling/%
@@ -114,26 +110,24 @@ $(DC_PREFIX)/bin/dc-%: $(DC_PREFIX)/lib/lib-dc-sh-art $(DC_PREFIX)/lib/lib-dc-sh
 # Tasks to be called on
 #######################################################
 
-build-builder: $(DC_PREFIX)/bin/bootstrap/builder $(DC_PREFIX)/bin/dc-tooling-build
-
 # High-level task for embedders to build just the tooling
-build-tooling: build-builder $(patsubst $(DC_MAKEFILE_DIR)/source/cli-tooling/%/cmd.sh,$(DC_PREFIX)/bin/dc-tooling-%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli-tooling/*/cmd.sh))
+tooling: builder $(patsubst $(DC_MAKEFILE_DIR)/source/cli-tooling/%/cmd.sh,$(DC_PREFIX)/bin/dc-tooling-%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli-tooling/*/cmd.sh))
 
 # High-level task to build the library, and extensions
-build-library: build-builder $(DC_PREFIX)/lib/lib-dc-sh-art $(DC_PREFIX)/lib/lib-dc-sh-art-extensions
+library: builder $(DC_PREFIX)/lib/lib-dc-sh-art $(DC_PREFIX)/lib/lib-dc-sh-art-extensions
 
 # High-level task to build all non tooling CLIs
-build-binaries: build-library $(patsubst $(DC_MAKEFILE_DIR)/source/cli-ext/%/cmd.sh,$(DC_PREFIX)/bin/dc-%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli-ext/*/cmd.sh)) \
+binaries: library $(patsubst $(DC_MAKEFILE_DIR)/source/cli-ext/%/cmd.sh,$(DC_PREFIX)/bin/dc-%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli-ext/*/cmd.sh)) \
 				$(patsubst $(DC_MAKEFILE_DIR)/source/cli/%/cmd.sh,$(DC_PREFIX)/bin/dc-%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli/*/cmd.sh))
 
 # Git sanity
-lint-signed: build-builder $(DC_PREFIX)/bin/dc-tooling-git
+lint-signed: builder $(DC_PREFIX)/bin/dc-tooling-git
 	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-git $(DC_MAKEFILE_DIR)
 	$(call footer, $@)
 
 # Linter
-lint-code: build-binaries $(DC_PREFIX)/bin/dc-tooling-lint
+lint-code: binaries $(DC_PREFIX)/bin/dc-tooling-lint
 	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-lint $(DC_MAKEFILE_DIR)/bootstrap
 	$(DC_PREFIX)/bin/dc-tooling-lint $(DC_MAKEFILE_DIR)/source
@@ -144,20 +138,20 @@ lint-code: build-binaries $(DC_PREFIX)/bin/dc-tooling-lint
 	$(call footer, $@)
 
 # Unit tests
-unit/%: $(DC_PREFIX)/bin/dc-tooling-test
+unit/%: builder $(DC_PREFIX)/bin/dc-tooling-test
 	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-test $(DC_MAKEFILE_DIR)/tests/$@
 	$(call footer, $@)
 
-test-unit: build-builder $(patsubst $(DC_MAKEFILE_DIR)/tests/unit/%,unit/%,$(wildcard $(DC_MAKEFILE_DIR)/tests/unit/*.sh))
+test-unit: $(patsubst $(DC_MAKEFILE_DIR)/tests/unit/%,unit/%,$(wildcard $(DC_MAKEFILE_DIR)/tests/unit/*.sh))
 
 # Integration tests
-integration/%: build-builder $(DC_PREFIX)/bin/dc-tooling-test $(DC_PREFIX)/bin/dc-%
+integration/%: builder $(DC_PREFIX)/bin/dc-tooling-test $(DC_PREFIX)/bin/dc-%
 	$(call title, $@)
 	PATH="$(DC_PREFIX)/bin:${PATH}" $(DC_PREFIX)/bin/dc-tooling-test $(DC_MAKEFILE_DIR)/tests/$@/*.sh
 	$(call footer, $@)
 
-test-integration: build-builder $(patsubst $(DC_MAKEFILE_DIR)/source/cli/%/cmd.sh,integration/%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli/*/cmd.sh)) \
+test-integration: $(patsubst $(DC_MAKEFILE_DIR)/source/cli/%/cmd.sh,integration/%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli/*/cmd.sh)) \
 	$(patsubst $(DC_MAKEFILE_DIR)/source/cli-ext/%/cmd.sh,integration/%,$(wildcard $(DC_MAKEFILE_DIR)/source/cli-ext/*/cmd.sh))
 
 dckr/%:
@@ -167,7 +161,7 @@ dckr/%:
 
 test-all: $(patsubst %,dckr/%,$(DCKR_PLATFORMS))
 
-build: build-tooling build-library build-binaries
+build: tooling library binaries
 lint: lint-code lint-signed
 test: test-unit test-integration
 
