@@ -7,8 +7,7 @@ DC_PREFIX ?= $(shell pwd)
 DC_NO_FANCY ?=
 
 # List of dckr platforms to test
-# make on debian-10 has no order guarantee on files, which breaks the builder here
-DCKR_PLATFORMS ?= debian-11 debian-12 debian-current debian-next ubuntu-1404 ubuntu-1604 ubuntu-1804 ubuntu-2004 ubuntu-2204 ubuntu-current ubuntu-next alpine-316 alpine-317 alpine-318 alpine-319 alpine-next
+DCKR_PLATFORMS ?= ubuntu-1404 ubuntu-1604 ubuntu-1804 ubuntu-2004 ubuntu-2204 ubuntu-current ubuntu-next alpine-316 alpine-317 alpine-318 alpine-319 alpine-next debian-10 debian-11 debian-12 debian-current debian-next
 
 # Fancy output if interactive
 ifndef DC_NO_FANCY
@@ -53,7 +52,7 @@ $(DC_PREFIX)/bin/bootstrap/builder: $(DC_MAKEFILE_DIR)/bootstrap $(DC_MAKEFILE_D
 	$(call footer, $@)
 
 # This builds the builder
-$(DC_PREFIX)/bin/dc-tooling-build: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE_DIR)/source/cli-tooling/build
+$(DC_PREFIX)/bin/dc-tooling-build: $(sort $(wildcard $(DC_MAKEFILE_DIR)/source/core/*.sh)) $(DC_MAKEFILE_DIR)/source/cli-tooling/build
 	$(call title, $@)
 	$(DC_PREFIX)/bin/bootstrap/builder --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="a script builder, part of the dc-tooling set of utilities" --with-git-info $^
 	$(call footer, $@)
@@ -65,19 +64,19 @@ build-builder: $(DC_PREFIX)/bin/bootstrap/builder $(DC_PREFIX)/bin/dc-tooling-bu
 # Base building tasks
 #######################################################
 # Builds the main library
-$(DC_PREFIX)/lib/lib-dc-mini: $(DC_MAKEFILE_DIR)/source/core/*.sh
+$(DC_PREFIX)/lib/lib-dc-mini: $(sort $(wildcard $(DC_MAKEFILE_DIR)/source/core/*.sh))
 	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="the library version" --with-git-info=DC_LIB $(sort $^)
 	$(call footer, $@)
 
 # Builds the main library
-$(DC_PREFIX)/lib/lib-dc-sh-art: $(DC_MAKEFILE_DIR)/source/core/*.sh $(DC_MAKEFILE_DIR)/source/headers/*.sh $(DC_MAKEFILE_DIR)/source/lib/*.sh
+$(DC_PREFIX)/lib/lib-dc-sh-art: $(sort $(wildcard $(DC_MAKEFILE_DIR)/source/core/*.sh)) $(sort $(wildcard $(DC_MAKEFILE_DIR)/source/headers/*.sh)) $(sort $(wildcard $(DC_MAKEFILE_DIR)/source/lib/*.sh))
 	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="the library version" --with-git-info=DC_LIB $(sort $^)
 	$(call footer, $@)
 
 # Builds the extensions
-$(DC_PREFIX)/lib/lib-dc-sh-art-extensions: $(DC_MAKEFILE_DIR)/source/extensions/**/*.sh
+$(DC_PREFIX)/lib/lib-dc-sh-art-extensions: $(sort $(wildcard $(DC_MAKEFILE_DIR)/source/extensions/**/*.sh))
 	$(call title, $@)
 	$(DC_PREFIX)/bin/dc-tooling-build --destination="$(shell dirname $@)" --name="$(shell basename $@)" --license="$(DC_LICENSE)" --author="$(DC_AUTHOR)" --description="extensions" $(sort $^)
 	$(call footer, $@)
