@@ -19,7 +19,7 @@ testing(){
   dc-tools::assert::equal "No SSH" "SSH_CLIENT_CONNECTION" "$(dc::error::lookup $exitcode)"
 
   exitcode=0
-  dc::internal::wrapped::ssh foobar@dacodac.local ls -lA || exitcode="$?"
+  dc::internal::wrapped::ssh -o "StrictHostKeyChecking=no" foobar@dacodac.local ls -lA || exitcode="$?"
   dc-tools::assert::equal "Wrong user" "SSH_CLIENT_AUTHENTICATION" "$(dc::error::lookup $exitcode)"
 
   [ "$HOME" != /home/dckr ] || startSkipping

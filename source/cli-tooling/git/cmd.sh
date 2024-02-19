@@ -35,7 +35,8 @@ dc-tooling::git::resignEverything(){
 }
 
 # Import committed keys
-for i in ./keys/*.pub; do
+_here="$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)"
+for i in "$_here"/keys/*.pub; do
   gpg --import "$i" 2>/dev/null || {
     dc::logger::error "Invalid gpg key $i"
   }
