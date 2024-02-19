@@ -49,12 +49,12 @@ dc::internal::wrapped::ssh(){
       return
     fi
 
-    if printf "%s" "$err" | dc::wrapped::grep -iq "Too many authentication failures"; then
+    if printf "%s" "$err" | dc::wrapped::grep -iq "(?:Too many authentication failures|Permission denied)"; then
       dc::error::throw SSH_CLIENT_AUTHENTICATION "$*"
       return
     fi
 
-    if printf "%s" "$err" | dc::wrapped::grep -iq "illegal option"; then
+    if printf "%s" "$err" | dc::wrapped::grep -iq "(?:illegal|unknown) option"; then
       dc::error::throw ARGUMENT_INVALID "$*"
       return
     fi

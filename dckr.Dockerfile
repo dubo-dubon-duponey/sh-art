@@ -111,7 +111,7 @@ RUN git config --global --add safe.directory /dckr-project-mount
 FROM com.dbdbdp.dckr:debian-10 as debian-10
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends make git shellcheck gpg ca-certificates # docker.io
-RUN apt-get install -y --no-install-recommends curl jq sqlite3
+RUN apt-get install -y --no-install-recommends curl jq sqlite3 ssh
 ENV DC_PREFIX=/tmp
 USER dckr
 RUN git config --global --add safe.directory /dckr-project-mount
@@ -120,7 +120,7 @@ RUN git config --global --add safe.directory /dckr-project-mount
 FROM com.dbdbdp.dckr:debian-11 as debian-11
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends make git shellcheck gpg ca-certificates # docker.io
-RUN apt-get install -y --no-install-recommends curl jq sqlite3
+RUN apt-get install -y --no-install-recommends curl jq sqlite3 ssh
 ENV DC_PREFIX=/tmp
 USER dckr
 RUN git config --global --add safe.directory /dckr-project-mount
@@ -129,7 +129,7 @@ RUN git config --global --add safe.directory /dckr-project-mount
 FROM com.dbdbdp.dckr:debian-12 as debian-12
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends make git shellcheck gpg ca-certificates # docker.io
-RUN apt-get install -y --no-install-recommends curl jq sqlite3
+RUN apt-get install -y --no-install-recommends curl jq sqlite3 ssh
 ENV DC_PREFIX=/tmp
 USER dckr
 RUN git config --global --add safe.directory /dckr-project-mount
@@ -138,7 +138,7 @@ RUN git config --global --add safe.directory /dckr-project-mount
 FROM com.dbdbdp.dckr:debian-current as debian-current
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends make git shellcheck gpg-agent gpg ca-certificates # docker.io
-RUN apt-get install -y --no-install-recommends curl jq sqlite3
+RUN apt-get install -y --no-install-recommends curl jq sqlite3 ssh
 ENV DC_PREFIX=/tmp
 USER dckr
 RUN git config --global --add safe.directory /dckr-project-mount
@@ -147,7 +147,7 @@ RUN git config --global --add safe.directory /dckr-project-mount
 FROM com.dbdbdp.dckr:debian-next as debian-next
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends make git shellcheck gpg-agent gpg ca-certificates # docker.io
-RUN apt-get install -y --no-install-recommends curl jq sqlite3
+RUN apt-get install -y --no-install-recommends curl jq sqlite3 ssh
 ENV DC_PREFIX=/tmp
 USER dckr
 RUN git config --global --add safe.directory /dckr-project-mount

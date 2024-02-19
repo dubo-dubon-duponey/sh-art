@@ -7,8 +7,8 @@ set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 testing(){
   exitcode=0
-  dc::internal::wrapped::ssh -fla apo@dacodac ls -lA || exitcode="$?"
-  dc-tools::assert::equal "Wrong arguments" "SSH_CLIENT_RESOLUTION" "$(dc::error::lookup $exitcode)"
+  dc::internal::wrapped::ssh -zzz apo@dacodac ls -lA || exitcode="$?"
+  dc-tools::assert::equal "Wrong arguments" "ARGUMENT_INVALID" "$(dc::error::lookup $exitcode)"
 
   exitcode=0
   dc::internal::wrapped::ssh --flouzy apo@dacodac ls -lA || exitcode="$?"
@@ -22,7 +22,9 @@ testing(){
   dc::internal::wrapped::ssh foobar@dacodac.local ls -lA || exitcode="$?"
   dc-tools::assert::equal "Wrong user" "SSH_CLIENT_AUTHENTICATION" "$(dc::error::lookup $exitcode)"
 
+  [ "$HOME" != /home/dckr ] || startSkipping
   exitcode=0
   dc::internal::wrapped::ssh apo@dacodac.local ls -lA >/dev/null || exitcode="$?"
   dc-tools::assert::equal "OK" "NO_ERROR" "$(dc::error::lookup $exitcode)"
+  [ "$HOME" != /home/dckr ] || endSkipping
 }
