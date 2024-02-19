@@ -36,7 +36,9 @@ dc-tooling::git::resignEverything(){
 
 # Import committed keys
 for i in ./keys/*.pub; do
-  gpg --import "$i"
+  gpg --import "$i" 2>/dev/null || {
+    dc::logger::error "Invalid gpg key $i"
+  }
 done
 
 #regex="^Signed-off-by: ([^<]+) <([^<>@]+@[^<>]+)>( \\(github: ([a-zA-Z0-9][a-zA-Z0-9-]+)\\))?$"
