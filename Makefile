@@ -7,7 +7,7 @@ DC_PREFIX ?= $(shell pwd)
 DC_NO_FANCY ?=
 
 # List of dckr platforms to test
-DCKR_PLATFORMS ?= debian-8 debian-9 debian-10 debian-current debian-next ubuntu-1404 ubuntu-1604 ubuntu-1804 ubuntu-current ubuntu-next alpine-38 alpine-39 alpine-310 alpine-311 alpine-next
+DCKR_PLATFORMS ?= debian-10 debian-11 debian-12 debian-current debian-next ubuntu-1404 ubuntu-1604 ubuntu-1804 ubuntu-2004 ubuntu-2204 ubuntu-current ubuntu-next alpine-316 alpine-317 alpine-318 alpine-319 alpine-next
 
 # Fancy output if interactive
 ifndef DC_NO_FANCY
