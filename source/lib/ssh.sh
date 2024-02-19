@@ -54,7 +54,9 @@ dc::internal::wrapped::ssh(){
       return
     fi
 
-    if printf "%s" "$err" | dc::wrapped::grep -iq "(?:illegal|unknown) option"; then
+    # Dear open-ssh, we are applauding the creativity here, using different synonyms from one release to the other
+    # Suggestions for you for the upcoming releases: un-allowed, dis-allowed, foobar-ed, not right, un-groakable
+    if printf "%s" "$err" | dc::wrapped::grep -iq "(?:illegal|unknown|unrecognized) option"; then
       dc::error::throw ARGUMENT_INVALID "$*"
       return
     fi

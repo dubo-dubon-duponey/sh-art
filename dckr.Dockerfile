@@ -2,7 +2,7 @@
 FROM com.dbdbdp.dckr:alpine-316 as alpine-316
 # no shellcheck package on alpine
 RUN apk add --no-cache make git ncurses gnupg
-RUN apk add --no-cache bash grep curl perl-utils libressl jq sqlite # docker-cli
+RUN apk add --no-cache bash grep curl perl-utils libressl jq sqlite openssh # docker-cli
 ENV DC_PREFIX=/tmp
 USER dckr
 RUN git config --global --add safe.directory /dckr-project-mount
@@ -11,7 +11,7 @@ RUN git config --global --add safe.directory /dckr-project-mount
 FROM com.dbdbdp.dckr:alpine-317 as alpine-317
 # no shellcheck package on alpine
 RUN apk add --no-cache make git ncurses gnupg
-RUN apk add --no-cache bash grep curl perl-utils libressl jq sqlite # docker-cli
+RUN apk add --no-cache bash grep curl perl-utils libressl jq sqlite openssh # docker-cli
 ENV DC_PREFIX=/tmp
 USER dckr
 RUN git config --global --add safe.directory /dckr-project-mount
@@ -20,7 +20,7 @@ RUN git config --global --add safe.directory /dckr-project-mount
 FROM com.dbdbdp.dckr:alpine-318 as alpine-318
 # no shellcheck package on alpine
 RUN apk add --no-cache make git ncurses gnupg
-RUN apk add --no-cache bash grep curl perl-utils libressl jq sqlite # docker-cli
+RUN apk add --no-cache bash grep curl perl-utils libressl jq sqlite openssh # docker-cli
 ENV DC_PREFIX=/tmp
 USER dckr
 RUN git config --global --add safe.directory /dckr-project-mount
@@ -29,7 +29,7 @@ RUN git config --global --add safe.directory /dckr-project-mount
 FROM com.dbdbdp.dckr:alpine-319 as alpine-319
 # no shellcheck package on alpine
 RUN apk add --no-cache make git ncurses gnupg
-RUN apk add --no-cache bash grep curl perl-utils libressl jq sqlite # docker-cli
+RUN apk add --no-cache bash grep curl perl-utils libressl jq sqlite openssh # docker-cli
 ENV DC_PREFIX=/tmp
 USER dckr
 RUN git config --global --add safe.directory /dckr-project-mount
@@ -38,7 +38,7 @@ RUN git config --global --add safe.directory /dckr-project-mount
 FROM com.dbdbdp.dckr:alpine-next as alpine-next
 # no shellcheck package on alpine
 RUN apk add --no-cache make git ncurses gnupg
-RUN apk add --no-cache bash grep curl perl-utils libressl jq sqlite # docker-cli
+RUN apk add --no-cache bash grep curl perl-utils libressl jq sqlite openssh # docker-cli
 ENV DC_PREFIX=/tmp
 USER dckr
 RUN git config --global --add safe.directory /dckr-project-mount
