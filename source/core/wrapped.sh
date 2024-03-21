@@ -18,6 +18,7 @@ dc::wrapped::grep(){
   local exitcode=0
 
   # If gnu grep, use -P for extended
+  # XXX is this below correct?
   if ! [ "${_DC_PRIVATE_IS_GNUGREP+x}" ]; then
     _DC_PRIVATE_IS_GNUGREP=""
     # XXX this will fuck up the file descriptor with bash 5.0.16...

@@ -25,7 +25,7 @@ dc::internal::wrapped::ssh(){
   dc::require ssh
 
   # Debug command
-  dc::logger::info "ssh $*"
+  dc::logger::debug "ssh $*"
 
   # Capture stderr, let stdout passthrough, and capture exit code
   exec 3>&1
@@ -55,9 +55,15 @@ dc::internal::wrapped::ssh(){
     fi
 
     # Dear open-ssh, we are applauding the creativity here, using different synonyms from one release to the other
-    # Suggestions for you for the upcoming releases: un-allowed, dis-allowed, foobar-ed, not right, un-groakable
+    # Suggestions for you for the upcoming releases: un-allowed, dis-allowed, foobar-ed, not right, un-groakable,
+    # or... BLAH!
     if printf "%s" "$err" | dc::wrapped::grep -iq "(?:illegal|unknown|unrecognized) option"; then
       dc::error::throw ARGUMENT_INVALID "$*"
+      return
+    fi
+
+    if printf "%s" "$err" | dc::wrapped::grep -iq "Operation timed out"; then
+      dc::error::throw SSH_CLIENT_CONNECTION "$*"
       return
     fi
 
