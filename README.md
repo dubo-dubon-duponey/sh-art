@@ -2,15 +2,12 @@
 
 > just a piece of shcript
 
-[![Build Status](https://travis-ci.org/dubo-dubon-duponey/sh-art.svg?branch=master)](https://travis-ci.org/dubo-dubon-duponey/sh-art)
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fdubo-dubon-duponey%2Fsh-art.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fdubo-dubon-duponey%2Fsh-art?ref=badge_shield)
+A robust bash library (bash 3 to 5) meant to ease the development of complex command line shell script utilities.
 
-Developing marginally complex command line utilities using bash in a consistent manner presents challenges.
+Specifically, it takes care of argument parsing and validation, exception handling, logging, http, string manipulation, 
+some crypto primitives, version inconsistencies fuckerisms, and other commodities, in a consistent fashion.
 
-This project aims at providing a generic library facilitating that task, driven by personal needs.
-
-Specifically, it takes care of argument parsing and validation, logging, http, string manipulation
-and other commodities in a consistent fashion.
+This is driven by personal needs.
 
 ## TL;DR
 
@@ -22,6 +19,8 @@ Or start your own `foobar` script:
 
 ```bash
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
+
 
 . "$(brew --prefix)/lib/dc-sh-art"
 
@@ -40,8 +39,8 @@ dc::commander::boot
 dc::require find
 
 # Test if the optional flag `myflag` was set
-if [ "$DC_ARGE_MYFLAG" ]; then
-  dc::logger::info "Hey! You used --myflag, and the value was $DC_ARGV_MYFLAG. Did you try --help and --version as well?"
+if dc::args::exist myflag; then
+  dc::logger::info "Hey! You used --myflag, and the value was ${DC_ARG_MYFLAG:-}. Did you try --help and --version as well?"
 fi
 
 # HEAD something over http
@@ -58,14 +57,14 @@ dc::http::dump::body
 ## Requirements
 
 Right now this is tested on:
- * macOS 10.14
- * Ubuntu 16.04, 18.04, 19.04, 19.10
- * Debian stretch, buster, and testing
- * Alpine 3.10 and edge
+ * macOS 10.15
+ * Ubuntu 14.04, 16.04, 18.04, rolling and next
+ * Debian 8, 9, 10, testing, unstable
+ * Alpine 3.8, 3.9, 3.10, 3.11 and edge
 
 If that wasn't clear, this is meant to be used with bash.
 
-Parts of the core library (`dc:http`) requires `jq` and `curl`, or `shasum`.
+Parts of the core library requires `jq`, `curl`, `shasum`, `openssl`.
 
 Library extensions require `sqlite`.
 
@@ -88,7 +87,3 @@ Specific binaries (the `dc-tooling-*`) may also require additional binaries like
 
  * it's a portementeau: "sh" (short for "shell") + "art" (short for "I like it"), which somewhat makes sense
  * if it was powershell instead of bash, it would probably have been named `phart`, which doesn't really sound right
-
-## License
-
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fdubo-dubon-duponey%2Fsh-art.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fdubo-dubon-duponey%2Fsh-art?ref=badge_large)

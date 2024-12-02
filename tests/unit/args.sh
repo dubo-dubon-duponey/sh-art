@@ -1,58 +1,94 @@
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 testArgumentProcessing(){
-  . source/core/args.sh "-t" "-u=bar ∞" "--ul" --ul-u_V="Baz baz ∞ bloom" "ignorethis" "foo" "baz=\"baz" "-fake" "--fake-it∞=really ∞"
-  dc-tools::assert::equal "argument 2" "true" "$DC_PARGE_2"
-  dc-tools::assert::equal "argument 2" "foo" "$DC_PARGV_2"
-  dc-tools::assert::equal "argument 3" "true" "$DC_PARGE_3"
-  dc-tools::assert::equal "argument 3" 'baz="baz' "$DC_PARGV_3"
-  dc-tools::assert::equal "argument 4" "true" "$DC_PARGE_4"
-  dc-tools::assert::equal "argument 4" "-fake" "$DC_PARGV_4"
-  dc-tools::assert::equal "argument 5" "true" "$DC_PARGE_5"
-  dc-tools::assert::equal "argument 5" "--fake-it∞=really ∞" "$DC_PARGV_5"
-  dc-tools::assert::equal "flag t" "true" "$DC_ARGE_T"
-  dc-tools::assert::equal "flag t" "" "$DC_ARGV_T"
-  dc-tools::assert::equal "flag u" "true" "$DC_ARGE_U"
-  dc-tools::assert::equal "flag u" "bar ∞" "$DC_ARGV_U"
-  dc-tools::assert::equal "flag ul" "true" "$DC_ARGE_UL"
-  dc-tools::assert::equal "flag ul" "" "$DC_ARGV_UL"
-  dc-tools::assert::equal "flag ul_u_v" "true" "$DC_ARGE_UL_U_V"
-  dc-tools::assert::equal "flag ul_u_v" "Baz baz ∞ bloom" "$DC_ARGV_UL_U_V"
+  local exitcode
 
-  local exit
+  . source/core/args.sh
 
-  dc::args::flag::validate t
-  dc::args::flag::validate u "^bar"
-  dc::args::flag::validate ul_u_v "^baz" "" insensitive
-  dc::args::flag::validate w "^baz" optional
+  exitcode=0
 
-  _=$(dc::args::flag::validate ul_u_v "^baz" 2>/dev/null)
-  exit=$?
-  dc-tools::assert::equal "Case sensitiveness failed validation" "$ERROR_ARGUMENT_INVALID" "$exit"
+  dc::args::parse "-t" "-u=bar ∞" "--ul" --ul-u_V="Baz baz ∞ bloom" "ignorethis" "foo" "baz=\"baz" "-fake" "--fake-it∞=really ∞" || exitcode=$?
 
-  _=$(dc::args::flag::validate ul_u_v "^Babar" 2>/dev/null)
-  exit=$?
-  dc-tools::assert::equal "Non matching regexp failed validation" "$ERROR_ARGUMENT_INVALID" "$exit"
+  dc-tools::assert::equal "args parsing" "NO_ERROR" "$(dc::error::lookup $exitcode)"
 
-  _=$(dc::args::flag::validate w 2>/dev/null)
-  exit=$?
-  dc-tools::assert::equal "Non existent flag failed validation" "$ERROR_ARGUMENT_MISSING" "$exit"
+  dc-tools::assert::equal "argument 2" "x" "${DC_ARG_2+x}"
+  dc-tools::assert::equal "argument 2" "foo" "$DC_ARG_2"
 
-  dc::args::arg::validate 2
-  dc::args::arg::validate 2 "foo$"
-  dc::args::arg::validate 2 "^FOO" "" insensitive
-  dc::args::arg::validate 10 "foo$" optional
+  dc-tools::assert::equal "argument 3" "x" "${DC_ARG_3+x}"
+  dc-tools::assert::equal "argument 3" 'baz="baz' "$DC_ARG_3"
 
-  _=$(dc::args::arg::validate 2 "^FOO" 2>/dev/null)
-  exit=$?
-  dc-tools::assert::equal "Case sensitiveness failed validation" "$ERROR_ARGUMENT_INVALID" "$exit"
+  dc-tools::assert::equal "argument 4" "x" "${DC_ARG_4+x}"
+  dc-tools::assert::equal "argument 4" "-fake" "$DC_ARG_4"
 
-  _=$(dc::args::arg::validate 2 "^Babar" 2>/dev/null)
-  exit=$?
-  dc-tools::assert::equal "Non matching regexp failed validation" "$ERROR_ARGUMENT_INVALID" "$exit"
+  dc-tools::assert::equal "argument 5" "x" "${DC_ARG_5+x}"
+  dc-tools::assert::equal "argument 5" "--fake-it∞=really ∞" "$DC_ARG_5"
 
-  _=$(dc::args::arg::validate 10 2>/dev/null)
-  exit=$?
-  dc-tools::assert::equal "Non existent arg failed validation" "$ERROR_ARGUMENT_MISSING" "$exit"
+  dc-tools::assert::equal "flag t" "x" "${DC_ARG_T+x}"
+  dc-tools::assert::equal "flag t" "" "$DC_ARG_T"
 
+  dc-tools::assert::equal "flag u" "x" "${DC_ARG_U+x}"
+  dc-tools::assert::equal "flag u" "bar ∞" "$DC_ARG_U"
+
+  dc-tools::assert::equal "flag ul" "x" "${DC_ARG_UL+x}"
+  dc-tools::assert::equal "flag ul" "" "$DC_ARG_UL"
+
+  dc-tools::assert::equal "flag ul_u_v" "x" "${DC_ARG_UL_U_V+x}"
+  dc-tools::assert::equal "flag ul_u_v" "Baz baz ∞ bloom" "$DC_ARG_UL_U_V"
+
+  exitcode=0
+  dc::args::validate t || exitcode=$?
+  dc-tools::assert::equal "${FUNCNAME[0]} t" "0" "$exitcode"
+
+  exitcode=0
+  dc::args::validate u "^bar" || exitcode=$?
+  dc-tools::assert::equal "${FUNCNAME[0]} u" "0" "$exitcode"
+
+  exitcode=0
+  dc::args::validate ul_u_v "^baz" "" insensitive || exitcode=$?
+  dc-tools::assert::equal "${FUNCNAME[0]} ul_u_v" "0" "$exitcode"
+
+  exitcode=0
+  dc::args::validate w "^baz" optional || exitcode=$?
+  dc-tools::assert::equal "${FUNCNAME[0]} w" "0" "$exitcode"
+
+  exitcode=0
+  dc::args::validate ul_u_v "^baz" || exitcode=$?
+  dc-tools::assert::equal "${FUNCNAME[0]} case sensitiveness failed validation" "$ERROR_ARGUMENT_INVALID" "$exitcode"
+
+  exitcode=0
+  dc::args::validate ul_u_v "^Babar" || exitcode=$?
+  dc-tools::assert::equal "${FUNCNAME[0]} non matching regexp failed validation" "$ERROR_ARGUMENT_INVALID" "$exitcode"
+
+  exitcode=0
+  dc::args::validate w || exitcode=$?
+  dc-tools::assert::equal "${FUNCNAME[0]} non existent flag failed validation" "$ERROR_ARGUMENT_MISSING" "$exitcode"
+
+  exitcode=0
+  dc::args::validate 2 || exitcode=$?
+  dc-tools::assert::equal "${FUNCNAME[0]} 2" "0" "$?"
+
+  exitcode=0
+  dc::args::validate 2 "foo$" || exitcode=$?
+  dc-tools::assert::equal "${FUNCNAME[0]} 2" "0" "$?"
+
+  exitcode=0
+  dc::args::validate 2 "^FOO" "" insensitive || exitcode=$?
+  dc-tools::assert::equal "${FUNCNAME[0]} 2" "0" "$?"
+
+  exitcode=0
+  dc::args::validate 10 "foo$" optional || exitcode=$?
+  dc-tools::assert::equal "${FUNCNAME[0]} 10" "0" "$?"
+
+  exitcode=0
+  dc::args::validate 2 "^FOO" || exitcode=$?
+  dc-tools::assert::equal "Case sensitiveness failed validation" "$ERROR_ARGUMENT_INVALID" "$exitcode"
+
+  exitcode=0
+  dc::args::validate 2 "^Babar" || exitcode=$?
+  dc-tools::assert::equal "Non matching regexp failed validation" "$ERROR_ARGUMENT_INVALID" "$exitcode"
+
+  exitcode=0
+  dc::args::validate 10 || exitcode=$?
+  dc-tools::assert::equal "Non existent arg failed validation" "$ERROR_ARGUMENT_MISSING" "$exitcode"
 }

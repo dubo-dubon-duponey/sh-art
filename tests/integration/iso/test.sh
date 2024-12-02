@@ -1,23 +1,26 @@
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 testMkISO(){
   [ "$(uname)" == Darwin ] || startSkipping
 
   local iso
-  iso="$(dc::portable::mktemp mkisotest) ∞ fancy"
+  local exitcode
+
+  iso="$(dc::fs::mktemp mkisotest) ∞ fancy" || true
   local vname="fancy ∞ name"
 
-  dc-iso -s --name="$vname" --file="$iso" --source="$(pwd)" create
-  exit=$?
-  dc-tools::assert::equal "$exit" "0"
+  exitcode=0
+  dc-iso -s --name="$vname" --file="$iso" --source="$(pwd)" create || exitcode=$?
+  dc-tools::assert::equal "$exitcode" "0"
 
-  dc-iso -s --file="$iso" mount
-  exit=$?
-  dc-tools::assert::equal "$exit" "0"
+  exitcode=0
+  dc-iso -s --file="$iso" mount || exitcode=$?
+  dc-tools::assert::equal "$exitcode" "0"
 
-  dc-iso -s --name="$vname" unmount
-  exit=$?
-  dc-tools::assert::equal "$exit" "0"
+  exitcode=0
+  dc-iso -s --name="$vname" unmount || exitcode=$?
+  dc-tools::assert::equal "$exitcode" "0"
 
   [ "$(uname)" == Darwin ] || endSkipping
 }

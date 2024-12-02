@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
+
+. source/cli-tooling/test/_assert.sh
 
 # Test the tester
 testAssert() {

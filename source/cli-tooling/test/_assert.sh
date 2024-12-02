@@ -1,18 +1,64 @@
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 dc-tools::assert::null(){
-  assertNull "$@"
+  local ex
+  assertNull "$@" || {
+    ex=$?
+    echo "=============================================================================================="
+    echo "Error details:"
+    dc::error::detail::get
+    echo
+    echo "=============================================================================================="
+    exit "$ex"
+  }
 }
 
 dc-tools::assert::notnull(){
-  assertNotNull "$@"
+  assertNotNull "$@" || {
+    ex=$?
+    echo "=============================================================================================="
+    echo "Error details:"
+    dc::error::detail::get
+    echo
+    echo "=============================================================================================="
+    exit "$ex"
+  }
 }
 
 dc-tools::assert::equal(){
-  assertEquals "$@"
+  local ex
+  assertEquals "$@" || {
+    ex=$?
+    echo "=============================================================================================="
+    echo "Error details:"
+    dc::error::detail::get
+    echo
+    echo "=============================================================================================="
+    exit "$ex"
+  }
 }
 
 dc-tools::assert::notequal(){
-  assertNotEquals "$@"
+  assertNotEquals "$@" || {
+    ex=$?
+    echo "=============================================================================================="
+    echo "Error details:"
+    dc::error::detail::get
+    echo
+    echo "=============================================================================================="
+    exit "$ex"
+  }
 }
 
+dc-tools::assert::contains(){
+  assertContains "$@" || {
+    ex=$?
+    echo "=============================================================================================="
+    echo "Error details:"
+    dc::error::detail::get
+    echo
+    echo "=============================================================================================="
+    exit "$ex"
+  }
+}

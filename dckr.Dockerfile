@@ -1,65 +1,153 @@
 ##################################################################
-FROM com.dbdbdp.dckr:alpine-current as alpine-current
+FROM com.dbdbdp.dckr:alpine-316 as alpine-316
 # no shellcheck package on alpine
-RUN apk add --no-cache make git bash ncurses grep gnupg
-RUN apk add --no-cache curl jq sqlite
+RUN apk add --no-cache make git ncurses gnupg
+RUN apk add --no-cache bash grep curl perl-utils libressl jq sqlite openssh # docker-cli
 ENV DC_PREFIX=/tmp
 USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
+
+##################################################################
+FROM com.dbdbdp.dckr:alpine-317 as alpine-317
+# no shellcheck package on alpine
+RUN apk add --no-cache make git ncurses gnupg
+RUN apk add --no-cache bash grep curl perl-utils libressl jq sqlite openssh # docker-cli
+ENV DC_PREFIX=/tmp
+USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
+
+##################################################################
+FROM com.dbdbdp.dckr:alpine-318 as alpine-318
+# no shellcheck package on alpine
+RUN apk add --no-cache make git ncurses gnupg
+RUN apk add --no-cache bash grep curl perl-utils libressl jq sqlite openssh # docker-cli
+ENV DC_PREFIX=/tmp
+USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
+
+##################################################################
+FROM com.dbdbdp.dckr:alpine-319 as alpine-319
+# no shellcheck package on alpine
+RUN apk add --no-cache make git ncurses gnupg
+RUN apk add --no-cache bash grep curl perl-utils libressl jq sqlite openssh # docker-cli
+ENV DC_PREFIX=/tmp
+USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
 
 ##################################################################
 FROM com.dbdbdp.dckr:alpine-next as alpine-next
 # no shellcheck package on alpine
-RUN apk add --no-cache make git bash ncurses grep gnupg
-RUN apk add --no-cache curl jq sqlite
+RUN apk add --no-cache make git ncurses gnupg
+RUN apk add --no-cache bash grep curl perl-utils libressl jq sqlite openssh # docker-cli
 ENV DC_PREFIX=/tmp
 USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
 
 ##################################################################
-FROM com.dbdbdp.dckr:ubuntu-lts-old as ubuntu-lts-old
-RUN apt-get install -y --no-install-recommends make git shellcheck ca-certificates
-# is too old, shellcheck is too old as well
-RUN apt-get install -y --no-install-recommends curl jq sqlite
+FROM com.dbdbdp.dckr:ubuntu-1404 as ubuntu-1404
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends make git shellcheck gnupg-agent gnupg ca-certificates # docker.io
+RUN apt-get install -y --no-install-recommends curl jq sqlite3 ssh
 ENV DC_PREFIX=/tmp
 USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
 
 ##################################################################
-FROM com.dbdbdp.dckr:ubuntu-lts-current as ubuntu-lts-current
-RUN apt-get install -y --no-install-recommends make git shellcheck gpg ca-certificates
-RUN apt-get install -y --no-install-recommends curl jq sqlite
+FROM com.dbdbdp.dckr:ubuntu-1604 as ubuntu-1604
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends make git shellcheck gnupg-agent gnupg ca-certificates # docker.io
+RUN apt-get install -y --no-install-recommends curl jq sqlite3 ssh
 ENV DC_PREFIX=/tmp
 USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
+
+##################################################################
+FROM com.dbdbdp.dckr:ubuntu-1804 as ubuntu-1804
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends make git shellcheck gpg-agent gpg ca-certificates # docker.io
+RUN apt-get install -y --no-install-recommends curl jq sqlite3 ssh
+ENV DC_PREFIX=/tmp
+USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
+
+##################################################################
+FROM com.dbdbdp.dckr:ubuntu-2004 as ubuntu-2004
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends make git shellcheck gpg-agent gpg ca-certificates # docker.io
+RUN apt-get install -y --no-install-recommends curl jq sqlite3 ssh
+ENV DC_PREFIX=/tmp
+USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
+
+##################################################################
+FROM com.dbdbdp.dckr:ubuntu-2204 as ubuntu-2204
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends make git shellcheck gpg-agent gpg ca-certificates # docker.io
+RUN apt-get install -y --no-install-recommends curl jq sqlite3 ssh
+ENV DC_PREFIX=/tmp
+USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
 
 ##################################################################
 FROM com.dbdbdp.dckr:ubuntu-current as ubuntu-current
-RUN apt-get install -y --no-install-recommends make git shellcheck gpg ca-certificates
-RUN apt-get install -y --no-install-recommends curl jq sqlite
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends make git shellcheck gpg-agent gpg ca-certificates # docker.io
+RUN apt-get install -y --no-install-recommends curl jq sqlite3 ssh
 ENV DC_PREFIX=/tmp
 USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
 
 ##################################################################
 FROM com.dbdbdp.dckr:ubuntu-next as ubuntu-next
-RUN apt-get install -y --no-install-recommends make git shellcheck gpg ca-certificates
-RUN apt-get install -y --no-install-recommends curl jq sqlite
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends make git shellcheck gpg-agent gpg ca-certificates # docker.io
+RUN apt-get install -y --no-install-recommends curl jq sqlite3 ssh
 ENV DC_PREFIX=/tmp
 USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
+
+# NOTE: debian typically comes WITHOUT procps - albeit we do not need it formally
+##################################################################
+FROM com.dbdbdp.dckr:debian-10 as debian-10
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends make git shellcheck gpg ca-certificates # docker.io
+RUN apt-get install -y --no-install-recommends curl jq sqlite3 ssh
+ENV DC_PREFIX=/tmp
+USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
 
 ##################################################################
-FROM com.dbdbdp.dckr:debian-old as debian-old
-RUN apt-get install -y --no-install-recommends make git shellcheck gpg ca-certificates
-RUN apt-get install -y --no-install-recommends curl jq sqlite
+FROM com.dbdbdp.dckr:debian-11 as debian-11
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends make git shellcheck gpg ca-certificates # docker.io
+RUN apt-get install -y --no-install-recommends curl jq sqlite3 ssh
 ENV DC_PREFIX=/tmp
 USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
+
+##################################################################
+FROM com.dbdbdp.dckr:debian-12 as debian-12
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends make git shellcheck gpg ca-certificates # docker.io
+RUN apt-get install -y --no-install-recommends curl jq sqlite3 ssh
+ENV DC_PREFIX=/tmp
+USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
 
 ##################################################################
 FROM com.dbdbdp.dckr:debian-current as debian-current
-RUN apt-get install -y --no-install-recommends make git shellcheck gpg ca-certificates
-RUN apt-get install -y --no-install-recommends curl jq sqlite
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends make git shellcheck gpg-agent gpg ca-certificates # docker.io
+RUN apt-get install -y --no-install-recommends curl jq sqlite3 ssh
 ENV DC_PREFIX=/tmp
 USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount
 
 ##################################################################
 FROM com.dbdbdp.dckr:debian-next as debian-next
-RUN apt-get install -y --no-install-recommends make git shellcheck gpg ca-certificates
-RUN apt-get install -y --no-install-recommends curl jq sqlite
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends make git shellcheck gpg-agent gpg ca-certificates # docker.io
+RUN apt-get install -y --no-install-recommends curl jq sqlite3 ssh
 ENV DC_PREFIX=/tmp
 USER dckr
+RUN git config --global --add safe.directory /dckr-project-mount

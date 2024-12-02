@@ -1,0 +1,3 @@
+disable=SC2015,SC2119
+# Because of shUnit
+disable=SC2003,SC2006

@@ -1,44 +1,57 @@
 # Core Library
 
-The core library provides basic functionality, and should be fairly stable and decently tested.
+The core library provides bare minimum functionality, and should be fairly stable and decently tested.
 
 ## API
 
-### argv
+### dc::args
 
 #### Description
 
-Including the library will always parse flags (arguments prefixed by a single or double dash, with or without a value).
+Including the library will always parse flags (arguments prefixed by a single or double dash, with or without a value), and parameters.
 
-If a flag has been specified (with or without a value), `DC_ARGE_NAME` will be set (to `true`).
-
-Values are available as `DC_ARGV_NAME` (where `NAME` is the capitalized, underscored form of the flag).
+Flag values are available as `DC_ARG_THE_NAME` (where `THE_NAME` is the capitalized, underscored form of the flag (`--the-name`)).
 
 Flags must be passed before any other argument.
 
-Examples:
+#### Examples
+
+##### Flags
 
 `myscript -h`
 ```bash
-[ "$DC_ARGE_H" ] && printf "%s\\n" "-h has been passed"
-[ ! "$DC_ARGV_H" ] && printf "%s\\n" "with no value"
+! dc::args::exist h || printf "%s\n" "-h has been passed"
+[ "${DC_ARG_H:-}" ] || printf "%s\n" "with no value"
 ```
 `myscript --something-special=foo`
 ```bash
-[ "$DC_ARGE_SOMETHING_SPECIAL" ] && printf "%s\\n" "-something-special has been passed"
-[ "$DC_ARGV_SOMETHING_SPECIAL" == "foo" ] && printf "%s\\n" "with value foo"
+! dc::args::exist something-special || {
+    printf "%s\n" "--something-special has been passed"
+    printf "%s\n" "with value: ${DC_ARG_SOMETHING_SPECIAL:-}"
+}
 ```
 
+##### Parameters
+
+`myscript "arg 1" "arg 2"`
+```bash
+! dc::args::exist 1 || printf "%s\n" "first argument has been passed with value: ${DC_ARG_1:-}"
+! dc::args::exist 2 || printf "%s\n" "second argument has been passed with value: ${DC_ARG_2:-}"
+! dc::args::exist 3 || printf "%s\n" "third argument has been passed with value: ${DC_ARG_3:-}"
+```
+
+<!--
 ### colors
 
 Color codes to be used with `tput` (eg: `$DC_COLOR_BLACK`).
 This is mainly of interest internally, and you should rather use the `logging` or `output` modules.
+-->
 
-### commander
+### dc::commander
+
+#### Description
 
 High-level helper for command-line applications to initialize with decent defaults and arguments constraints.
-
-Example implementation:
 
 <!--
 #### Methods
@@ -65,11 +78,14 @@ Example implementation:
 
 -->
 
+#### Examples
+
+Example implementation:
 
 ```bash
 dc::commander::initialize
 dc::commander::declare::flag myflag "^(foo|bar)$" "an optional flag that does foo or bar" optional
-dc::commander::declare::arg 1 "^[0-9]+$" "some_arg" "first mandatory argument, that must be an integer"
+dc::commander::declare::arg 1 "$DC_TYPE_INTEGER" "some_arg" "first mandatory argument, that must be an integer"
 dc::commander::boot
 ```
 
@@ -92,7 +108,6 @@ MYCLI_LOG_LEVEL=debug
 MYCLI_LOG_AUTH=true
 ```
 
-
 #### Customization hooks:
 
 The following environment variables may be set by the embedding script:
@@ -112,81 +127,146 @@ For more flexibility, people can write their own `dc::commander::help` or `dc::c
 Or just take some inspiration from `dc::commander::initialize` and `dc::commander::boot` and write their own initialization routine...
 
 
-### errors
+### dc::error
+
+#### Description
 
 Errors to be used as exit codes.
 
-Used by core methods, and may be used by implementers as well if they fit.
+Core errors use the 144-254 range.
 
-Internal errors use the 200-299 range.
-
-Custom errors defined by additional libraries should use the 100-199 range.
-
-Custom errors defined by applications should use the 1-99 range.
+Custom errors defined by applications and additional libraries should use the 3-125 range.
 
 Internal errors:
 ```bash
-# Network level error
-ERROR_NETWORK=200
+./bin/dc-libre env | grep "^ERROR" | sort
 
-# Missing required argument
-ERROR_ARGUMENT_MISSING=201
+# No error
+ERROR_NO_ERROR=0
 
-# Invalid argument
-ERROR_ARGUMENT_INVALID=202
+# Library errors
+ERROR_ARGUMENT_INVALID=149
+ERROR_ARGUMENT_MISSING=150
+ERROR_ARGUMENT_TIMEOUT=151
+ERROR_BINARY_UNKNOWN_ERROR=148
+ERROR_CRYPTO_PEM_NO_SUCH_HEADER=160
+ERROR_CRYPTO_SHASUM_FILE_ERROR=155
+ERROR_CRYPTO_SHASUM_VERIFY_ERROR=159
+ERROR_CRYPTO_SHASUM_WRONG_ALGORITHM=154
+ERROR_CRYPTO_SSL_INVALID_KEY=156
+ERROR_CRYPTO_SSL_WRONG_ARGUMENTS=158
+ERROR_CRYPTO_SSL_WRONG_PASSWORD=157
+ERROR_CURL_CONNECTION_FAILED=167
+ERROR_CURL_DNS_FAILED=168
+ERROR_DOCKER_MISSING_PLUGIN=164
+ERROR_DOCKER_NO_SUCH_OBJECT=163
+ERROR_DOCKER_WRONG_COMMAND=161
+ERROR_DOCKER_WRONG_SYNTAX=162
+ERROR_ENCODING_CONVERSION_FAIL=165
+ERROR_ENCODING_UNKNOWN=166
+ERROR_ERROR_DOCKER_BLOCKLAYER_STUCK=169
+ERROR_FILESYSTEM=152
+ERROR_GANDI_AUTHORIZATION=171
+ERROR_GANDI_BROKEN=172
+ERROR_GANDI_GENERIC=173
+ERROR_GANDI_NETWORK=170
+ERROR_GENERIC_FAILURE=146
+ERROR_GREP_NO_MATCH=145
+ERROR_LIMIT=153
+ERROR_REQUIREMENT_MISSING=144
 
-# Should be used to convey that a certain operation is not supported
-ERROR_UNSUPPORTED=203
+# System errors
+ERROR_SYSTEM_COMMAND_NOT_EXECUTABLE=126
+ERROR_SYSTEM_COMMAND_NOT_FOUND=127
+ERROR_SYSTEM_EXIT_OUT_OF_RANGE=255
+ERROR_SYSTEM_GENERIC_ERROR=1
+ERROR_SYSTEM_INVALID_EXIT_ARGUMENT=128
+ERROR_SYSTEM_SHELL_BUILTIN_MISUSE=2
 
-# Generic error to denote that the operation has failed
-# More specific errors may be provided instead
-ERROR_FAILED=204
-
-# Expectations failed on a file (not readable, writable, doesn't exist, can't be created)
-ERROR_FILESYSTEM=205
-
-# System requirement missing
-readonly ERROR_MISSING_REQUIREMENTS=206
+# Signals
+ERROR_SYSTEM_SIGABRT=134
+ERROR_SYSTEM_SIGALRM=142
+ERROR_SYSTEM_SIGHUP=129
+ERROR_SYSTEM_SIGINT=130
+ERROR_SYSTEM_SIGKILL=137
+ERROR_SYSTEM_SIGQUIT=131
+ERROR_SYSTEM_SIGTERM=143
+ERROR_UNSUPPORTED=147
 ```
 
-### fs
+#### Examples
+
+Error declaration
+
+```
+dc::error::register "SOMETHING"
+
+env | grep "^ERROR_SOMETHING"
+```
+
+Error lookup
+
+```
+res=$(callingsomemethod foo) || exitcode=$?
+
+dc::error::lookup "$exitcode"
+```
+
+Error detail
+
+```
+ls -lA /nonexistent || {
+    dc::error::detail::set "ls failed on /nonexistent"
+    exit "$ERROR_GENERIC_FAILURE"
+}
+
+# dc::error::detail::get # will retrieve the set error (useful in a trap for example)
+```
+
+### dc::fs
+
+#### Description
 
 Simple filesystem helpers
 
-#### Methods
+#### Examples
 
 ```bash
-dc::fs::isfile [isWritable] [createIfMissing]
-dc::fs::isdir [isWritable] [createIfMissing]
+dc::fs::isfile somepath [isWritable] [createIfMissing]
+dc::fs::isdir somepath [isWritable] [createIfMissing]
+dc::fs::rm somepath
+dc::fs::mktemp [prefix]
 ```
 
-### http
+### dc::http
+
+#### Description
 
 A wrapper around curl.
 
-#### Methods
+#### Examples
 
 ```bash
 # This will bypass the redacting mechanism, effectively logging credentials
 # and other sensitive informations to stderr
 # Typically wired-up with the MYCLI_LOG_AUTH environment variable.
-dc::configure::http::leak
+dc::http::leak::set
 
 # This will bypass TLS verification errors (useful with self-signed certs, or if you don't care about security)
 # Typically wired-up with the --insecure flag
-dc::configure::http::insecure
+dc::http::insecure::set
 
-# Dump the last received response headers to stderr at the warning level
+# Log the last received response headers to stderr at the warning level
 dc::http::dump::headers
 
 # Log the last received response body to stderr at the warning level (NO REDACTION HERE)
 dc::http::dump::body
 
 # URI encode "something"
-dc::http::uriencode "something"
+dc::encoding::uriencode "something"
 
 # Perform an http request (method defaults to HEAD if left unspecified)
-dc::http::request URL [METHOD] [PAYLOAD] [request header] ... [request header]
+dc::http::request URL [METHOD] [PAYLOAD] [OUTPUT_FILE] [request header] ... [request header]
 
 # "dc::http::request" will set the following variables:
 # - DC_HTTP_STATUS: 3 digit status code after redirects
@@ -196,8 +276,9 @@ dc::http::request URL [METHOD] [PAYLOAD] [request header] ... [request header]
 # - DC_HTTP_BODY: temporary filename containing the raw body
 ```
 
-### logger
+### dc::logger
 
+#### Description
 Provides logging.
 
 All logs are written to stderr (which can then be easily redirected).
@@ -217,27 +298,27 @@ The currently supported levels are:
  * `warning`: denotes that there is an abnormal condition, recoverable error, or something that is worth notifying the user about
  * `error`: denotes an error that is non-recoverable, typically followed by exiting with a non-zero status
 
-#### Methods
+#### Examples
 
 ```bash
 # Set the log level to debug (all messages are logged)
-dc::configure::logger::setlevel::debug
+dc::logger::level::set::debug
 
 # Set the log level to info (all messages but debug are logged)
-dc::configure::logger::setlevel::info
+dc::logger::level::set::info
 
 # Set the log level to warning (only warning and errors are logged)
-dc::configure::logger::setlevel::warning
+dc::logger::level::set::warning
 
 # Set the log level to error (only errors are logged)
-dc::configure::logger::setlevel::error
+dc::logger::level::set::error
 
 # Set the log level to whatever level you pass it
-dc::configure::logger::setlevel $level
+dc::logger::level::set $level
 
 # Mute any logging entirely. Users of your app will have to rely on exit codes for feedback.
 # This is typically wired-up with the -s flag
-dc::configure::logger::mute
+dc::logger::mute
 
 # Log one or many debug message
 dc::logger::debug $args...
@@ -252,11 +333,13 @@ dc::logger::warning $args...
 dc::logger::error $args...
 ```
 
-### output
+### dc::output
+
+#### Description
 
 Simple helpers to output stuff to stdout.
 
-### Methods
+#### Examples
 
 ```bash
 dc::output::h1 "Title"
@@ -272,20 +355,13 @@ dc::output::break "line break"
 dc::output::json '{"foo": "bar"}'
 ```
 
-### Portable
+### dc::prompt
 
-Code for stuff that is not portable or hard to get right
+#### Description
 
-#### Methods
 
-```bash
-dc::portable::mktemp
-dc::portable::base64d
-```
 
-### prompt
-
-#### Methods
+#### Examples
 ```bash
 # Asks a question to the user and store the answer in $variablename
 dc::prompt::question "message" variablename
@@ -295,31 +371,95 @@ dc::prompt::confirm
 dc::prompt::credentials "message for username" varnameforusername "message for password" varnameforpassword
 ```
 
-### System requirements
+### dc::require
+
+#### Examples
+
+```bash
+# binaryName is mandatory
+dc::require binaryName
+# binaryName version 1.2 or above is required
+dc::require binaryName 1.2 --versionFlag
+# DC_DEPENDENCIES_V_BINARYNAME will hold the version in case you need to inspect it
+
+dc::require binaryName || dc::logger::warning "This program run best with binaryName, you should install it"
+
+dc::require::platform::mac # Require macos
+dc::require::platform::linux  # Require linux
+dc::require::platform "$DC_PLATFORM_MAC" 
+dc::require::platform "$DC_PLATFORM_LINUX" 
+dc::require::platform "$YOUR_OWN_SHIT_MATCHING_UNAME"
+```
+
+### dc::trap
+
+#### Description
+
+All exit (errors, signals, explicit exit) are being trapped, and may be forwarded to "exit handlers".
+
+This is convenient for:
+ * providing shutdown/cleanup code
+ * capture exceptions and provide detailed/localized information about the error condition outside of your main code
+ * report errors to a third-party service
+
+#### Examples
+
+Two handlers are provided by default:
+ * console handler (in `handler.sh`) that simply summarize the exception
+ * busnag handler (in `extensions/bugsnag/reporter.sh`) that push exceptions to the BugSnag service (see `cli-ext/libre` for implementation)
+
+Example implementation of your own handler:
+
+```
+
+myhandler(){
+  local exit="$1"
+  local detail="$2"
+  local command="$3"
+  local lineno="$4"
+
+  dc::logger::error "[MYHANDLER] Exit code:       $exit"
+  dc::logger::error "[MYHANDLER]      condition:  $(dc::error::lookup "$exit")"
+  dc::logger::error "[MYHANDLER]      detail:     $detail"
+  dc::logger::error "[MYHANDLER]      command:    $command"
+  dc::logger::error "[MYHANDLER]      line:       $lineno"
+}
+
+dc::trap::register dc::error::handler
+```
+
+### Wrapped
+
+#### Description
+
+Code for stuff that is not portable or hard to get right
+
+#### Examples
+
+```
+dc::wrapped::grep
+dc::wrapped::base64d
+```
+
 
 #### Methods
 
 ```bash
-# binaryName is mandatory
-dc::require "binaryName"
-# binaryName version 1.2 is required
-dc::require "binaryName" "--versionFlag" "1.2"
-# DC_DEPENDENCIES_V_BINARYNAME will hold the version in case you need to inspect it
-
-dc::optional "binaryName" # <- same API as require, will spit a warning instead of exiting if a requirement is not satisfied
-
-dc::require::platform::mac # Require macos
-dc::require::platform::linux # Require linux
-dc::require::platform "$DC_PLATFORM_MAC"
-dc::require::platform "$DC_PLATFORM_LINUX"
-dc::require::platform "$YOUR_OWN_SHIT_MATCHING_UNAME"
+dc::fs::mktemp "prefix"
+dc::wrapped::base64d
 ```
+
+<!--
 
 ### Version
 
 A handful of variable holding sh-art version and build information.
 
 ```bash
+DC_LIB_VERSION
+DC_LIB_REVISION
+DC_LIB_BUILD_DATE
+
 DC_VERSION
 DC_REVISION
 DC_BUILD_DATE
@@ -331,3 +471,5 @@ DC_BUILD_DATE
 #### Methods
 
 TODO
+
+-->
